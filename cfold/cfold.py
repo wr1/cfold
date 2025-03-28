@@ -32,10 +32,24 @@ def fold(directory=None, output="codefold.txt"):
     with open(output, "w", encoding="utf-8") as outfile:
         outfile.write(
             "# Instructions for LLM:\n"
-            "# - To modify a file, keep its '# --- File: path ---' header and update the content below.\n"
-            "# - To delete a file, replace its content with '# DELETE'.\n"
-            "# - To add a new file, include a new '# --- File: path ---' section with the desired content.\n"
-            "# - Preserve the '# --- File: path ---' format for all files.\n\n"
+            "# This file uses the cfold format to manage a Python project codebase.\n"
+            "# - Folding: 'cfold fold <output.txt>' captures all included files from the directory into this .txt.\n"
+            "# - Unfolding: 'cfold unfold <modified.txt>' applies changes from this .txt to the directory.\n"
+            "# Rules:\n"
+            "# - To modify a file: Keep its '# --- File: path ---' header and update content below.\n"
+            "# - To delete a file: Replace its content with '# DELETE'.\n"
+            "# - To add a file: Add a new '# --- File: path ---' section with content.\n"
+            "# - Only include modified, new, or deleted files in the modified .txt; unchanged files are preserved by 'unfold'.\n"
+            "# - For Markdown (e.g., .md files, docstrings, comments): Prefix every line with 'MD:' in the .txt.\n"
+            "#   'unfold' strips 'MD:' only from .md files, not .py files.\n"
+            "# - Always preserve '# --- File: path ---' format.\n"
+            "# Example:\n"
+            "#   # --- File: docs/example.md ---\n"
+            "#   MD:# Title\n"
+            "#   MD:Text\n"
+            "#   # --- File: src/test.py ---\n"
+            "#   MD:# Comment with MD: prefix\n"
+            "#   print('Code')\n\n"
         )
         for dirpath, _, filenames in os.walk(directory):
             for filename in filenames:
@@ -44,7 +58,12 @@ def fold(directory=None, output="codefold.txt"):
                     relpath = os.path.relpath(filepath, directory)
                     outfile.write(f"# --- File: {relpath} ---\n")
                     with open(filepath, "r", encoding="utf-8") as infile:
-                        outfile.write(infile.read() + "\n\n")
+                        content = infile.read()
+                        if filepath.endswith(".md"):
+                            content = "\n".join(
+                                f"MD:{line}" for line in content.splitlines()
+                            )
+                        outfile.write(content + "\n\n")
     print(f"Codebase folded into {output}")
 
 
@@ -151,14 +170,23 @@ def init(output="start.txt", custom_instruction=""):
         outfile.write(
             "# Instructions for LLM:\n"
             "# This file uses the cfold format to manage a Python project codebase.\n"
-            "# - Folding: 'cfold fold <output.txt>' captures the current directory into a single .txt file.\n"
-            "# - Unfolding: 'cfold unfold <modified.txt>' applies changes from the .txt back to the directory.\n"
+            "# - Folding: 'cfold fold <output.txt>' captures all included files from the directory into this .txt.\n"
+            "# - Unfolding: 'cfold unfold <modified.txt>' applies changes from this .txt to the directory.\n"
             "# Rules:\n"
-            "# - To modify a file, keep its '# --- File: path ---' header and update the content below.\n"
-            "# - To delete a file, replace its content with '# DELETE'.\n"
-            "# - To add a new file, include a new '# --- File: path ---' section with the content.\n"
-            "# - For Markdown (.md) files, prefix each line with 'MD:' in the .txt; it will be stripped on unfold.\n"
-            "# - Preserve the '# --- File: path ---' format for all files.\n\n"
+            "# - To modify a file: Keep its '# --- File: path ---' header and update content below.\n"
+            "# - To delete a file: Replace its content with '# DELETE'.\n"
+            "# - To add a file: Add a new '# --- File: path ---' section with content.\n"
+            "# - Only include modified, new, or deleted files in the modified .txt; unchanged files are preserved by 'unfold'.\n"
+            "# - For Markdown (e.g., .md files, docstrings, comments): Prefix every line with 'MD:' in the .txt.\n"
+            "#   'unfold' strips 'MD:' only from .md files, not .py files.\n"
+            "# - Always preserve '# --- File: path ---' format.\n"
+            "# Example:\n"
+            "#   # --- File: docs/example.md ---\n"
+            "#   MD:# Title\n"
+            "#   MD:Text\n"
+            "#   # --- File: src/test.py ---\n"
+            "#   MD:# Comment with MD: prefix\n"
+            "#   print('Code')\n\n"
             "# Project Setup Guidance:\n"
             "# Create a Poetry-managed Python project with:\n"
             "# - pyproject.toml: Define package metadata, dependencies, and scripts.\n"
