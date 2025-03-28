@@ -15,13 +15,10 @@ EXCLUDED_FILES = {".pyc"}
 def should_include_file(filepath):
     """Check if a file should be included based on extension and exclusion rules."""
     path = Path(filepath)
-    # Check if file has an included extension
     if path.suffix not in INCLUDED_EXTENSIONS:
         return False
-    # Exclude files in excluded directories
     if any(part in EXCLUDED_DIRS for part in path.parts):
         return False
-    # Exclude specific file types
     if path.suffix in EXCLUDED_FILES:
         return False
     return True
@@ -29,7 +26,7 @@ def should_include_file(filepath):
 
 def fold(directory=None, output="codefold.txt"):
     """Wrap a Poetry project's codebase into a single file with LLM instructions."""
-    directory = directory or os.getcwd()  # Default to current directory
+    directory = directory or os.getcwd()
     directory = os.path.abspath(directory)
 
     with open(output, "w", encoding="utf-8") as outfile:
@@ -58,21 +55,18 @@ def apply_diff(original_lines, modified_lines):
 
     result = []
     for line in diff:
-        if line.startswith("  "):  # Unchanged line
+        if line.startswith("  "):
             result.append(line[2:])
-        elif line.startswith("+ "):  # Added or modified line
+        elif line.startswith("+ "):
             result.append(line[2:])
-        # Lines starting with '- ' are removed, so we skip them
-
     return "".join(result)
 
 
 def unfold(fold_file, original_dir=None, output_dir=None):
     """Unfold a modified fold file, merging with original project if provided, into output_dir or cwd."""
-    output_dir = output_dir or os.getcwd()  # Default to current directory
+    output_dir = output_dir or os.getcwd()
     output_dir = os.path.abspath(output_dir)
 
-    # Parse the modified fold file
     with open(fold_file, "r", encoding="utf-8") as infile:
         content = infile.read()
         sections = re.split(r"# --- File: (.+?) ---\n", content)[1:]
@@ -84,15 +78,19 @@ def unfold(fold_file, original_dir=None, output_dir=None):
         for i in range(0, len(sections), 2):
             filepath = sections[i].strip()
             file_content = sections[i + 1].strip()
+            # Strip MD: prefix for .md files
+            if filepath.endswith(".md"):
+                file_content = "\n".join(
+                    line[3:] if line.startswith("MD:") else line
+                    for line in file_content.splitlines()
+                ).strip()
             modified_files[filepath] = file_content
 
-    # If output_dir exists and is not empty, we'll merge into it
     if os.path.exists(output_dir) and os.listdir(output_dir):
         print(f"Merging into existing directory: {output_dir}")
     else:
         os.makedirs(output_dir, exist_ok=True)
 
-    # If original_dir is provided, merge with original codebase
     if original_dir and os.path.isdir(original_dir):
         print(f"Merging with original codebase from {original_dir}")
         for dirpath, _, filenames in os.walk(original_dir):
@@ -104,7 +102,6 @@ def unfold(fold_file, original_dir=None, output_dir=None):
                     os.makedirs(os.path.dirname(dst), exist_ok=True)
 
                     if relpath not in modified_files:
-                        # Copy unchanged files from original
                         src = os.path.join(original_dir, relpath)
                         shutil.copy2(src, dst)
                         print(f"Copied unchanged file: {relpath}")
@@ -113,7 +110,6 @@ def unfold(fold_file, original_dir=None, output_dir=None):
                             os.remove(dst)
                             print(f"Deleted file: {relpath}")
                     else:
-                        # Merge changes using diff
                         original_path = os.path.join(original_dir, relpath)
                         if os.path.exists(original_path):
                             with open(
@@ -124,19 +120,15 @@ def unfold(fold_file, original_dir=None, output_dir=None):
                             modified_lines = modified_files[relpath].splitlines(
                                 keepends=True
                             )
-                            merged_content = apply_diff(
-                                original_lines, modified_lines
-                            )  # Updated call
+                            merged_content = apply_diff(original_lines, modified_lines)
                             with open(dst, "w", encoding="utf-8") as outfile:
                                 outfile.write(merged_content)
                             print(f"Merged modified file: {relpath}")
                         else:
-                            # If original doesn’t exist, use the modified content directly
                             with open(dst, "w", encoding="utf-8") as outfile:
                                 outfile.write(modified_files[relpath])
                             print(f"Wrote new file: {relpath}")
     else:
-        # No original_dir: only write files from the fold file into output_dir
         for filepath, file_content in modified_files.items():
             if file_content == "# DELETE":
                 full_path = os.path.join(output_dir, filepath)
@@ -151,6 +143,37 @@ def unfold(fold_file, original_dir=None, output_dir=None):
             print(f"Wrote file: {filepath}")
 
     print(f"Codebase unfolded into {output_dir}")
+
+
+def init(output="start.txt", custom_instruction=""):
+    """Create an initial .txt file with LLM instructions for project setup."""
+    with open(output, "w", encoding="utf-8") as outfile:
+        outfile.write(
+            "# Instructions for LLM:\n"
+            "# This file uses the cfold format to manage a Python project codebase.\n"
+            "# - Folding: 'cfold fold <output.txt>' captures the current directory into a single .txt file.\n"
+            "# - Unfolding: 'cfold unfold <modified.txt>' applies changes from the .txt back to the directory.\n"
+            "# Rules:\n"
+            "# - To modify a file, keep its '# --- File: path ---' header and update the content below.\n"
+            "# - To delete a file, replace its content with '# DELETE'.\n"
+            "# - To add a new file, include a new '# --- File: path ---' section with the content.\n"
+            "# - For Markdown (.md) files, prefix each line with 'MD:' in the .txt; it will be stripped on unfold.\n"
+            "# - Preserve the '# --- File: path ---' format for all files.\n\n"
+            "# Project Setup Guidance:\n"
+            "# Create a Poetry-managed Python project with:\n"
+            "# - pyproject.toml: Define package metadata, dependencies, and scripts.\n"
+            "# - CI: Add .github/workflows/ with .yml files for testing and publishing (e.g., test.yml, publish.yml).\n"
+            "# - MkDocs: Add docs/ directory with .md files and mkdocs.yml for documentation.\n"
+            "# Example structure:\n"
+            "#   pyproject.toml\n"
+            "#   README.md\n"
+            "#   src/<package>/__init__.py\n"
+            "#   .github/workflows/test.yml\n"
+            "#   docs/index.md\n"
+            "#   mkdocs.yml\n\n"
+            f"# Custom Instruction:\n# {custom_instruction}\n"
+        )
+    print(f"Initialized project template in {output}")
 
 
 def main():
@@ -185,12 +208,28 @@ def main():
         "--output-dir", "-o", help="Output directory (defaults to current directory)"
     )
 
+    # Init command
+    init_parser = subparsers.add_parser(
+        "init", help="Initialize a project template with LLM instructions."
+    )
+    init_parser.add_argument(
+        "output", nargs="?", default="start.txt", help="Output file (e.g., start.txt)"
+    )
+    init_parser.add_argument(
+        "--custom",
+        "-c",
+        default="Describe the purpose of your project here.",
+        help="Custom instruction for the LLM",
+    )
+
     args = parser.parse_args()
 
     if args.command == "fold":
         fold(args.directory, args.output)
     elif args.command == "unfold":
         unfold(args.foldfile, args.original_dir, args.output_dir)
+    elif args.command == "init":
+        init(args.output, args.custom)
 
 
 if __name__ == "__main__":

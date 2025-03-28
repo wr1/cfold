@@ -1,0 +1,7 @@
+site_name: cfold Documentation
+theme:
+  name: material
+nav:
+  - Home: index.md
+  - Usage: usage.md
+  - API Reference: api.md
