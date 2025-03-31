@@ -37,6 +37,7 @@ cfold fold my_project -o folded.txt
 
 - `-d/--directory`: Directory to fold (default: current dir).
 - `-o/--output`: Output file (default: `codefold.txt`).
+- Supports `.foldignore` file with gitignore-style patterns to exclude files (e.g., `*.log`, `temp/`).
 
 ### `cfold unfold`
 

@@ -27,6 +27,7 @@ cfold fold <directory> -o <output_file>
 
 *   `<directory>`: The directory containing the codebase you want to fold.
 *   `-o <output_file>` or `--output <output_file>`:  (Optional) The name of the output file. Defaults to `codefold.txt`.
+*   Supports `.foldignore` file with gitignore-style patterns to exclude files during folding.
 
 Example:
 
@@ -34,7 +35,7 @@ Example:
 cfold fold my_project -o folded_code.txt
 ```
 
-This will create a file named `folded_code.txt` containing the entire codebase of the `my_project` directory, along with instructions for LLMs.
+This will create a file named `folded_code.txt` containing the entire codebase of the `my_project` directory, along with instructions for LLMs. Create a `.foldignore` file in the directory to exclude specific patterns (e.g., `*.log` or `temp/`).
 
 ### Unfolding a codebase
 
@@ -53,20 +54,22 @@ Example:
 cfold unfold folded_code.txt -d my_project_modified
 ```
 
-This will create a directory named `my_project_modified` containing the unfolded codebase from `folded_code.txt`.  Any modifications, additions, or deletions made by the LLM will be reflected in this new directory.
+This will create a directory named `my_project_modified` containing the unfolded codebase from `folded_code.txt`. Any modifications, additions, or deletions made by the LLM will be reflected in this new directory.
 
 ## Fold File Format
 
 The fold file format is designed to be easily understood by both humans and LLMs. It consists of the following structure:
 
 1.  **Instructions:** The file begins with instructions for the LLM, explaining how to modify, delete, or add files.
-2.  **File Sections:** The rest of the file is divided into sections, each representing a single file in the codebase. Each section starts with a line in the format `# --- File: <path> ---`, where `<path>` is the relative path to the file within the original directory.  The content of the file follows this header.
+2.  **File Sections:** The rest of the file is divided into sections, each representing a single file in the codebase. Each section starts with a line in the format `# --- File: <path> ---`, where `<path>` is the relative path to the file within the original directory. The content of the file follows this header.
 
 **Modifying Files:** To modify a file, keep its `# --- File: path ---` header and update the content below.
 
 **Deleting Files:** To delete a file, replace its content with `# DELETE`.
 
 **Adding New Files:** To add a new file, include a new `# --- File: path ---` section with the desired content.
+
+**Ignoring Files:** Add patterns to a `.foldignore` file in the project root (e.g., `*.log` or `temp/`) to exclude files during folding.
 
 **Important:** Preserve the `# --- File: path ---` format for all files.
 
@@ -77,7 +80,13 @@ Let's say you have a directory named `my_project` with the following structure:
 ```
 my_project/
 ├── main.py
-└── utils.py
+├── utils.py
+└── .foldignore
+```
+
+With `.foldignore` containing:
+```
+utils.py
 ```
 
 After running `cfold fold my_project -o folded.txt`, the `folded.txt` file might look like this:
@@ -88,21 +97,3 @@ After running `cfold fold my_project -o folded.txt`, the `folded.txt` file might
 # - To delete a file, replace its content with '# DELETE'.
 # - To add a new file, include a new '# --- File: path ---' section with the desired content.
 # - Preserve the '# --- File: path ---' format for all files.
-
-# --- File: main.py ---
-print("Hello from main.py")
-
-# --- File: utils.py ---
-def utility_function():
-    print("Hello from utils.py")
-```
-
-You can then provide this `folded.txt` file to an LLM, have it make modifications, and then unfold the modified file using `cfold unfold`.
-
-## Contributing
-
-Contributions are welcome! Please submit a pull request with your changes.
-
-## License
-
-This project is licensed under the MIT License.

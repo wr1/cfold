@@ -5,29 +5,56 @@ import shutil
 import re
 from pathlib import Path
 import difflib
+import fnmatch
 
 # Define file patterns to include and exclude
 INCLUDED_EXTENSIONS = {".py", ".toml", ".md", ".yml", ".yaml"}
 EXCLUDED_DIRS = {".pytest_cache", "__pycache__", "build", "dist", ".egg-info", "venv"}
 EXCLUDED_FILES = {".pyc"}
 
+def load_foldignore(directory):
+    """Load and parse .foldignore file if it exists."""
+    ignore_file = Path(directory) / ".foldignore"
+    ignore_patterns = []
+    if ignore_file.exists():
+        with open(ignore_file, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#"):
+                    ignore_patterns.append(line)
+    return ignore_patterns
 
-def should_include_file(filepath):
-    """Check if a file should be included based on extension and exclusion rules."""
+def should_include_file(filepath, ignore_patterns=None, root_dir=None):
+    """Check if a file should be included based on extension, exclusion rules, and .foldignore patterns."""
     path = Path(filepath)
+    
+    # Calculate relative path from root_dir if provided, otherwise use filepath as is
+    if root_dir:
+        relpath = os.path.relpath(filepath, root_dir)
+    else:
+        relpath = str(path)
+    
+    # Check basic inclusion rules
     if path.suffix not in INCLUDED_EXTENSIONS:
         return False
     if any(part in EXCLUDED_DIRS for part in path.parts):
         return False
     if path.suffix in EXCLUDED_FILES:
         return False
+    
+    # Check .foldignore patterns
+    if ignore_patterns:
+        for pattern in ignore_patterns:
+            if fnmatch.fnmatch(relpath, pattern):
+                return False
+    
     return True
-
 
 def fold(directory=None, output="codefold.txt"):
     """Wrap a Poetry project's codebase into a single file with LLM instructions."""
     directory = directory or os.getcwd()
     directory = os.path.abspath(directory)
+    ignore_patterns = load_foldignore(directory)
 
     with open(output, "w", encoding="utf-8") as outfile:
         outfile.write(
@@ -43,6 +70,7 @@ def fold(directory=None, output="codefold.txt"):
             "# - For Markdown (e.g., .md files, docstrings, comments): Prefix every line with 'MD:' in the .txt.\n"
             "#   'unfold' strips 'MD:' only from .md files, not .py files.\n"
             "# - Always preserve '# --- File: path ---' format.\n"
+            "# - Supports .foldignore file with gitignore-style patterns to exclude files during folding.\n"
             "# Example:\n"
             "#   # --- File: docs/example.md ---\n"
             "#   MD:# Title\n"
@@ -54,7 +82,7 @@ def fold(directory=None, output="codefold.txt"):
         for dirpath, _, filenames in os.walk(directory):
             for filename in filenames:
                 filepath = os.path.join(dirpath, filename)
-                if should_include_file(filepath):
+                if should_include_file(filepath, ignore_patterns, directory):
                     relpath = os.path.relpath(filepath, directory)
                     outfile.write(f"# --- File: {relpath} ---\n")
                     with open(filepath, "r", encoding="utf-8") as infile:
@@ -65,7 +93,6 @@ def fold(directory=None, output="codefold.txt"):
                             )
                         outfile.write(content + "\n\n")
     print(f"Codebase folded into {output}")
-
 
 def apply_diff(original_lines, modified_lines):
     """Apply changes from modified_lines to original_lines, preserving unchanged parts."""
@@ -79,7 +106,6 @@ def apply_diff(original_lines, modified_lines):
         elif line.startswith("+ "):
             result.append(line[2:])
     return "".join(result)
-
 
 def unfold(fold_file, original_dir=None, output_dir=None):
     """Unfold a modified fold file, merging with original project if provided, into output_dir or cwd."""
@@ -97,7 +123,6 @@ def unfold(fold_file, original_dir=None, output_dir=None):
         for i in range(0, len(sections), 2):
             filepath = sections[i].strip()
             file_content = sections[i + 1].strip()
-            # Strip MD: prefix for .md files
             if filepath.endswith(".md"):
                 file_content = "\n".join(
                     line[3:] if line.startswith("MD:") else line
@@ -112,10 +137,11 @@ def unfold(fold_file, original_dir=None, output_dir=None):
 
     if original_dir and os.path.isdir(original_dir):
         print(f"Merging with original codebase from {original_dir}")
+        ignore_patterns = load_foldignore(original_dir)
         for dirpath, _, filenames in os.walk(original_dir):
             for filename in filenames:
                 filepath = os.path.join(dirpath, filename)
-                if should_include_file(filepath):
+                if should_include_file(filepath, ignore_patterns, original_dir):
                     relpath = os.path.relpath(filepath, original_dir)
                     dst = os.path.join(output_dir, relpath)
                     os.makedirs(os.path.dirname(dst), exist_ok=True)
@@ -131,14 +157,10 @@ def unfold(fold_file, original_dir=None, output_dir=None):
                     else:
                         original_path = os.path.join(original_dir, relpath)
                         if os.path.exists(original_path):
-                            with open(
-                                original_path, "r", encoding="utf-8"
-                            ) as orig_file:
+                            with open(original_path, "r", encoding="utf-8") as orig_file:
                                 original_content = orig_file.read()
                             original_lines = original_content.splitlines(keepends=True)
-                            modified_lines = modified_files[relpath].splitlines(
-                                keepends=True
-                            )
+                            modified_lines = modified_files[relpath].splitlines(keepends=True)
                             merged_content = apply_diff(original_lines, modified_lines)
                             with open(dst, "w", encoding="utf-8") as outfile:
                                 outfile.write(merged_content)
@@ -163,7 +185,6 @@ def unfold(fold_file, original_dir=None, output_dir=None):
 
     print(f"Codebase unfolded into {output_dir}")
 
-
 def init(output="start.txt", custom_instruction=""):
     """Create an initial .txt file with LLM instructions for project setup."""
     with open(output, "w", encoding="utf-8") as outfile:
@@ -180,6 +201,7 @@ def init(output="start.txt", custom_instruction=""):
             "# - For Markdown (e.g., .md files, docstrings, comments): Prefix every line with 'MD:' in the .txt.\n"
             "#   'unfold' strips 'MD:' only from .md files, not .py files.\n"
             "# - Always preserve '# --- File: path ---' format.\n"
+            "# - Supports .foldignore file with gitignore-style patterns to exclude files during folding.\n"
             "# Example:\n"
             "#   # --- File: docs/example.md ---\n"
             "#   MD:# Title\n"
@@ -203,14 +225,12 @@ def init(output="start.txt", custom_instruction=""):
         )
     print(f"Initialized project template in {output}")
 
-
 def main():
     parser = argparse.ArgumentParser(
         description="cfold: Fold and unfold Poetry-managed Python projects with MkDocs and CI support."
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    # Fold command
     fold_parser = subparsers.add_parser(
         "fold", help="Fold a project directory into a single file."
     )
@@ -224,7 +244,6 @@ def main():
         "--directory", "-d", help="Directory to fold (defaults to current directory)"
     )
 
-    # Unfold command
     unfold_parser = subparsers.add_parser(
         "unfold", help="Unfold a modified file into a project directory."
     )
@@ -236,7 +255,6 @@ def main():
         "--output-dir", "-o", help="Output directory (defaults to current directory)"
     )
 
-    # Init command
     init_parser = subparsers.add_parser(
         "init", help="Initialize a project template with LLM instructions."
     )
@@ -258,7 +276,6 @@ def main():
         unfold(args.foldfile, args.original_dir, args.output_dir)
     elif args.command == "init":
         init(args.output, args.custom)
-
 
 if __name__ == "__main__":
     main()
