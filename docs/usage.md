@@ -56,3 +56,8 @@ cfold unfold folded.txt -o my_project_modified -i my_project
 
 - `-i/--original-dir`: Original directory to merge with (optional).
 - `-o/--output-dir`: Output directory (default: current working directory).
+
+## Advanced Refactoring
+
+- **Line Edits with Diff**: Use unified diff format to edit specific lines:
+  ```plaintext
