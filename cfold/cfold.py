@@ -7,7 +7,6 @@ import re
 from pathlib import Path
 import fnmatch
 import ast
-import difflib
 
 # Define file patterns to include and exclude
 INCLUDED_EXTENSIONS = {".py", ".toml", ".md", ".yml", ".yaml"}
@@ -126,8 +125,8 @@ def apply_diff(original_lines, modified_lines):
         return "".join(modified_lines)  # No valid diff hunks, treat as full content
 
     # Construct a unified diff string and apply it
-    diff_text = "\n".join(modified_lines) + "\n"
-    original_text = "".join(original_lines)
+    # diff_text = "\n".join(modified_lines) + "\n"
+    # original_text = "".join(original_lines)
     # Use a simple patch applicator for unified diff
     result = list(original_lines)
     current_pos = 0
