@@ -61,4 +61,4 @@ cfold unfold folded.txt -o my_project_modified -i my_project
 
 - **Full File Updates**: To modify a file, provide its full content under `# --- File: path ---`.
 - **Deletions**: Use `# DELETE` to remove a file.
-- **Moves**: Use `
+- **Moves**: Use `# MOVE` to relocate a file.

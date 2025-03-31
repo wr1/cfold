@@ -1,7 +1,6 @@
 # cfold
 
 [![Tests](https://github.com/wr1/cfold/actions/workflows/python-app.yml/badge.svg)](https://github.com/wr1/cfold/actions/workflows/python-app.yml) 
-<!-- [![Coverage](https://codecov.io/gh/<your-username>/cfold/branch/master/graph/badge.svg)](https://codecov.io/gh/<your-username>/cfold) -->
 
 cfold is a command-line tool that helps you prepare codebases for interaction with Large Language Models (LLMs). It can "fold" a directory of code into a single text file, and "unfold" a modified version of that file back into a directory structure. This is useful for providing LLMs with the context of an entire project in a manageable format, allowing them to make changes, add new files, or delete existing ones.
 
@@ -67,31 +66,10 @@ The fold file format is designed to be easily understood by both humans and LLMs
 1.  **Instructions:** The file begins with instructions for the LLM, explaining how to modify, delete, or add files.
 2.  **File Sections:** The rest of the file is divided into sections, each representing a single file in the codebase. Each section starts with a line in the format `# --- File: <path> ---`, where `<path>` is the path relative to the CWD of the original `fold` command.
 
-**Modifying Files:** To modify a file, keep its `# --- File: path ---` header and update the content below.
+**Modifying Files:** To modify a file, keep its `# --- File: path ---` header and update the full content below.
 
 **Deleting Files:** To delete a file, replace its content with `# DELETE`.
 
 **Adding New Files:** To add a new file, include a new `# --- File: path ---` section with the desired content.
 
-**Ignoring Files:** Add patterns to a `.foldignore` file in the project root (e.g., `*.log` or `temp/`) to exclude files during folding.
-
-**Important:** Preserve the `# --- File: path ---` format for all files.
-
-## Example
-
-Let's say you have a directory structure under `/home/user`:
-```
-/home/user/
-├── my_project/
-│   ├── main.py
-│   ├── utils.py
-│   └── .foldignore
-```
-
-With `.foldignore` containing:
-```
-my_project/utils.py
-```
-
-Running `cfold fold my_project -o folded.txt` from `/home/user` produces `folded.txt`:
-```
+**Moving Files:** To move a file, use `
