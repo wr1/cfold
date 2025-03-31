@@ -157,9 +157,10 @@ def test_unfold_complex_diff(temp_project, tmp_path):
         "# --- File: project/docs/index.md ---\n"  # Delete
         "# DELETE\n"
         "\n"
-        # "# --- File: project/new_file.py ---\n"  # New file
-        # "print('Brand new file')\n"
-        # "\n"
+        "# MOVE: project/utils.py -> project/src/utils.py\n"  # Move
+        "# --- File: project/new_file.py ---\n"  # New file
+        "print('Brand new file')\n"
+        "\n"
     )
     # "# MOVE: project/utils.py -> project/src/utils.py\n"  # Move
 
@@ -173,9 +174,9 @@ def test_unfold_complex_diff(temp_project, tmp_path):
     assert "---" not in main_content and "@@" not in main_content
 
     # Check utils.py (moved and replaced)
-    utils_content = (output_dir / "project" / "utils.py").read_text()
+    utils_content = (output_dir / "project" / "src" / "utils.py").read_text()
     assert utils_content == "def new_util():\n    return 42"
-    # assert not (output_dir / "project" / "utils.py").exists()
+    assert not (output_dir / "project" / "utils.py").exists()
     assert "---" not in utils_content and "@@" not in utils_content
 
     # Check importer.py (diff applied)
@@ -187,7 +188,7 @@ def test_unfold_complex_diff(temp_project, tmp_path):
     assert not (output_dir / "project" / "docs" / "index.md").exists()
 
     # # Check new_file.py (new file added)
-    # assert (output_dir / "project" / "new_file.py").exists()
-    # new_file_content = (output_dir / "project" / "new_file.py").read_text()
-    # assert new_file_content == "print('Brand new file')"
-    # assert "---" not in new_file_content and "@@" not in new_file_content
+    assert (output_dir / "project" / "new_file.py").exists()
+    new_file_content = (output_dir / "project" / "new_file.py").read_text()
+    assert new_file_content == "print('Brand new file')"
+    assert "---" not in new_file_content and "@@" not in new_file_content
