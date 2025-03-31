@@ -4,7 +4,7 @@ import argparse
 import shutil
 import re
 from pathlib import Path
-import pkg_resources
+from importlib import resources
 from cfold.utils.foldignore import load_foldignore, should_include_file
 from cfold.utils.instructions import load_instructions
 from cfold.utils.diff import apply_diff
@@ -40,7 +40,7 @@ def fold(files=None, output="codefold.txt", prompt_file=None):
         return
 
     with open(output, "w", encoding="utf-8") as outfile:
-        # Write the external instructions
+        # Write the external instructions from resources
         outfile.write(load_instructions())
 
         # Write the folded files

@@ -14,6 +14,8 @@
 # - Always preserve '# --- File: path ---' or '# MOVE: ...' format.
 # - Supports .foldignore file with gitignore-style patterns to exclude files during folding (directory mode).
 # - Paths are relative to the current working directory (CWD) by default.
+# Guidelines: 
+# - Reply using a single txt file for implementing changes to multiple files using 'cfold unfold <singlefile.txt>'. 
 # Example:
 #   # --- File: my_project/docs/example.md ---
 #   MD:# Title
