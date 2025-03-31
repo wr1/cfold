@@ -72,42 +72,29 @@ def unfold(fold_file, original_dir=None, output_dir=None):
 
     with open(fold_file, "r", encoding="utf-8") as infile:
         content = infile.read()
-        # Split into sections, capturing top-level moves and file sections distinctly
-        sections = re.split(
-            r"(# --- File: .+? ---|# MOVE: .+? -> .+?(?=\n#|$))",
-            content,
-            flags=re.DOTALL,
-        )
-        if not sections:
-            print("Warning: Empty fold file")
+        sections = re.split(r"(# --- File: .+? ---|# MOVE: .+? -> .+?)\n", content)[1:]
+        if len(sections) % 2 != 0:
+            print("Warning: Malformed fold file - odd number of sections")
             return
 
-        # Parse sections into instructions and file content
         modified_files = {}
         moves = {}
-        i = 0
-        while i < len(sections):
-            section = sections[i].strip()
-            if section.startswith("# --- File:"):
+        for i in range(0, len(sections), 2):
+            header = sections[i].strip()
+            file_content = sections[i + 1].rstrip()
+            if header.startswith("# --- File:"):
                 filepath = (
-                    section.replace("# --- File: ", "").replace(" ---", "").strip()
+                    header.replace("# --- File: ", "").replace(" ---", "").strip()
                 )
-                if i + 1 < len(sections):
-                    file_content = sections[i + 1].rstrip()
-                    if filepath.endswith(".md"):
-                        # Preserve MD: lines as literal content, strip only for output
-                        file_content = "\n".join(
-                            line[3:] if line.startswith("MD:") else line
-                            for line in file_content.splitlines()
-                        )
-                    modified_files[filepath] = file_content
-                i += 2
-            elif section.startswith("# MOVE:"):
-                old_path, new_path = section.replace("# MOVE: ", "").split(" -> ")
+                if filepath.endswith(".md"):
+                    file_content = "\n".join(
+                        line[3:] if line.startswith("MD:") else line
+                        for line in file_content.splitlines()
+                    )
+                modified_files[filepath] = file_content
+            elif header.startswith("# MOVE:"):
+                old_path, new_path = header.replace("# MOVE: ", "").split(" -> ")
                 moves[old_path.strip()] = new_path.strip()
-                i += 1
-            else:
-                i += 1  # Skip non-matching sections (e.g., instructions)
 
     update_references(modified_files, moves, cwd)
 
