@@ -50,17 +50,33 @@ def should_include_file(filepath, ignore_patterns=None, root_dir=None):
     
     return True
 
-def fold(directory=None, output="codefold.txt"):
-    """Wrap a project's codebase into a single file with LLM instructions, using paths relative to CWD."""
+def fold(files=None, output="codefold.txt"):
+    """Wrap specified files or a directory into a single file with LLM instructions, using paths relative to CWD."""
     cwd = os.getcwd()
-    directory = os.path.abspath(directory or cwd)
-    ignore_patterns = load_foldignore(directory)
+    
+    # If no files are specified, default to folding the current directory
+    if not files:
+        directory = cwd
+        ignore_patterns = load_foldignore(directory)
+        files = []
+        for dirpath, _, filenames in os.walk(directory):
+            for filename in filenames:
+                filepath = os.path.join(dirpath, filename)
+                if should_include_file(filepath, ignore_patterns, directory):
+                    files.append(filepath)
+    else:
+        # Convert input files to absolute paths and filter
+        files = [os.path.abspath(f) for f in files if os.path.isfile(f) and should_include_file(f)]
+
+    if not files:
+        print("No valid files to fold.")
+        return
 
     with open(output, "w", encoding="utf-8") as outfile:
         outfile.write(
             "# Instructions for LLM:\n"
             "# This file uses the cfold format to manage a Python project codebase.\n"
-            "# - Folding: 'cfold fold <output.txt>' captures all included files from the directory into this .txt.\n"
+            "# - Folding: 'cfold fold <files> -o <output.txt>' captures specified files into this .txt.\n"
             "# - Unfolding: 'cfold unfold <modified.txt>' applies changes from this .txt to the directory.\n"
             "# Rules:\n"
             "# - To modify a file: Keep its '# --- File: path ---' header and update content below.\n"
@@ -70,7 +86,7 @@ def fold(directory=None, output="codefold.txt"):
             "# - For Markdown (e.g., .md files, docstrings, comments): Prefix every line with 'MD:' in the .txt.\n"
             "#   'unfold' strips 'MD:' only from .md files, not .py files.\n"
             "# - Always preserve '# --- File: path ---' format.\n"
-            "# - Supports .foldignore file with gitignore-style patterns to exclude files during folding.\n"
+            "# - Supports .foldignore file with gitignore-style patterns to exclude files during folding (when folding a directory).\n"
             "# - Paths are relative to the current working directory (CWD) by default.\n"
             "# Example:\n"
             "#   # --- File: my_project/docs/example.md ---\n"
@@ -80,19 +96,16 @@ def fold(directory=None, output="codefold.txt"):
             "#   MD:# Comment with MD: prefix\n"
             "#   print('Code')\n\n"
         )
-        for dirpath, _, filenames in os.walk(directory):
-            for filename in filenames:
-                filepath = os.path.join(dirpath, filename)
-                if should_include_file(filepath, ignore_patterns, directory):
-                    relpath = os.path.relpath(filepath, cwd)
-                    outfile.write(f"# --- File: {relpath} ---\n")
-                    with open(filepath, "r", encoding="utf-8") as infile:
-                        content = infile.read()
-                        if filepath.endswith(".md"):
-                            content = "\n".join(
-                                f"MD:{line}" for line in content.splitlines()
-                            )
-                        outfile.write(content + "\n\n")
+        for filepath in files:
+            relpath = os.path.relpath(filepath, cwd)
+            outfile.write(f"# --- File: {relpath} ---\n")
+            with open(filepath, "r", encoding="utf-8") as infile:
+                content = infile.read()
+                if filepath.endswith(".md"):
+                    content = "\n".join(
+                        f"MD:{line}" for line in content.splitlines()
+                    )
+                outfile.write(content + "\n\n")
     print(f"Codebase folded into {output}")
 
 def apply_diff(original_lines, modified_lines):
@@ -193,7 +206,7 @@ def init(output="start.txt", custom_instruction=""):
         outfile.write(
             "# Instructions for LLM:\n"
             "# This file uses the cfold format to manage a Python project codebase.\n"
-            "# - Folding: 'cfold fold <output.txt>' captures all included files from the directory into this .txt.\n"
+            "# - Folding: 'cfold fold <files> -o <output.txt>' captures specified files into this .txt.\n"
             "# - Unfolding: 'cfold unfold <modified.txt>' applies changes from this .txt to the directory.\n"
             "# Rules:\n"
             "# - To modify a file: Keep its '# --- File: path ---' header and update content below.\n"
@@ -203,7 +216,7 @@ def init(output="start.txt", custom_instruction=""):
             "# - For Markdown (e.g., .md files, docstrings, comments): Prefix every line with 'MD:' in the .txt.\n"
             "#   'unfold' strips 'MD:' only from .md files, not .py files.\n"
             "# - Always preserve '# --- File: path ---' format.\n"
-            "# - Supports .foldignore file with gitignore-style patterns to exclude files during folding.\n"
+            "# - Supports .foldignore file with gitignore-style patterns to exclude files during folding (when folding a directory).\n"
             "# - Paths are relative to the current working directory (CWD) by default.\n"
             "# Example:\n"
             "#   # --- File: my_project/docs/example.md ---\n"
@@ -235,16 +248,19 @@ def main():
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     fold_parser = subparsers.add_parser(
-        "fold", help="Fold a project directory into a single file."
+        "fold", help="Fold specified files or a directory into a single file."
     )
     fold_parser.add_argument(
-        "output",
-        nargs="?",
+        "files",
+        nargs="*",
+        default=None,
+        help="Files to fold (optional; if omitted, folds the current directory)",
+    )
+    fold_parser.add_argument(
+        "--output",
+        "-o",
         default="codefold.txt",
-        help="Output file (e.g., folded.txt)",
-    )
-    fold_parser.add_argument(
-        "--directory", "-d", help="Directory to fold (defaults to current directory)"
+        help="Output file (e.g., folded.txt; default: codefold.txt)",
     )
 
     unfold_parser = subparsers.add_parser(
@@ -274,7 +290,7 @@ def main():
     args = parser.parse_args()
 
     if args.command == "fold":
-        fold(args.directory, args.output)
+        fold(args.files, args.output)
     elif args.command == "unfold":
         unfold(args.foldfile, args.original_dir, args.output_dir)
     elif args.command == "init":

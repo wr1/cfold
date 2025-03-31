@@ -29,16 +29,22 @@ cfold init start.txt --custom "Build a tool to process data."
 
 ### `cfold fold`
 
-Fold a directory into a single file:
+Fold specified files or a directory into a single file:
 
 ```bash
-cfold fold my_project -o folded.txt
+cfold fold file1.py file2.md -o folded.txt
 ```
 
-- `-d/--directory`: Directory to fold (default: current dir).
+Or fold the current directory:
+
+```bash
+cfold fold -o folded.txt
+```
+
+- `files`: Files to fold (optional; if omitted, folds the current directory).
 - `-o/--output`: Output file (default: `codefold.txt`).
 - Paths are relative to the current working directory (CWD).
-- Supports `.foldignore` file with gitignore-style patterns to exclude files (e.g., `*.log`, `temp/`).
+- Supports `.foldignore` file with gitignore-style patterns to exclude files (when folding a directory).
 
 ### `cfold unfold`
 

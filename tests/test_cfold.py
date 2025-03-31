@@ -17,10 +17,11 @@ def temp_project(tmp_path):
     return proj_dir
 
 def test_fold(temp_project, tmp_path):
-    """Test the fold function creates the correct output with paths relative to CWD."""
+    """Test the fold function creates the correct output with specific files."""
     output_file = tmp_path / "folded.txt"
     os.chdir(tmp_path)  # Simulate running from tmp_path as CWD
-    cfold.fold(str(temp_project), str(output_file))
+    files = [str(temp_project / "main.py"), str(temp_project / "docs" / "index.md")]
+    cfold.fold(files, str(output_file))
     assert output_file.exists()
     with open(output_file, "r", encoding="utf-8") as f:
         content = f.read()
@@ -28,6 +29,20 @@ def test_fold(temp_project, tmp_path):
     assert "# --- File: project/main.py ---" in content
     assert 'print("Hello")' in content
     assert "# --- File: project/docs/index.md ---" in content
+    assert "MD:# Docs" in content
+    assert "utils.py" not in content  # Not included in files list
+
+def test_fold_directory_default(temp_project, tmp_path):
+    """Test folding the current directory when no files are specified."""
+    output_file = tmp_path / "folded.txt"
+    os.chdir(temp_project)  # Set CWD to project dir
+    cfold.fold(None, str(output_file))
+    assert output_file.exists()
+    with open(output_file, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "# --- File: main.py ---" in content
+    assert "# --- File: docs/index.md ---" in content
+    assert "# --- File: utils.py ---" in content
 
 def test_unfold_new_files(temp_project, tmp_path):
     """Test unfolding creates new files correctly using paths relative to CWD."""
