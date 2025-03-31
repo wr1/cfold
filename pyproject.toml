@@ -3,7 +3,7 @@ authors = ["Your Name <your.email@example.com>"]
 description = "A command line tool"
 license = "MIT"
 name = "cfold"
-packages = [{include = "cfold"}]
+packages = [{include = "cfold", from = "."}]
 readme = "README.md"
 version = "0.1.0"
 

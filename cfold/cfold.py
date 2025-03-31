@@ -4,58 +4,16 @@ import argparse
 import shutil
 import re
 from pathlib import Path
-import fnmatch
-import ast
 import pkg_resources
+from cfold.utils.foldignore import load_foldignore, should_include_file
+from cfold.utils.instructions import load_instructions
+from cfold.utils.diff import apply_diff
+from cfold.utils.references import update_references
 
 # Define file patterns to include and exclude
 INCLUDED_EXTENSIONS = {".py", ".toml", ".md", ".yml", ".yaml"}
 EXCLUDED_DIRS = {".pytest_cache", "__pycache__", "build", "dist", ".egg-info", "venv"}
 EXCLUDED_FILES = {".pyc"}
-
-
-def load_foldignore(directory):
-    """Load and parse .foldignore file if it exists."""
-    ignore_file = Path(directory) / ".foldignore"
-    ignore_patterns = []
-    if ignore_file.exists():
-        with open(ignore_file, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith("#"):
-                    ignore_patterns.append(line)
-    return ignore_patterns
-
-
-def should_include_file(filepath, ignore_patterns=None, root_dir=None):
-    """Check if a file should be included based on extension, exclusion rules, and .foldignore patterns."""
-    path = Path(filepath)
-    if root_dir:
-        relpath = os.path.relpath(filepath, root_dir)
-    else:
-        relpath = str(path)
-    if path.suffix not in INCLUDED_EXTENSIONS:
-        return False
-    if any(part in EXCLUDED_DIRS for part in path.parts):
-        return False
-    if path.suffix in EXCLUDED_FILES:
-        return False
-    if ignore_patterns:
-        for pattern in ignore_patterns:
-            if fnmatch.fnmatch(relpath, pattern):
-                return False
-    return True
-
-
-def load_instructions():
-    """Load the boilerplate instructions from the resources file."""
-    try:
-        instructions = pkg_resources.resource_string(
-            "cfold", "resources/instructions.txt"
-        ).decode("utf-8")
-        return instructions
-    except Exception as e:
-        raise RuntimeError(f"Failed to load instructions from resources: {e}")
 
 
 def fold(files=None, output="codefold.txt", prompt_file=None):
@@ -106,106 +64,6 @@ def fold(files=None, output="codefold.txt", prompt_file=None):
                     outfile.write("\n")
 
     print(f"Codebase folded into {output}")
-
-
-def apply_diff(original_lines, modified_lines):
-    """Apply unified diff changes or full content replacement."""
-    if not modified_lines or not any(line.startswith("---") for line in modified_lines):
-        # Full content replacement
-        return "".join(modified_lines)
-
-    # Handle unified diff format
-    diff_lines = [
-        line for line in modified_lines if not line.startswith(("---", "+++"))
-    ]
-    if not diff_lines or not any(line.startswith("@@") for line in diff_lines):
-        return "".join(modified_lines)  # No valid diff hunks, treat as full content
-
-    result = list(original_lines)
-    current_pos = 0
-    hunk = []
-    for line in diff_lines:
-        if line.startswith("@@"):
-            if hunk:
-                # Apply previous hunk
-                for h_line in hunk:
-                    if h_line.startswith("-") and current_pos < len(result):
-                        result.pop(current_pos)
-                    elif h_line.startswith("+"):
-                        result.insert(current_pos, h_line[1:])
-                        current_pos += 1
-                    elif h_line.startswith(" "):
-                        current_pos += 1
-            hunk = [line]
-        elif line.startswith(("+", "-", " ")):
-            hunk.append(line)
-
-    # Apply final hunk
-    if hunk:
-        for h_line in hunk:
-            if h_line.startswith("-") and current_pos < len(result):
-                result.pop(current_pos)
-            elif h_line.startswith("+"):
-                result.insert(current_pos, h_line[1:])
-                current_pos += 1
-            elif h_line.startswith(" "):
-                current_pos += 1
-
-    return "".join(result)
-
-
-def update_references(modified_files, moves, cwd):
-    """Update file references in Python files affected by moves."""
-    for old_path, new_path in moves.items():
-        old_relpath = Path(old_path)
-        new_relpath = Path(new_path)
-        old_module = ".".join(old_relpath.with_suffix("").parts)
-        new_module = ".".join(new_relpath.with_suffix("").parts)
-
-        for filepath, content in modified_files.items():
-            if filepath.endswith(".py") and content != "# DELETE":
-                lines = content.splitlines(keepends=True)
-                if any(l.startswith("---") for l in lines):
-                    try:
-                        with open(
-                            os.path.join(cwd, filepath), "r", encoding="utf-8"
-                        ) as f:
-                            original_lines = f.read().splitlines(keepends=True)
-                        content = apply_diff(original_lines, lines)
-                    except FileNotFoundError:
-                        content = apply_diff([], lines)
-                try:
-                    tree = ast.parse(content)
-
-                    class ImportVisitor(ast.NodeVisitor):
-                        def __init__(self):
-                            self.changes = []
-
-                        def visit_Import(self, node):
-                            for alias in node.names:
-                                if alias.name == old_module:
-                                    self.changes.append(
-                                        (node.lineno, f"import {new_module}")
-                                    )
-                            self.generic_visit(node)
-
-                        def visit_ImportFrom(self, node):
-                            if node.module == old_module:
-                                names = ", ".join(alias.name for alias in node.names)
-                                self.changes.append(
-                                    (node.lineno, f"from {new_module} import {names}")
-                                )
-                            self.generic_visit(node)
-
-                    visitor = ImportVisitor()
-                    visitor.visit(tree)
-                    if visitor.changes:
-                        lines = content.splitlines(keepends=True)
-                        for lineno, new_line in sorted(visitor.changes, reverse=True):
-                            lines[lineno - 1] = new_line + "\n"
-                        modified_files[filepath] = "".join(lines)
-                except SyntaxError:
-                    print(f"Warning: Could not parse {filepath} for reference updates.")
 
 
 def unfold(fold_file, original_dir=None, output_dir=None):

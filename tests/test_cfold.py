@@ -1,6 +1,7 @@
 import pytest
 import os
 from pathlib import Path
+import os
 from cfold import cfold
 
 # Test suite for cfold main functionality
