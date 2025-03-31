@@ -28,7 +28,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        poetry install --with dev  # Removed --no-root
+        poetry install --with dev
 
     - name: Install Codecov uploader
       run: |
@@ -43,3 +43,7 @@ jobs:
     - name: Test with pytest
       run: |
         poetry run pytest tests/ --cov=cfold --cov-report=xml
+
+    - name: Upload coverage to Codecov
+      run: |
+        ./codecov -f coverage.xml -t ${CODECOV_TOKEN}

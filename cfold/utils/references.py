@@ -1,8 +1,6 @@
 from pathlib import Path
 import ast
-from .diff import apply_diff
 import os
-
 
 def update_references(modified_files, moves, cwd):
     """Update file references in Python files affected by moves."""
@@ -14,16 +12,6 @@ def update_references(modified_files, moves, cwd):
 
         for filepath, content in modified_files.items():
             if filepath.endswith(".py") and content != "# DELETE":
-                lines = content.splitlines(keepends=True)
-                if any(l.startswith("---") for l in lines):
-                    try:
-                        with open(
-                            os.path.join(cwd, filepath), "r", encoding="utf-8"
-                        ) as f:
-                            original_lines = f.read().splitlines(keepends=True)
-                        content = apply_diff(original_lines, lines)
-                    except FileNotFoundError:
-                        content = apply_diff([], lines)
                 try:
                     tree = ast.parse(content)
 

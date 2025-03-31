@@ -69,16 +69,12 @@ def test_unfold_new_files(temp_project, tmp_path):
 
 
 def test_unfold_modify_and_delete(temp_project, tmp_path):
-    """Test unfolding with modifications and deletions using paths relative to CWD."""
+    """Test unfolding with modifications and deletions using full content."""
     fold_file = tmp_path / "folded.txt"
     fold_file.write_text(
         "# Instructions for LLM:\n\n"
         "# --- File: project/main.py ---\n"
-        "--- main.py\n"
-        "+++ main.py\n"
-        "@@ -1 +1 @@\n"
-        '-print("Hello")\n'
-        '+print("Modified")\n'
+        "print('Modified')\n"
         "# --- File: project/utils.py ---\n"
         "# DELETE\n\n"
     )
@@ -86,23 +82,19 @@ def test_unfold_modify_and_delete(temp_project, tmp_path):
     output_dir = tmp_path
     cfold.unfold(str(fold_file), str(temp_project), str(output_dir))
     assert (output_dir / "project" / "main.py").exists()
-    assert (output_dir / "project" / "main.py").read_text() == 'print("Modified")'
+    assert (output_dir / "project" / "main.py").read_text() == "print('Modified')\n"
     assert not (output_dir / "project" / "utils.py").exists()
     assert (output_dir / "project" / "docs" / "index.md").exists()
 
 
 def test_unfold_move_and_update_references(temp_project, tmp_path):
-    """Test unfolding with file moves and reference updates."""
+    """Test unfolding with file moves and reference updates using full content."""
     fold_file = tmp_path / "folded.txt"
     fold_file.write_text(
         "# Instructions for LLM:\n\n"
         "# MOVE: project/main.py -> project/src/main.py\n"
         "# --- File: project/importer.py ---\n"
-        "--- importer.py\n"
-        "+++ importer.py\n"
-        "@@ -1 +1 @@\n"
-        "-import project.main\n"
-        "+import project.src.main\n"
+        "import project.src.main\n"
     )
     os.chdir(tmp_path)
     output_dir = tmp_path
@@ -114,7 +106,7 @@ def test_unfold_move_and_update_references(temp_project, tmp_path):
     assert not (output_dir / "project" / "main.py").exists()
     assert (
         output_dir / "project" / "importer.py"
-    ).read_text() == "import project.src.main"
+    ).read_text() == "import project.src.main\n"
 
 
 def test_init(tmp_path):
@@ -129,66 +121,51 @@ def test_init(tmp_path):
     assert custom in content
 
 
-def test_unfold_complex_diff(temp_project, tmp_path):
-    """Test unfolding a complex diff file ensures no diff syntax remains in output."""
-    fold_file = tmp_path / "complex_diff.txt"
+def test_unfold_complex_full_content(temp_project, tmp_path):
+    """Test unfolding a complex full-content file ensures correct application."""
+    fold_file = tmp_path / "complex_full.txt"
     fold_file.write_text(
         "# Instructions for LLM:\n\n"
-        "# --- File: project/main.py ---\n"  # Unified diff modification
-        "--- main.py\n"
-        "+++ main.py\n"
-        "@@ -1 +1,2 @@\n"
-        '-print("Hello")\n'
-        '+print("Modified Hello")\n'
-        '+print("Extra line")\n'
+        "# --- File: project/main.py ---\n"
+        'print("Modified Hello")\n'
+        'print("Extra line")\n'
         "\n"
-        "# --- File: project/utils.py ---\n"  # Full content replacement
+        "# --- File: project/utils.py ---\n"
         "def new_util():\n"
         "    return 42\n"
         "\n"
-        "# --- File: project/importer.py ---\n"  # Unified diff with multiple hunks
-        "--- importer.py\n"
-        "+++ importer.py\n"
-        "@@ -1 +1,2 @@\n"
-        "-import project.main\n"
-        "+from project.main import *\n"
-        "+print('Imported')\n"
+        "# --- File: project/importer.py ---\n"
+        "from project.main import *\n"
+        "print('Imported')\n"
         "\n"
-        "# --- File: project/docs/index.md ---\n"  # Delete
+        "# --- File: project/docs/index.md ---\n"
         "# DELETE\n"
         "\n"
-        "# MOVE: project/utils.py -> project/src/utils.py\n"  # Move
-        "# --- File: project/new_file.py ---\n"  # New file
+        "# MOVE: project/utils.py -> project/src/utils.py\n"
+        "# --- File: project/new_file.py ---\n"
         "print('Brand new file')\n"
         "\n"
     )
-    # "# MOVE: project/utils.py -> project/src/utils.py\n"  # Move
-
     os.chdir(tmp_path)
     output_dir = tmp_path
     cfold.unfold(str(fold_file), str(temp_project), str(output_dir))
 
-    # Check main.py (diff applied)
+    # Check main.py
     main_content = (output_dir / "project" / "main.py").read_text()
-    assert main_content == 'print("Modified Hello")\nprint("Extra line")'
-    assert "---" not in main_content and "@@" not in main_content
+    assert main_content == 'print("Modified Hello")\nprint("Extra line")\n'
 
     # Check utils.py (moved and replaced)
     utils_content = (output_dir / "project" / "src" / "utils.py").read_text()
-    assert utils_content == "def new_util():\n    return 42"
+    assert utils_content == "def new_util():\n    return 42\n"
     assert not (output_dir / "project" / "utils.py").exists()
-    assert "---" not in utils_content and "@@" not in utils_content
 
-    # Check importer.py (diff applied)
+    # Check importer.py
     importer_content = (output_dir / "project" / "importer.py").read_text()
-    assert importer_content == "from project.main import *\nprint('Imported')"
-    assert "---" not in importer_content and "@@" not in importer_content
+    assert importer_content == "from project.main import *\nprint('Imported')\n"
 
     # Check index.md (deleted)
     assert not (output_dir / "project" / "docs" / "index.md").exists()
 
-    # # Check new_file.py (new file added)
-    assert (output_dir / "project" / "new_file.py").exists()
+    # Check new_file.py
     new_file_content = (output_dir / "project" / "new_file.py").read_text()
-    assert new_file_content == "print('Brand new file')"
-    assert "---" not in new_file_content and "@@" not in new_file_content
+    assert new_file_content == "print('Brand new file')\n"

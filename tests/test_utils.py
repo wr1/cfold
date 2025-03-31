@@ -27,13 +27,3 @@ def test_load_foldignore(tmp_path):
     ignore_file.write_text("*.log\ntemp/*\n# comment\nsecret.conf\n")
     patterns = cfold.load_foldignore(str(tmp_path))
     assert patterns == ["*.log", "temp/*", "secret.conf"]
-
-def test_apply_diff():
-    """Test diff application for file modifications."""
-    original = ["line1\n", "line2\n", "line3\n"]
-    modified = ["line1\n", "new line2\n", "line3\n"]
-    result = cfold.apply_diff(original, modified)
-    assert result == "line1\nnew line2\nline3\n"
-    modified = ["line1\n", "line2\n", "line3\n", "line4\n"]
-    result = cfold.apply_diff(original, modified)
-    assert result == "line1\nline2\nline3\nline4\n"

@@ -7,7 +7,6 @@ from pathlib import Path
 from importlib import resources
 from cfold.utils.foldignore import load_foldignore, should_include_file
 from cfold.utils.instructions import load_instructions
-from cfold.utils.diff import apply_diff
 from cfold.utils.references import update_references
 
 # Define file patterns to include and exclude
@@ -67,7 +66,7 @@ def fold(files=None, output="codefold.txt", prompt_file=None):
 
 
 def unfold(fold_file, original_dir=None, output_dir=None):
-    """Unfold a modified fold file with support for moves and diff edits, using paths relative to CWD."""
+    """Unfold a modified fold file with support for moves, deletes, and full rewrites, using paths relative to CWD."""
     cwd = os.getcwd()
     output_dir = os.path.abspath(output_dir or cwd)
 
@@ -87,7 +86,7 @@ def unfold(fold_file, original_dir=None, output_dir=None):
                 filepath = (
                     header.replace("# --- File: ", "").replace(" ---", "").strip()
                 )
-                if filepath.endswith(".md") and not file_content.startswith("---"):
+                if filepath.endswith(".md"):
                     file_content = "\n".join(
                         line[3:] if line.startswith("MD:") else line
                         for line in file_content.splitlines()
@@ -116,7 +115,9 @@ def unfold(fold_file, original_dir=None, output_dir=None):
                     dst = os.path.join(output_dir, relpath)
                     new_path = moves.get(relpath)
 
-                    if new_path:  # File is moved
+                    if (
+                        new_path and relpath not in modified_files
+                    ):  # Move without content change
                         new_dst = os.path.join(output_dir, new_path)
                         os.makedirs(os.path.dirname(new_dst), exist_ok=True)
                         shutil.copy2(filepath, new_dst)
@@ -132,27 +133,37 @@ def unfold(fold_file, original_dir=None, output_dir=None):
                         if os.path.exists(dst):
                             os.remove(dst)
                             print(f"Deleted file: {relpath}")
-                    else:  # Modified file
-                        with open(filepath, "r", encoding="utf-8") as orig_file:
-                            original_content = orig_file.read()
-                        original_lines = original_content.splitlines(keepends=True)
-                        modified_lines = modified_files[relpath].splitlines(
-                            keepends=True
+                    else:  # Modified file (full rewrite)
+                        new_dst = os.path.join(output_dir, new_path or relpath)
+                        os.makedirs(os.path.dirname(new_dst), exist_ok=True)
+                        with open(new_dst, "w", encoding="utf-8") as outfile:
+                            outfile.write(modified_files[relpath] + "\n")
+                        if new_path and os.path.exists(dst) and dst != new_dst:
+                            os.remove(dst)
+                        print(
+                            f"Rewrote file: {relpath}"
+                            + (f" and moved to {new_path}" if new_path else "")
                         )
-                        merged_content = apply_diff(original_lines, modified_lines)
-                        os.makedirs(os.path.dirname(dst), exist_ok=True)
-                        with open(dst, "w", encoding="utf-8") as outfile:
-                            outfile.write(merged_content)
-                        print(f"Applied changes to file: {relpath}")
+
+        # Handle new files not in original_dir
+        for filepath, file_content in modified_files.items():
+            if file_content == "# DELETE":
+                continue
+            full_path = os.path.join(output_dir, moves.get(filepath, filepath))
+            if not os.path.exists(os.path.join(original_dir, filepath)):
+                os.makedirs(os.path.dirname(full_path), exist_ok=True)
+                with open(full_path, "w", encoding="utf-8") as outfile:
+                    outfile.write(file_content + "\n")
+                print(f"Wrote new file: {filepath}")
+
     else:
         for filepath, file_content in modified_files.items():
-            full_path = os.path.join(output_dir, filepath)
+            full_path = os.path.join(output_dir, moves.get(filepath, filepath))
             if file_content == "# DELETE":
                 if os.path.exists(full_path):
                     os.remove(full_path)
                     print(f"Deleted file: {filepath}")
                 continue
-
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
             try:
                 with open(full_path, "w", encoding="utf-8") as outfile:
@@ -164,7 +175,7 @@ def unfold(fold_file, original_dir=None, output_dir=None):
         for old_path, new_path in moves.items():
             old_full_path = os.path.join(output_dir, old_path)
             new_full_path = os.path.join(output_dir, new_path)
-            if os.path.exists(old_full_path):
+            if os.path.exists(old_full_path) and old_path not in modified_files:
                 os.makedirs(os.path.dirname(new_full_path), exist_ok=True)
                 shutil.move(old_full_path, new_full_path)
                 print(f"Moved file: {old_path} -> {new_path}")
