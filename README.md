@@ -1,5 +1,7 @@
 # cfold
 
+[![Tests](https://github.com/<your-username>/cfold/actions/workflows/python-app.yml/badge.svg)](https://github.com/<your-username>/cfold/actions/workflows/python-app.yml) [![Coverage](https://codecov.io/gh/<your-username>/cfold/branch/master/graph/badge.svg)](https://codecov.io/gh/<your-username>/cfold)
+
 cfold is a command-line tool that helps you prepare codebases for interaction with Large Language Models (LLMs). It can "fold" a directory of code into a single text file, and "unfold" a modified version of that file back into a directory structure. This is useful for providing LLMs with the context of an entire project in a manageable format, allowing them to make changes, add new files, or delete existing ones.
 
 ## Installation
@@ -92,8 +94,3 @@ my_project/utils.py
 
 Running `cfold fold my_project -o folded.txt` from `/home/user` produces `folded.txt`:
 ```
-# Instructions for LLM:
-# - To modify a file, keep its '# --- File: path ---' header and update the content below.
-# - To delete a file, replace its content with '# DELETE'.
-# - To add a new file, include a new '# --- File: path ---' section with the desired content.
-# - Preserve the '# --- File: path ---' format for all files.

@@ -1,7 +1,6 @@
 import pytest
 import os
 from pathlib import Path
-import os
 from cfold import cfold
 
 # Test suite for cfold main functionality
@@ -113,7 +112,6 @@ def test_unfold_move_and_update_references(temp_project, tmp_path):
         output_dir / "project" / "src" / "main.py"
     ).read_text() == 'print("Hello")\n'
     assert not (output_dir / "project" / "main.py").exists()
-    # print(output_dir / "project" / "importer.py").read_text()
     assert (
         output_dir / "project" / "importer.py"
     ).read_text() == "import project.src.main"
@@ -129,3 +127,67 @@ def test_init(tmp_path):
     assert "Instructions for LLM:" in content
     assert "Create a Poetry-managed Python project" in content
     assert custom in content
+
+
+def test_unfold_complex_diff(temp_project, tmp_path):
+    """Test unfolding a complex diff file ensures no diff syntax remains in output."""
+    fold_file = tmp_path / "complex_diff.txt"
+    fold_file.write_text(
+        "# Instructions for LLM:\n\n"
+        "# --- File: project/main.py ---\n"  # Unified diff modification
+        "--- main.py\n"
+        "+++ main.py\n"
+        "@@ -1 +1,2 @@\n"
+        '-print("Hello")\n'
+        '+print("Modified Hello")\n'
+        '+print("Extra line")\n'
+        "\n"
+        "# --- File: project/utils.py ---\n"  # Full content replacement
+        "def new_util():\n"
+        "    return 42\n"
+        "\n"
+        "# --- File: project/importer.py ---\n"  # Unified diff with multiple hunks
+        "--- importer.py\n"
+        "+++ importer.py\n"
+        "@@ -1 +1,2 @@\n"
+        "-import project.main\n"
+        "+from project.main import *\n"
+        "+print('Imported')\n"
+        "\n"
+        "# --- File: project/docs/index.md ---\n"  # Delete
+        "# DELETE\n"
+        "\n"
+        # "# --- File: project/new_file.py ---\n"  # New file
+        # "print('Brand new file')\n"
+        # "\n"
+    )
+    # "# MOVE: project/utils.py -> project/src/utils.py\n"  # Move
+
+    os.chdir(tmp_path)
+    output_dir = tmp_path
+    cfold.unfold(str(fold_file), str(temp_project), str(output_dir))
+
+    # Check main.py (diff applied)
+    main_content = (output_dir / "project" / "main.py").read_text()
+    assert main_content == 'print("Modified Hello")\nprint("Extra line")'
+    assert "---" not in main_content and "@@" not in main_content
+
+    # Check utils.py (moved and replaced)
+    utils_content = (output_dir / "project" / "utils.py").read_text()
+    assert utils_content == "def new_util():\n    return 42"
+    # assert not (output_dir / "project" / "utils.py").exists()
+    assert "---" not in utils_content and "@@" not in utils_content
+
+    # Check importer.py (diff applied)
+    importer_content = (output_dir / "project" / "importer.py").read_text()
+    assert importer_content == "from project.main import *\nprint('Imported')"
+    assert "---" not in importer_content and "@@" not in importer_content
+
+    # Check index.md (deleted)
+    assert not (output_dir / "project" / "docs" / "index.md").exists()
+
+    # # Check new_file.py (new file added)
+    # assert (output_dir / "project" / "new_file.py").exists()
+    # new_file_content = (output_dir / "project" / "new_file.py").read_text()
+    # assert new_file_content == "print('Brand new file')"
+    # assert "---" not in new_file_content and "@@" not in new_file_content

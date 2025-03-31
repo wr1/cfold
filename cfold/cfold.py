@@ -152,6 +152,7 @@ def unfold(fold_file, original_dir=None, output_dir=None):
                     os.remove(full_path)
                     print(f"Deleted file: {filepath}")
                 continue
+
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
             try:
                 with open(full_path, "w", encoding="utf-8") as outfile:
