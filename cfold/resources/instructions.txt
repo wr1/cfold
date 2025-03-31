@@ -1,0 +1,27 @@
+# Instructions for LLM:
+# This file uses the cfold format to manage a Python project codebase.
+# - Folding: 'cfold fold <files> -o <output.txt>' captures specified files into this .txt.
+# - Unfolding: 'cfold unfold <modified.txt>' applies changes from this .txt to the directory.
+# Rules:
+# - To modify a file fully: Keep its '# --- File: path ---' header and update content below.
+# - To edit lines: Use unified diff format (---, +++, @@ ... @@) after '# --- File: path ---'.
+# - To delete a file: Replace its content with '# DELETE'.
+# - To add a file: Add a new '# --- File: path ---' section with content.
+# - To move/rename a file: Add '# MOVE: old_path -> new_path' (relative to CWD).
+# - Only include modified, new, deleted, or moved files in the modified .txt; unchanged files are preserved.
+# - For Markdown (e.g., .md files): Prefix every line with 'MD:' in full content mode.
+#   'unfold' strips 'MD:' only from .md files, not .py files; diff mode preserves literal content.
+# - Always preserve '# --- File: path ---' or '# MOVE: ...' format.
+# - Supports .foldignore file with gitignore-style patterns to exclude files during folding (directory mode).
+# - Paths are relative to the current working directory (CWD) by default.
+# Example:
+#   # --- File: my_project/docs/example.md ---
+#   MD:# Title
+#   MD:Text
+#   # --- File: my_project/src/test.py ---
+#   --- test.py
+#   +++ test.py
+#   @@ -1 +1 @@
+#   -print('Old')
+#   +print('New')
+#   # MOVE: my_project/src/test.py -> my_project/src/new_test.py

@@ -1,4 +1,3 @@
-# --- File: cfold/cfold.py ---
 #!/usr/bin/env python3
 import os
 import argparse
@@ -7,6 +6,7 @@ import re
 from pathlib import Path
 import fnmatch
 import ast
+import pkg_resources
 
 # Define file patterns to include and exclude
 INCLUDED_EXTENSIONS = {".py", ".toml", ".md", ".yml", ".yaml"}
@@ -47,8 +47,19 @@ def should_include_file(filepath, ignore_patterns=None, root_dir=None):
     return True
 
 
-def fold(files=None, output="codefold.txt"):
-    """Wrap specified files or a directory into a single file with LLM instructions, using paths relative to CWD."""
+def load_instructions():
+    """Load the boilerplate instructions from the resources file."""
+    try:
+        instructions = pkg_resources.resource_string(
+            "cfold", "resources/instructions.txt"
+        ).decode("utf-8")
+        return instructions
+    except Exception as e:
+        raise RuntimeError(f"Failed to load instructions from resources: {e}")
+
+
+def fold(files=None, output="codefold.txt", prompt_file=None):
+    """Wrap specified files or a directory into a single file with LLM instructions and optional prompt, using paths relative to CWD."""
     cwd = os.getcwd()
     if not files:
         directory = cwd
@@ -71,35 +82,10 @@ def fold(files=None, output="codefold.txt"):
         return
 
     with open(output, "w", encoding="utf-8") as outfile:
-        outfile.write(
-            "# Instructions for LLM:\n"
-            "# This file uses the cfold format to manage a Python project codebase.\n"
-            "# - Folding: 'cfold fold <files> -o <output.txt>' captures specified files into this .txt.\n"
-            "# - Unfolding: 'cfold unfold <modified.txt>' applies changes from this .txt to the directory.\n"
-            "# Rules:\n"
-            "# - To modify a file fully: Keep its '# --- File: path ---' header and update content below.\n"
-            "# - To edit lines: Use unified diff format (---, +++, @@ ... @@) after '# --- File: path ---'.\n"
-            "# - To delete a file: Replace its content with '# DELETE'.\n"
-            "# - To add a file: Add a new '# --- File: path ---' section with content.\n"
-            "# - To move/rename a file: Add '# MOVE: old_path -> new_path' (relative to CWD).\n"
-            "# - Only include modified, new, deleted, or moved files in the modified .txt; unchanged files are preserved.\n"
-            "# - For Markdown (e.g., .md files): Prefix every line with 'MD:' in full content mode.\n"
-            "#   'unfold' strips 'MD:' only from .md files, not .py files; diff mode preserves literal content.\n"
-            "# - Always preserve '# --- File: path ---' or '# MOVE: ...' format.\n"
-            "# - Supports .foldignore file with gitignore-style patterns to exclude files during folding (directory mode).\n"
-            "# - Paths are relative to the current working directory (CWD) by default.\n"
-            "# Example:\n"
-            "#   # --- File: my_project/docs/example.md ---\n"
-            "#   MD:# Title\n"
-            "#   MD:Text\n"
-            "#   # --- File: my_project/src/test.py ---\n"
-            "#   --- test.py\n"
-            "#   +++ test.py\n"
-            "#   @@ -1 +1 @@\n"
-            "#   -print('Old')\n"
-            "#   +print('New')\n"
-            "#   # MOVE: my_project/src/test.py -> my_project/src/new_test.py\n\n"
-        )
+        # Write the external instructions
+        outfile.write(load_instructions())
+
+        # Write the folded files
         for filepath in files:
             relpath = os.path.relpath(filepath, cwd)
             outfile.write(f"# --- File: {relpath} ---\n")
@@ -108,11 +94,22 @@ def fold(files=None, output="codefold.txt"):
                 if filepath.endswith(".md"):
                     content = "\n".join(f"MD:{line}" for line in content.splitlines())
                 outfile.write(content + "\n\n")
+
+        # Append the prompt file content if provided
+        if prompt_file:
+            if not os.path.isfile(prompt_file):
+                print(f"Warning: Prompt file '{prompt_file}' does not exist. Skipping.")
+            else:
+                with open(prompt_file, "r", encoding="utf-8") as prompt_infile:
+                    outfile.write("\n# Prompt:\n")
+                    outfile.write(prompt_infile.read())
+                    outfile.write("\n")
+
     print(f"Codebase folded into {output}")
 
 
 def apply_diff(original_lines, modified_lines):
-    """Apply unified diff changes or full content replacement using difflib."""
+    """Apply unified diff changes or full content replacement."""
     if not modified_lines or not any(line.startswith("---") for line in modified_lines):
         # Full content replacement
         return "".join(modified_lines)
@@ -124,10 +121,6 @@ def apply_diff(original_lines, modified_lines):
     if not diff_lines or not any(line.startswith("@@") for line in diff_lines):
         return "".join(modified_lines)  # No valid diff hunks, treat as full content
 
-    # Construct a unified diff string and apply it
-    # diff_text = "\n".join(modified_lines) + "\n"
-    # original_text = "".join(original_lines)
-    # Use a simple patch applicator for unified diff
     result = list(original_lines)
     current_pos = 0
     hunk = []
@@ -173,7 +166,6 @@ def update_references(modified_files, moves, cwd):
             if filepath.endswith(".py") and content != "# DELETE":
                 lines = content.splitlines(keepends=True)
                 if any(l.startswith("---") for l in lines):
-                    # Apply diff if present
                     try:
                         with open(
                             os.path.join(cwd, filepath), "r", encoding="utf-8"
@@ -181,7 +173,6 @@ def update_references(modified_files, moves, cwd):
                             original_lines = f.read().splitlines(keepends=True)
                         content = apply_diff(original_lines, lines)
                     except FileNotFoundError:
-                        # If no original file, assume diff is standalone
                         content = apply_diff([], lines)
                 try:
                     tree = ast.parse(content)
@@ -248,7 +239,6 @@ def unfold(fold_file, original_dir=None, output_dir=None):
                 old_path, new_path = header.replace("# MOVE: ", "").split(" -> ")
                 moves[old_path.strip()] = new_path.strip()
 
-    # Update references in Python files for moves
     update_references(modified_files, moves, cwd)
 
     if os.path.exists(output_dir) and os.listdir(output_dir):
@@ -297,7 +287,6 @@ def unfold(fold_file, original_dir=None, output_dir=None):
                             outfile.write(merged_content)
                         print(f"Applied changes to file: {relpath}")
     else:
-        # No original_dir: process modified_files and moves directly
         for filepath, file_content in modified_files.items():
             full_path = os.path.join(output_dir, filepath)
             if file_content == "# DELETE":
@@ -327,34 +316,8 @@ def unfold(fold_file, original_dir=None, output_dir=None):
 def init(output="start.txt", custom_instruction=""):
     """Create an initial .txt file with LLM instructions for project setup."""
     with open(output, "w", encoding="utf-8") as outfile:
+        outfile.write(load_instructions())
         outfile.write(
-            "# Instructions for LLM:\n"
-            "# This file uses the cfold format to manage a Python project codebase.\n"
-            "# - Folding: 'cfold fold <files> -o <output.txt>' captures specified files into this .txt.\n"
-            "# - Unfolding: 'cfold unfold <modified.txt>' applies changes from this .txt to the directory.\n"
-            "# Rules:\n"
-            "# - To modify a file fully: Keep its '# --- File: path ---' header and update content below.\n"
-            "# - To edit lines: Use unified diff format (---, +++, @@ ... @@) after '# --- File: path ---'.\n"
-            "# - To delete a file: Replace its content with '# DELETE'.\n"
-            "# - To add a file: Add a new '# --- File: path ---' section with content.\n"
-            "# - To move/rename a file: Add '# MOVE: old_path -> new_path' (relative to CWD).\n"
-            "# - Only include modified, new, deleted, or moved files in the modified .txt; unchanged files are preserved.\n"
-            "# - For Markdown (e.g., .md files): Prefix every line with 'MD:' in full content mode.\n"
-            "#   'unfold' strips 'MD:' only from .md files, not .py files; diff mode preserves literal content.\n"
-            "# - Always preserve '# --- File: path ---' or '# MOVE: ...' format.\n"
-            "# - Supports .foldignore file with gitignore-style patterns to exclude files during folding (directory mode).\n"
-            "# - Paths are relative to the current working directory (CWD) by default.\n"
-            "# Example:\n"
-            "#   # --- File: my_project/docs/example.md ---\n"
-            "#   MD:# Title\n"
-            "#   MD:Text\n"
-            "#   # --- File: my_project/src/test.py ---\n"
-            "#   --- test.py\n"
-            "#   +++ test.py\n"
-            "#   @@ -1 +1 @@\n"
-            "#   -print('Old')\n"
-            "#   +print('New')\n"
-            "#   # MOVE: my_project/src/test.py -> my_project/src/new_test.py\n\n"
             "# Project Setup Guidance:\n"
             "# Create a Poetry-managed Python project with:\n"
             "# - pyproject.toml: Define package metadata, dependencies, and scripts.\n"
@@ -393,6 +356,12 @@ def main():
         default="codefold.txt",
         help="Output file (e.g., folded.txt; default: codefold.txt)",
     )
+    fold_parser.add_argument(
+        "--prompt",
+        "-p",
+        default=None,
+        help="Optional file containing a prompt to append to the output",
+    )
 
     unfold_parser = subparsers.add_parser(
         "unfold", help="Unfold a modified file into a project directory."
@@ -421,7 +390,7 @@ def main():
     args = parser.parse_args()
 
     if args.command == "fold":
-        fold(args.files, args.output)
+        fold(args.files, args.output, args.prompt)
     elif args.command == "unfold":
         unfold(args.foldfile, args.original_dir, args.output_dir)
     elif args.command == "init":
