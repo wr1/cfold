@@ -37,6 +37,7 @@ cfold fold my_project -o folded.txt
 
 - `-d/--directory`: Directory to fold (default: current dir).
 - `-o/--output`: Output file (default: `codefold.txt`).
+- Paths are relative to the current working directory (CWD).
 - Supports `.foldignore` file with gitignore-style patterns to exclude files (e.g., `*.log`, `temp/`).
 
 ### `cfold unfold`
@@ -48,4 +49,4 @@ cfold unfold folded.txt -o my_project_modified -i my_project
 ```
 
 - `-i/--original-dir`: Original directory to merge with (optional).
-- `-o/--output-dir`: Output directory (default: current dir).
+- `-o/--output-dir`: Output directory (default: current working directory).
