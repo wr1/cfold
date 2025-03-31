@@ -8,7 +8,7 @@ import difflib
 
 # Define file patterns to include and exclude
 INCLUDED_EXTENSIONS = {".py", ".toml", ".md", ".yml", ".yaml"}
-EXCLUDED_DIRS = {".pytest_cache", "__pycache__", "build", "dist", ".egg-info"}
+EXCLUDED_DIRS = {".pytest_cache", "__pycache__", "build", "dist", ".egg-info", "venv"}
 EXCLUDED_FILES = {".pyc"}
 
 
