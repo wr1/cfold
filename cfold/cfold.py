@@ -7,7 +7,6 @@ from pathlib import Path
 from importlib import resources
 from cfold.utils.foldignore import load_foldignore, should_include_file
 from cfold.utils.instructions import load_instructions
-from cfold.utils.references import update_references
 
 # Define file patterns to include and exclude
 INCLUDED_EXTENSIONS = {".py", ".toml", ".md", ".yml", ".yaml"}
@@ -39,10 +38,7 @@ def fold(files=None, output="codefold.txt", prompt_file=None):
         return
 
     with open(output, "w", encoding="utf-8") as outfile:
-        # Write the external instructions from resources
         outfile.write(load_instructions())
-
-        # Write the folded files
         for filepath in files:
             relpath = os.path.relpath(filepath, cwd)
             outfile.write(f"# --- File: {relpath} ---\n")
@@ -51,52 +47,39 @@ def fold(files=None, output="codefold.txt", prompt_file=None):
                 if filepath.endswith(".md"):
                     content = "\n".join(f"MD:{line}" for line in content.splitlines())
                 outfile.write(content + "\n\n")
-
-        # Append the prompt file content if provided
-        if prompt_file:
-            if not os.path.isfile(prompt_file):
-                print(f"Warning: Prompt file '{prompt_file}' does not exist. Skipping.")
-            else:
-                with open(prompt_file, "r", encoding="utf-8") as prompt_infile:
-                    outfile.write("\n# Prompt:\n")
-                    outfile.write(prompt_infile.read())
-                    outfile.write("\n")
-
+        if prompt_file and os.path.isfile(prompt_file):
+            with open(prompt_file, "r", encoding="utf-8") as prompt_infile:
+                outfile.write("\n# Prompt:\n")
+                outfile.write(prompt_infile.read())
+                outfile.write("\n")
+        elif prompt_file:
+            print(f"Warning: Prompt file '{prompt_file}' does not exist. Skipping.")
     print(f"Codebase folded into {output}")
 
 
 def unfold(fold_file, original_dir=None, output_dir=None):
-    """Unfold a modified fold file with support for moves, deletes, and full rewrites, using paths relative to CWD."""
+    """Unfold a modified fold file with support for deletes and full rewrites, using paths relative to CWD."""
     cwd = os.getcwd()
     output_dir = os.path.abspath(output_dir or cwd)
 
     with open(fold_file, "r", encoding="utf-8") as infile:
         content = infile.read()
-        sections = re.split(r"(# --- File: .+? ---|# MOVE: .+? -> .+?)\n", content)[1:]
+        sections = re.split(r"(# --- File: .+? ---)\n", content)[1:]
         if len(sections) % 2 != 0:
             print("Warning: Malformed fold file - odd number of sections")
             return
 
         modified_files = {}
-        moves = {}
         for i in range(0, len(sections), 2):
             header = sections[i].strip()
             file_content = sections[i + 1].rstrip()
-            if header.startswith("# --- File:"):
-                filepath = (
-                    header.replace("# --- File: ", "").replace(" ---", "").strip()
+            filepath = header.replace("# --- File: ", "").replace(" ---", "").strip()
+            if filepath.endswith(".md"):
+                file_content = "\n".join(
+                    line[3:] if line.startswith("MD:") else line
+                    for line in file_content.splitlines()
                 )
-                if filepath.endswith(".md"):
-                    file_content = "\n".join(
-                        line[3:] if line.startswith("MD:") else line
-                        for line in file_content.splitlines()
-                    )
-                modified_files[filepath] = file_content
-            elif header.startswith("# MOVE:"):
-                old_path, new_path = header.replace("# MOVE: ", "").split(" -> ")
-                moves[old_path.strip()] = new_path.strip()
-
-    update_references(modified_files, moves, cwd)
+            modified_files[filepath] = file_content
 
     if os.path.exists(output_dir) and os.listdir(output_dir):
         print(f"Merging into existing directory: {output_dir}")
@@ -113,52 +96,33 @@ def unfold(fold_file, original_dir=None, output_dir=None):
                 if should_include_file(filepath, ignore_patterns, original_dir):
                     relpath = os.path.relpath(filepath, cwd)
                     dst = os.path.join(output_dir, relpath)
-                    new_path = moves.get(relpath)
-
-                    if (
-                        new_path and relpath not in modified_files
-                    ):  # Move without content change
-                        new_dst = os.path.join(output_dir, new_path)
-                        os.makedirs(os.path.dirname(new_dst), exist_ok=True)
-                        shutil.copy2(filepath, new_dst)
-                        if os.path.exists(dst):
-                            os.remove(dst)
-                        print(f"Moved file: {relpath} -> {new_path}")
-                    elif relpath not in modified_files:  # Unchanged file
+                    if relpath not in modified_files:
                         os.makedirs(os.path.dirname(dst), exist_ok=True)
                         if os.path.abspath(filepath) != os.path.abspath(dst):
                             shutil.copy2(filepath, dst)
                             print(f"Copied unchanged file: {relpath}")
-                    elif modified_files[relpath] == "# DELETE":  # Deleted file
+                    elif modified_files[relpath] == "# DELETE":
                         if os.path.exists(dst):
                             os.remove(dst)
                             print(f"Deleted file: {relpath}")
-                    else:  # Modified file (full rewrite)
-                        new_dst = os.path.join(output_dir, new_path or relpath)
-                        os.makedirs(os.path.dirname(new_dst), exist_ok=True)
-                        with open(new_dst, "w", encoding="utf-8") as outfile:
+                    else:
+                        os.makedirs(os.path.dirname(dst), exist_ok=True)
+                        with open(dst, "w", encoding="utf-8") as outfile:
                             outfile.write(modified_files[relpath] + "\n")
-                        if new_path and os.path.exists(dst) and dst != new_dst:
-                            os.remove(dst)
-                        print(
-                            f"Rewrote file: {relpath}"
-                            + (f" and moved to {new_path}" if new_path else "")
-                        )
+                        print(f"Rewrote file: {relpath}")
 
-        # Handle new files not in original_dir
         for filepath, file_content in modified_files.items():
             if file_content == "# DELETE":
                 continue
-            full_path = os.path.join(output_dir, moves.get(filepath, filepath))
+            full_path = os.path.join(output_dir, filepath)
             if not os.path.exists(os.path.join(original_dir, filepath)):
                 os.makedirs(os.path.dirname(full_path), exist_ok=True)
                 with open(full_path, "w", encoding="utf-8") as outfile:
                     outfile.write(file_content + "\n")
                 print(f"Wrote new file: {filepath}")
-
     else:
         for filepath, file_content in modified_files.items():
-            full_path = os.path.join(output_dir, moves.get(filepath, filepath))
+            full_path = os.path.join(output_dir, filepath)
             if file_content == "# DELETE":
                 if os.path.exists(full_path):
                     os.remove(full_path)
@@ -171,14 +135,6 @@ def unfold(fold_file, original_dir=None, output_dir=None):
                 print(f"Wrote file: {filepath}")
             except Exception as e:
                 print(f"Error writing {filepath}: {e}")
-
-        for old_path, new_path in moves.items():
-            old_full_path = os.path.join(output_dir, old_path)
-            new_full_path = os.path.join(output_dir, new_path)
-            if os.path.exists(old_full_path) and old_path not in modified_files:
-                os.makedirs(os.path.dirname(new_full_path), exist_ok=True)
-                shutil.move(old_full_path, new_full_path)
-                print(f"Moved file: {old_path} -> {new_path}")
 
     print(f"Codebase unfolded into {output_dir}")
 

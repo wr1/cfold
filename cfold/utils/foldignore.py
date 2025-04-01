@@ -2,7 +2,6 @@ from pathlib import Path
 import fnmatch
 import os
 
-
 def load_foldignore(directory):
     """Load and parse .foldignore file if it exists."""
     ignore_file = Path(directory) / ".foldignore"
@@ -15,19 +14,10 @@ def load_foldignore(directory):
                     ignore_patterns.append(line)
     return ignore_patterns
 
-
 def should_include_file(filepath, ignore_patterns=None, root_dir=None):
     """Check if a file should be included based on extension, exclusion rules, and .foldignore patterns."""
-    # Define file patterns to include and exclude
     INCLUDED_EXTENSIONS = {".py", ".toml", ".md", ".yml", ".yaml"}
-    EXCLUDED_DIRS = {
-        ".pytest_cache",
-        "__pycache__",
-        "build",
-        "dist",
-        ".egg-info",
-        "venv",
-    }
+    EXCLUDED_DIRS = {".pytest_cache", "__pycache__", "build", "dist", ".egg-info", "venv"}
     EXCLUDED_FILES = {".pyc"}
 
     path = Path(filepath)
