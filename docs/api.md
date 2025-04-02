@@ -1,26 +1,18 @@
 # API Reference
 
-## `cfold.fold(directory=None, output="codefold.txt")`
+## `cfold.fold(files=None, output="codefold.txt", prompt_file=None)`
 
-Wrap a project into a single file with LLM instructions.
-
-- **Args**:
-  - `directory` (str): Directory to fold (default: current dir).
-  - `output` (str): Output file path (default: "codefold.txt").
+- `files`: Files or directory to fold (default: CWD).
+- `output`: Output file (default: `codefold.txt`).
+- `prompt_file`: Optional prompt file.
 
 ## `cfold.unfold(fold_file, original_dir=None, output_dir=None)`
 
-Unfold a modified fold file into a directory, merging with the original if provided.
-
-- **Args**:
-  - `fold_file` (str): Path to the folded `.txt` file.
-  - `original_dir` (str): Original project directory (optional).
-  - `output_dir` (str): Output directory (default: current dir).
+- `fold_file`: The fold file to unfold.
+- `original_dir`: Original directory to merge (optional).
+- `output_dir`: Output directory (default: CWD).
 
 ## `cfold.init(output="start.txt", custom_instruction="")`
 
-Create an initial `.txt` template with LLM instructions.
-
-- **Args**:
-  - `output` (str): Output file path (default: "start.txt").
-  - `custom_instruction` (str): Custom project purpose (default: "Describe the purpose of your project here.").
+- `output`: Output file (default: `start.txt`).
+- `custom_instruction`: Custom project purpose.
