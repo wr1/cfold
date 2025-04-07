@@ -24,4 +24,6 @@
 # - '# --- File: src/utils/helper.py ---' with extracted functions.
 # - Aim for modularity: Each file should have a single responsibility, making it easier to modify or replace individually.
 # - Reply using a single txt file for implementing changes to multiple files using 'cfold unfold <singlefile.txt>'.
+# - No need to include LLM instructions in the output.
 #- Assume that when a test is commented out, the test didn’t pass; do not just reenable the test, but attempt to fix it.
+
