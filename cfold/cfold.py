@@ -30,7 +30,7 @@ def fold(files=None, output="codefold.txt", prompt_file=None):
         files = [
             os.path.abspath(f)
             for f in files
-            if os.path.isfile(f) and should_include_file(f)
+            if os.path.isfile(f)  # and should_include_file(f)
         ]
 
     if not files:
@@ -63,7 +63,7 @@ def unfold(fold_file, original_dir=None, output_dir=None):
     output_dir = os.path.abspath(output_dir or cwd)
 
     with open(fold_file, "r", encoding="utf-8") as infile:
-        content = infile.read()
+        content = infile.read().replace("CFOLD: ", "")
         sections = re.split(r"(# --- File: .+? ---)\n", content)[1:]
         if len(sections) % 2 != 0:
             print("Warning: Malformed fold file - odd number of sections")
