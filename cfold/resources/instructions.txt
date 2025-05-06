@@ -26,3 +26,4 @@
 # - Aim for modularity: Each file should have a single responsibility, making it easier to modify or replace individually.
 # - Reply using a single plain text code block for implementing changes to multiple files using 'cfold unfold <singlefile.txt>'.
 # - No need to include LLM instructions in the output.
+# Please return the cfold formatted output directly in the chat without opening Grok Studio or the canvas panel.

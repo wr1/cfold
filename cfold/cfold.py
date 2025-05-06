@@ -63,7 +63,8 @@ def unfold(fold_file, original_dir=None, output_dir=None):
     output_dir = os.path.abspath(output_dir or cwd)
 
     with open(fold_file, "r", encoding="utf-8") as infile:
-        content = infile.read().replace("CFOLD: ", "")
+        # hack to deal with grok sometimes not rendering as code block
+        content = infile.read().replace("CFOLD: ", "").replace("CFOLD:", "")
         sections = re.split(r"(# --- File: .+? ---)\n", content)[1:]
         if len(sections) % 2 != 0:
             print("Warning: Malformed fold file - odd number of sections")
