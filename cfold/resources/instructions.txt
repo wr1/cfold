@@ -12,6 +12,7 @@
 # - Always preserve '# --- File: path ---' format for file sections.
 # - Supports .foldignore file with gitignore-style patterns to exclude files during folding (directory mode).
 # - Paths are relative to the current working directory (CWD) by default.
+# - Can you preped 'CFOLD: ' to every line in the output? So for markdown a line starts 'CFOLD: MD: '  
 # Refactoring Guidelines:
 # - Prefer organizing code into subdirectories based on functionality (e.g., 'src/utils/', 'src/core/', 'src/cli/').
 # - Split functionality into small, focused files (e.g., one function or class per file where practical, typically 50-200 lines).
@@ -23,5 +24,6 @@
 # - '# --- File: src/core/main.py ---' with reduced content.
 # - '# --- File: src/utils/helper.py ---' with extracted functions.
 # - Aim for modularity: Each file should have a single responsibility, making it easier to modify or replace individually.
-# - Reply using a single txt file for implementing changes to multiple files using 'cfold unfold <singlefile.txt>'.
-#- Assume that when a test is commented out, the test didn’t pass; do not just reenable the test, but attempt to fix it.
+# - Reply using a single plain text code block for implementing changes to multiple files using 'cfold unfold <singlefile.txt>'.
+# - No need to include LLM instructions in the output.
+# Please return the cfold formatted output directly in the chat without opening Grok Studio or the canvas panel.
