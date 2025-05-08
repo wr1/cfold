@@ -26,6 +26,23 @@ cfold init start.txt --custom "Build a tool."
 cfold fold -o folded.txt
 ```
 
+```bash 
+
+usage: cfold fold [-h] [--output OUTPUT] [--prompt PROMPT] [files ...]
+
+positional arguments:
+  files                 Files to fold (optional; if omitted, folds the current directory)
+
+options:
+  -h, --help            show this help message and exit
+  --output OUTPUT, -o OUTPUT
+                        Output file (e.g., folded.txt; default: codefold.txt)
+  --prompt PROMPT, -p PROMPT
+                        Optional file containing a prompt to append to the output
+```
+
+
+
 ### `cfold unfold`
 
 ```bash
