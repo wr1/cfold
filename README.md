@@ -1,8 +1,8 @@
-# cfold
-
 [![Tests](https://github.com/wr1/cfold/actions/workflows/python-app.yml/badge.svg)](https://github.com/wr1/cfold/actions/workflows/python-app.yml)
 
-`cfold` is a command-line tool that helps you prepare codebases for interaction with Large Language Models (LLMs). It can "fold" a directory or specific files into a single text file and "unfold" a modified version back into a directory structure. All file paths are handled relative to the current working directory (CWD).
+# cfold
+
+`cfold` is a command-line tool that helps you prepare codebases for interaction with Large Language Models (LLMs). It can "fold" a directory of code into a single text file and "unfold" a modified version back into a directory structure.
 
 ## Installation
 
