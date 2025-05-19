@@ -8,15 +8,17 @@ from importlib import resources
 from cfold.utils.foldignore import load_foldignore, should_include_file
 from cfold.utils.instructions import load_instructions
 
-# Define file patterns to include and exclude
-INCLUDED_EXTENSIONS = {".py", ".toml", ".md", ".yml", ".yaml"}
+# Define file patterns to exclude
 EXCLUDED_DIRS = {".pytest_cache", "__pycache__", "build", "dist", ".egg-info", "venv"}
 EXCLUDED_FILES = {".pyc"}
 
 
-def fold(files=None, output="codefold.txt", prompt_file=None, nodoc=False):
+def fold(files=None, output="codefold.txt", prompt_file=None, dialect="default"):
     """Wrap specified files or a directory into a single file with LLM instructions and optional prompt, using paths relative to CWD."""
     cwd = os.getcwd()
+    instructions = load_instructions(dialect)
+    included_suffixes = instructions["included_suffix"]
+
     if not files:
         directory = cwd
         ignore_patterns = load_foldignore(directory)
@@ -24,15 +26,13 @@ def fold(files=None, output="codefold.txt", prompt_file=None, nodoc=False):
         for dirpath, _, filenames in os.walk(directory):
             for filename in filenames:
                 filepath = os.path.join(dirpath, filename)
-                if should_include_file(filepath, ignore_patterns, directory):
-                    if nodoc and filepath.endswith(".md"):
-                        continue
+                if should_include_file(filepath, ignore_patterns, directory, included_suffixes):
                     files.append(filepath)
     else:
         files = [
             os.path.abspath(f)
             for f in files
-            if os.path.isfile(f) and (not nodoc or not f.endswith(".md"))
+            if os.path.isfile(f) and Path(f).suffix in included_suffixes
         ]
 
     if not files:
@@ -40,7 +40,7 @@ def fold(files=None, output="codefold.txt", prompt_file=None, nodoc=False):
         return
 
     with open(output, "w", encoding="utf-8") as outfile:
-        outfile.write(load_instructions())
+        outfile.write(instructions["prefix"] + "\n\n")
         for filepath in files:
             relpath = os.path.relpath(filepath, cwd)
             outfile.write(f"# --- File: {relpath} ---\n")
@@ -96,7 +96,7 @@ def unfold(fold_file, original_dir=None, output_dir=None):
         for dirpath, _, filenames in os.walk(original_dir):
             for filename in filenames:
                 filepath = os.path.join(dirpath, filename)
-                if should_include_file(filepath, ignore_patterns, original_dir):
+                if should_include_file(filepath, ignore_patterns, original_dir, included_suffixes):
                     relpath = os.path.relpath(filepath, cwd)
                     dst = os.path.join(output_dir, relpath)
                     if relpath not in modified_files:
@@ -142,10 +142,11 @@ def unfold(fold_file, original_dir=None, output_dir=None):
     print(f"Codebase unfolded into {output_dir}")
 
 
-def init(output="start.txt", custom_instruction=""):
+def init(output="start.txt", custom_instruction="", dialect="default"):
     """Create an initial .txt file with LLM instructions for project setup."""
+    instructions = load_instructions(dialect)
     with open(output, "w", encoding="utf-8") as outfile:
-        outfile.write(load_instructions())
+        outfile.write(instructions["prefix"] + "\n\n")
         outfile.write(
             "# Project Setup Guidance:\n"
             "# Create a Poetry-managed Python project with:\n"
@@ -166,7 +167,7 @@ def init(output="start.txt", custom_instruction=""):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="cfold: Fold and unfold Python projects with paths relative to CWD."
+        description="Fold and unfold Python projects with paths relative to CWD."
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -192,10 +193,10 @@ def main():
         help="Optional file containing a prompt to append to the output",
     )
     fold_parser.add_argument(
-        "--nodoc",
-        "-n",
-        action="store_true",
-        help="Exclude Markdown (.md) files from folding",
+        "--dialect",
+        "-d",
+        default="default",
+        help="Dialect for instructions (e.g., default, codeonly, doconly; default: default)",
     )
 
     unfold_parser = subparsers.add_parser(
@@ -221,15 +222,21 @@ def main():
         default="Describe the purpose of your project here.",
         help="Custom instruction for the LLM",
     )
+    init_parser.add_argument(
+        "--dialect",
+        "-d",
+        default="default",
+        help="Dialect for instructions (e.g., default, codeonly, doconly; default: default)",
+    )
 
     args = parser.parse_args()
 
     if args.command == "fold":
-        fold(args.files, args.output, args.prompt, args.nodoc)
+        fold(args.files, args.output, args.prompt, args.dialect)
     elif args.command == "unfold":
         unfold(args.foldfile, args.original_dir, args.output_dir)
     elif args.command == "init":
-        init(args.output, args.custom)
+        init(args.output, args.custom, args.dialect)
 
 
 if __name__ == "__main__":

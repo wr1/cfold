@@ -47,11 +47,11 @@ def test_fold_directory_default(temp_project, tmp_path):
     assert "# --- File: utils.py ---" in content
 
 
-def test_fold_nodoc(temp_project, tmp_path):
-    """Test folding with --nodoc excludes Markdown files."""
+def test_fold_dialect_codeonly(temp_project, tmp_path):
+    """Test folding with codeonly dialect excludes non-code files."""
     output_file = tmp_path / "folded.txt"
     os.chdir(temp_project)
-    cfold.fold(None, str(output_file), nodoc=True)
+    cfold.fold(None, str(output_file), dialect="codeonly")
     assert output_file.exists()
     with open(output_file, "r", encoding="utf-8") as f:
         content = f.read()
@@ -59,6 +59,22 @@ def test_fold_nodoc(temp_project, tmp_path):
     assert "# --- File: utils.py ---" in content
     assert "# --- File: importer.py ---" in content
     assert "# --- File: docs/index.md ---" not in content
+    assert "included_suffix: [.py]" in content
+
+
+def test_fold_dialect_doconly(temp_project, tmp_path):
+    """Test folding with doconly dialect includes only doc files."""
+    output_file = tmp_path / "folded.txt"
+    os.chdir(temp_project)
+    cfold.fold(None, str(output_file), dialect="doconly")
+    assert output_file.exists()
+    with open(output_file, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "# --- File: docs/index.md ---" in content
+    assert "# --- File: main.py ---" not in content
+    assert "# --- File: utils.py ---" not in content
+    assert "# --- File: importer.py ---" not in content
+    assert "included_suffix: [.md, .yml, .yaml]" in content
 
 
 def test_unfold_new_files(temp_project, tmp_path):
@@ -140,6 +156,19 @@ def test_init(tmp_path):
     assert "Instructions for LLM:" in content
     assert "Create a Poetry-managed Python project" in content
     assert custom in content
+
+
+def test_init_dialect(tmp_path):
+    """Test init with different dialects."""
+    output_file = tmp_path / "start.txt"
+    custom = "Test custom instruction"
+    cfold.init(str(output_file), custom, dialect="doconly")
+    assert output_file.exists()
+    content = output_file.read_text()
+    assert "Instructions for LLM:" in content
+    assert "Create a Poetry-managed Python project" in content
+    assert custom in content
+    assert "included_suffix: [.md, .yml, .yaml]" in content
 
 
 def test_unfold_complex_full_content(temp_project, tmp_path):

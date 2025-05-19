@@ -17,9 +17,8 @@ def load_foldignore(directory):
     return ignore_patterns
 
 
-def should_include_file(filepath, ignore_patterns=None, root_dir=None):
+def should_include_file(filepath, ignore_patterns=None, root_dir=None, suffixes=None):
     """Check if a file should be included based on extension, exclusion rules, and .foldignore patterns."""
-    INCLUDED_EXTENSIONS = {".py", ".toml", ".md", ".yml", ".yaml"}
     EXCLUDED_DIRS = {
         ".pytest_cache",
         "__pycache__",
@@ -35,7 +34,7 @@ def should_include_file(filepath, ignore_patterns=None, root_dir=None):
         relpath = os.path.relpath(filepath, root_dir)
     else:
         relpath = str(path)
-    if path.suffix not in INCLUDED_EXTENSIONS:
+    if suffixes and path.suffix not in suffixes:
         return False
     if any(part in EXCLUDED_DIRS for part in path.parts):
         return False
