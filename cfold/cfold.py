@@ -26,7 +26,9 @@ def fold(files=None, output="codefold.txt", prompt_file=None, dialect="default")
         for dirpath, _, filenames in os.walk(directory):
             for filename in filenames:
                 filepath = os.path.join(dirpath, filename)
-                if should_include_file(filepath, ignore_patterns, directory, included_suffixes):
+                if should_include_file(
+                    filepath, ignore_patterns, directory, included_suffixes
+                ):
                     files.append(filepath)
     else:
         files = [
@@ -66,7 +68,7 @@ def unfold(fold_file, original_dir=None, output_dir=None):
 
     with open(fold_file, "r", encoding="utf-8") as infile:
         # hack to deal with grok sometimes not rendering as code block
-        content = infile.read().replace("", "").replace("", "")
+        content = infile.read().replace("CFOLD: ", "").replace("MD: ", "")
         sections = re.split(r"(# --- File: .+? ---)\n", content)[1:]
         if len(sections) % 2 != 0:
             print("Warning: Malformed fold file - odd number of sections")
@@ -96,7 +98,9 @@ def unfold(fold_file, original_dir=None, output_dir=None):
         for dirpath, _, filenames in os.walk(original_dir):
             for filename in filenames:
                 filepath = os.path.join(dirpath, filename)
-                if should_include_file(filepath, ignore_patterns, original_dir, included_suffixes):
+                if should_include_file(
+                    filepath, ignore_patterns, original_dir, included_suffixes
+                ):
                     relpath = os.path.relpath(filepath, cwd)
                     dst = os.path.join(output_dir, relpath)
                     if relpath not in modified_files:
@@ -226,7 +230,7 @@ def main():
         "--dialect",
         "-d",
         default="default",
-        help="Dialect for instructions (e.g., default, codeonly, doconly; default: default)",
+        help="Dialect for instructions (e.g., default, codeonly, doconly, latex; default: default)",
     )
 
     args = parser.parse_args()
