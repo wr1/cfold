@@ -1,4 +1,5 @@
 [![Tests](https://github.com/wr1/cfold/actions/workflows/python-app.yml/badge.svg)](https://github.com/wr1/cfold/actions/workflows/python-app.yml)
+![Version](https://img.shields.io/github/v/release/wr1/cfold)
 
 # cfold
 
@@ -24,18 +25,19 @@ python -m pip install .
 Fold specific files or the current directory into a single text file:
 
 ```bash
-cfold fold [files...] -o <output_file> [--prompt <prompt_file>]
+cfold fold [files...] -o <output_file> [--prompt <prompt_file>] [--dialect <dialect>]
 ```
 
 - `[files...]`: Specific files to fold (optional; if omitted, folds the entire current directory).
 - `-o <output_file>`: Output file (default: `codefold.txt`).
 - `--prompt <prompt_file>`: Optional file to append as a prompt in the output.
+- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `codeonly`, `doconly`; default: `default`).
 - Supports `.foldignore` for excluding files when folding a directory.
 
-Example:
+Example (fold only code files):
 
 ```bash
-cfold fold src/main.py docs/index.md -o folded.txt --prompt prompt.txt
+cfold fold -o folded.txt --dialect codeonly
 ```
 
 ### Unfolding a codebase
@@ -61,16 +63,17 @@ cfold unfold folded.txt -o output_dir
 Create a template file with LLM instructions for project setup:
 
 ```bash
-cfold init [<output_file>] [--custom <instruction>]
+cfold init [<output_file>] [--custom <instruction>] [--dialect <dialect>]
 ```
 
 - `<output_file>`: Output file (default: `start.txt`).
 - `--custom <instruction>`: Custom instruction for the LLM.
+- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `codeonly`, `doconly`; default: `default`).
 
 Example:
 
 ```bash
-cfold init start.txt --custom "Build a Python CLI tool."
+cfold init start.txt --custom "Build a Python CLI tool." --dialect default
 ```
 
 ## Fold File Format

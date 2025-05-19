@@ -32,11 +32,12 @@ python -m pip install .
 Initialize a project template with LLM instructions:
 
 ```bash
-cfold init [<output_file>] [--custom <instruction>]
+cfold init [<output_file>] [--custom <instruction>] [--dialect <dialect>]
 ```
 
 - `<output_file>`: Output file (default: `start.txt`).
 - `--custom <instruction>`: Custom instruction for the LLM (e.g., project purpose).
+- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `codeonly`, `doconly`; default: `default`).
 
 Example:
 
@@ -49,13 +50,13 @@ cfold init start.txt --custom "Build a tool for code folding."
 Fold specific files or the current directory into a single text file:
 
 ```bash
-cfold fold [files...] [--output <output_file>] [--prompt <prompt_file>]
+cfold fold [files...] [--output <output_file>] [--prompt <prompt_file>] [--dialect <dialect>]
 ```
 
 Options:
 
 ```bash
-usage: cfold fold [-h] [--output OUTPUT] [--prompt PROMPT] [files ...]
+usage: cfold fold [-h] [--output OUTPUT] [--prompt PROMPT] [--dialect DIALECT] [files ...]
 
 positional arguments:
   files                 Files to fold (optional; if omitted, folds the current directory)
@@ -66,12 +67,20 @@ options:
                         Output file (e.g., folded.txt; default: codefold.txt)
   --prompt PROMPT, -p PROMPT
                         Optional file containing a prompt to append to the output
+  --dialect DIALECT, -d DIALECT
+                        Dialect for instructions (e.g., default, codeonly, doconly; default: default)
 ```
 
 Example:
 
 ```bash
 cfold fold src/main.py -o folded.txt --prompt prompt.txt
+```
+
+Example (fold only code files):
+
+```bash
+cfold fold -o folded.txt --dialect codeonly
 ```
 
 ### `cfold unfold`
