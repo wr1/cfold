@@ -65,6 +65,10 @@ def unfold(fold_file, original_dir=None, output_dir=None):
     """Unfold a modified fold file with support for deletes and full rewrites, using paths relative to CWD."""
     cwd = os.getcwd()
     output_dir = os.path.abspath(output_dir or cwd)
+    instructions = load_instructions(
+        "default"
+    )  # Use default dialect for suffix filtering
+    included_suffixes = instructions["included_suffix"]
 
     with open(fold_file, "r", encoding="utf-8") as infile:
         # hack to deal with grok sometimes not rendering as code block

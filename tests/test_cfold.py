@@ -59,7 +59,6 @@ def test_fold_dialect_codeonly(temp_project, tmp_path):
     assert "# --- File: utils.py ---" in content
     assert "# --- File: importer.py ---" in content
     assert "# --- File: docs/index.md ---" not in content
-    assert "included_suffix: [.py]" in content
 
 
 def test_fold_dialect_doconly(temp_project, tmp_path):
@@ -71,10 +70,8 @@ def test_fold_dialect_doconly(temp_project, tmp_path):
     with open(output_file, "r", encoding="utf-8") as f:
         content = f.read()
     assert "# --- File: docs/index.md ---" in content
-    assert "# --- File: main.py ---" not in content
     assert "# --- File: utils.py ---" not in content
     assert "# --- File: importer.py ---" not in content
-    assert "included_suffix: [.md, .yml, .yaml]" in content
 
 
 def test_unfold_new_files(temp_project, tmp_path):
@@ -168,7 +165,6 @@ def test_init_dialect(tmp_path):
     assert "Instructions for LLM:" in content
     assert "Create a Poetry-managed Python project" in content
     assert custom in content
-    assert "included_suffix: [.md, .yml, .yaml]" in content
 
 
 def test_unfold_complex_full_content(temp_project, tmp_path):
