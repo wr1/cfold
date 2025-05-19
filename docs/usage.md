@@ -49,13 +49,13 @@ cfold init start.txt --custom "Build a tool for code folding."
 Fold specific files or the current directory into a single text file:
 
 ```bash
-cfold fold [files...] [--output <output_file>] [--prompt <prompt_file>]
+cfold fold [files...] [--output <output_file>] [--prompt <prompt_file>] [--nodoc]
 ```
 
 Options:
 
 ```bash
-usage: cfold fold [-h] [--output OUTPUT] [--prompt PROMPT] [files ...]
+usage: cfold fold [-h] [--output OUTPUT] [--prompt PROMPT] [--nodoc] [files ...]
 
 positional arguments:
   files                 Files to fold (optional; if omitted, folds the current directory)
@@ -66,12 +66,19 @@ options:
                         Output file (e.g., folded.txt; default: codefold.txt)
   --prompt PROMPT, -p PROMPT
                         Optional file containing a prompt to append to the output
+  --nodoc, -n           Exclude Markdown (.md) files from folding
 ```
 
 Example:
 
 ```bash
 cfold fold src/main.py -o folded.txt --prompt prompt.txt
+```
+
+Example (excluding Markdown files):
+
+```bash
+cfold fold --nodoc -o folded.txt
 ```
 
 ### `cfold unfold`

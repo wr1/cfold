@@ -47,6 +47,20 @@ def test_fold_directory_default(temp_project, tmp_path):
     assert "# --- File: utils.py ---" in content
 
 
+def test_fold_nodoc(temp_project, tmp_path):
+    """Test folding with --nodoc excludes Markdown files."""
+    output_file = tmp_path / "folded.txt"
+    os.chdir(temp_project)
+    cfold.fold(None, str(output_file), nodoc=True)
+    assert output_file.exists()
+    with open(output_file, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "# --- File: main.py ---" in content
+    assert "# --- File: utils.py ---" in content
+    assert "# --- File: importer.py ---" in content
+    assert "# --- File: docs/index.md ---" not in content
+
+
 def test_unfold_new_files(temp_project, tmp_path):
     """Test unfolding creates new files correctly using paths relative to CWD."""
     fold_file = tmp_path / "folded.txt"

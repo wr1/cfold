@@ -14,7 +14,7 @@ EXCLUDED_DIRS = {".pytest_cache", "__pycache__", "build", "dist", ".egg-info", "
 EXCLUDED_FILES = {".pyc"}
 
 
-def fold(files=None, output="codefold.txt", prompt_file=None):
+def fold(files=None, output="codefold.txt", prompt_file=None, nodoc=False):
     """Wrap specified files or a directory into a single file with LLM instructions and optional prompt, using paths relative to CWD."""
     cwd = os.getcwd()
     if not files:
@@ -25,12 +25,14 @@ def fold(files=None, output="codefold.txt", prompt_file=None):
             for filename in filenames:
                 filepath = os.path.join(dirpath, filename)
                 if should_include_file(filepath, ignore_patterns, directory):
+                    if nodoc and filepath.endswith(".md"):
+                        continue
                     files.append(filepath)
     else:
         files = [
             os.path.abspath(f)
             for f in files
-            if os.path.isfile(f)  # and should_include_file(f)
+            if os.path.isfile(f) and (not nodoc or not f.endswith(".md"))
         ]
 
     if not files:
@@ -64,7 +66,7 @@ def unfold(fold_file, original_dir=None, output_dir=None):
 
     with open(fold_file, "r", encoding="utf-8") as infile:
         # hack to deal with grok sometimes not rendering as code block
-        content = infile.read().replace("CFOLD: ", "").replace("CFOLD:", "")
+        content = infile.read().replace("", "").replace("", "")
         sections = re.split(r"(# --- File: .+? ---)\n", content)[1:]
         if len(sections) % 2 != 0:
             print("Warning: Malformed fold file - odd number of sections")
@@ -189,6 +191,12 @@ def main():
         default=None,
         help="Optional file containing a prompt to append to the output",
     )
+    fold_parser.add_argument(
+        "--nodoc",
+        "-n",
+        action="store_true",
+        help="Exclude Markdown (.md) files from folding",
+    )
 
     unfold_parser = subparsers.add_parser(
         "unfold", help="Unfold a modified file into a project directory."
@@ -217,7 +225,7 @@ def main():
     args = parser.parse_args()
 
     if args.command == "fold":
-        fold(args.files, args.output, args.prompt)
+        fold(args.files, args.output, args.prompt, args.nodoc)
     elif args.command == "unfold":
         unfold(args.foldfile, args.original_dir, args.output_dir)
     elif args.command == "init":
