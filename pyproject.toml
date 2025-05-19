@@ -9,7 +9,7 @@ version = "0.1.0"
 
 [tool.poetry.dependencies]
 pytest-cov = ">5.0.0"
-python = "^3.11"
+python = "^3.10"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^6.0.0"
