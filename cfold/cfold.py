@@ -26,7 +26,9 @@ def fold(files=None, output="codefold.txt", prompt_file=None, dialect="default")
         for dirpath, _, filenames in os.walk(directory):
             for filename in filenames:
                 filepath = os.path.join(dirpath, filename)
-                if should_include_file(filepath, ignore_patterns, directory, included_suffixes):
+                if should_include_file(
+                    filepath, ignore_patterns, directory, included_suffixes
+                ):
                     files.append(filepath)
     else:
         files = [
@@ -63,6 +65,10 @@ def unfold(fold_file, original_dir=None, output_dir=None):
     """Unfold a modified fold file with support for deletes and full rewrites, using paths relative to CWD."""
     cwd = os.getcwd()
     output_dir = os.path.abspath(output_dir or cwd)
+    instructions = load_instructions(
+        "default"
+    )  # Use default dialect for suffix filtering
+    included_suffixes = instructions["included_suffix"]
 
     with open(fold_file, "r", encoding="utf-8") as infile:
         # hack to deal with grok sometimes not rendering as code block
@@ -96,7 +102,9 @@ def unfold(fold_file, original_dir=None, output_dir=None):
         for dirpath, _, filenames in os.walk(original_dir):
             for filename in filenames:
                 filepath = os.path.join(dirpath, filename)
-                if should_include_file(filepath, ignore_patterns, original_dir, included_suffixes):
+                if should_include_file(
+                    filepath, ignore_patterns, original_dir, included_suffixes
+                ):
                     relpath = os.path.relpath(filepath, cwd)
                     dst = os.path.join(output_dir, relpath)
                     if relpath not in modified_files:
