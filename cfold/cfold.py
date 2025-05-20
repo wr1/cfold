@@ -72,7 +72,7 @@ def unfold(fold_file, original_dir=None, output_dir=None):
 
     with open(fold_file, "r", encoding="utf-8") as infile:
         # hack to deal with grok sometimes not rendering as code block
-        content = infile.read().replace("", "").replace("", "")
+        content = infile.read().replace("CFOLD: ", "").replace("CFOLD:", "")
         sections = re.split(r"(# --- File: .+? ---)\n", content)[1:]
         if len(sections) % 2 != 0:
             print("Warning: Malformed fold file - odd number of sections")
@@ -234,7 +234,7 @@ def main():
         "--dialect",
         "-d",
         default="default",
-        help="Dialect for instructions (e.g., default, codeonly, doconly; default: default)",
+        help="Dialect for instructions (e.g., default, codeonly, doconly, latex; default: default)",
     )
 
     args = parser.parse_args()

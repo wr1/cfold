@@ -5,7 +5,7 @@ license = "MIT"
 name = "cfold"
 packages = [{include = "cfold", from = "."}]
 readme = "README.md"
-version = "0.1.2"
+version = "0.1.3"
 
 [tool.poetry.dependencies]
 pytest-cov = ">5.0.0"
