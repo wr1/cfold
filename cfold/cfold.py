@@ -16,6 +16,7 @@ EXCLUDED_FILES = {".pyc"}
 def fold(files=None, output="codefold.txt", prompt_file=None, dialect="default"):
     """Wrap specified files or a directory into a single file with LLM instructions and optional prompt, using paths relative to CWD."""
     cwd = os.getcwd()
+    common = load_instructions("common")
     instructions = load_instructions(dialect)
     included_suffixes = instructions["included_suffix"]
 
@@ -42,6 +43,7 @@ def fold(files=None, output="codefold.txt", prompt_file=None, dialect="default")
         return
 
     with open(output, "w", encoding="utf-8") as outfile:
+        outfile.write(common["prefix"] + "\n\n")
         outfile.write(instructions["prefix"] + "\n\n")
         for filepath in files:
             relpath = os.path.relpath(filepath, cwd)
@@ -152,6 +154,7 @@ def unfold(fold_file, original_dir=None, output_dir=None):
 
 def init(output="start.txt", custom_instruction="", dialect="default"):
     """Create an initial .txt file with LLM instructions for project setup."""
+    common = load_instructions("common")
     instructions = load_instructions(dialect)
     with open(output, "w", encoding="utf-8") as outfile:
         outfile.write(instructions["prefix"] + "\n\n")
@@ -168,7 +171,7 @@ def init(output="start.txt", custom_instruction="", dialect="default"):
             "#   my_project/.github/workflows/test.yml\n"
             "#   my_project/docs/index.md\n"
             "#   my_project/mkdocs.yml\n\n"
-            f"# Custom Instruction:\n# {custom_instruction}\n"
+            f"# Custom Instruction:\n{common['prefix']}\n\n\n{custom_instruction}\n"
         )
     print(f"Initialized project template in {output}")
 
@@ -204,7 +207,7 @@ def main():
         "--dialect",
         "-d",
         default="default",
-        help="Dialect for instructions (e.g., default, codeonly, doconly; default: default)",
+        help="Dialect for instructions (e.g., default, codeonly, doconly, latex; default: default)",
     )
 
     unfold_parser = subparsers.add_parser(

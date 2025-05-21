@@ -10,7 +10,7 @@ def load_instructions(dialect="default"):
             raise ValueError(f"Dialect '{dialect}' not found in py.yml")
         return {
             "prefix": config[dialect]["prefix"],
-            "included_suffix": config[dialect]["included_suffix"]
+            "included_suffix": config[dialect]["included_suffix"] if "included_suffix" in config[dialect] else None,
         }
     except Exception as e:
         raise RuntimeError(f"Failed to load instructions for dialect '{dialect}' from py.yml: {e}")
