@@ -33,66 +33,66 @@ default:
   included_suffix: [".py", ".toml", ".md", ".yml", ".yaml"]
 
 codeonly:
-  prefix: "# Instructions for LLM:
-# This file uses the cfold format to manage a Python project codebase.
-# - Folding: 'cfold fold <files> -o <output.txt>' captures specified files into this .txt.
-# - Unfolding: 'cfold unfold <modified.txt>' applies changes from this .txt to the directory.
-# Rules:
-# - To modify a file: Keep its '# --- File: path ---' header and provide the full updated content below.
-# - To delete a file: Replace its content with '# DELETE'.
-# - To add a file: Add a new '# --- File: path ---' section with the full content.
-# - To move/rename a file: Delete the old file with '# DELETE' under its original '# --- File: old_path ---' and add a new '# --- File: new_path ---' section with the full content.
-# - Only include modified, new, or deleted files here; unchanged files are preserved from the original directory (if provided with -i).
-# - Always preserve '# --- File: path ---' format for file sections.
-# - Supports .foldignore file with gitignore-style patterns to exclude files during folding (directory mode).
-# - Paths are relative to the current working directory (CWD) by default.
-# - Can you preped 'CFOLD: ' to every line in the output?   
-# Refactoring Guidelines:
-# - Prefer organizing code into subdirectories based on functionality (e.g., 'src/utils/', 'src/core/', 'src/cli/').
-# - Split functionality into small, focused files (e.g., one function or class per file where practical, typically 50-200 lines).
-# - To refactor (e.g., move/rename):
-# - Delete the original file with '# DELETE' under its '# --- File: old_path ---'.
-# - Add the new file with '# --- File: new_path ---' and its full content.
-# - Example: To split a large 'main.py' into smaller files:
-# - '# --- File: main.py ---' with '# DELETE'.
-# - '# --- File: src/core/main.py ---' with reduced content.
-# - '# --- File: src/utils/helper.py ---' with extracted functions.
-# - Aim for modularity: Each file should have a single responsibility, making it easier to modify or replace individually.
-# - Reply using a single plain text code block for implementing changes to multiple files using 'cfold unfold <singlefile.txt>'.
-# - No need to include LLM instructions in the output.
-# Please return the cfold formatted output directly in the chat without opening Grok Studio or the canvas panel."
-  included_suffix: [".py"]
+  prefix: "# Instructions for LLM:\n
+# This file uses the cfold format to manage a Python project codebase.\n
+# - Folding: 'cfold fold <files> -o <output.txt>' captures specified files into this .txt.\n
+# - Unfolding: 'cfold unfold <modified.txt>' applies changes from this .txt to the directory.\n
+# Rules:\n
+# - To modify a file: Keep its '# --- File: path ---' header and provide the full updated content below.\n
+# - To delete a file: Replace its content with '# DELETE'.\n
+# - To add a file: Add a new '# --- File: path ---' section with the full content.\n
+# - To move/rename a file: Delete the old file with '# DELETE' under its original '# --- File: old_path ---' and add a new '# --- File: new_path ---' section with the full content.\n
+# - Only include modified, new, or deleted files here; unchanged files are preserved from the original directory (if provided with -i).\n
+# - Always preserve '# --- File: path ---' format for file sections.\n
+# - Supports .foldignore file with gitignore-style patterns to exclude files during folding (directory mode).\n
+# - Paths are relative to the current working directory (CWD) by default.\n
+# - Can you preped 'CFOLD: ' to every line in the output?   \n
+# Refactoring Guidelines:\n
+# - Prefer organizing code into subdirectories based on functionality (e.g., 'src/utils/', 'src/core/', 'src/cli/').\n
+# - Split functionality into small, focused files (e.g., one function or class per file where practical, typically 50-200 lines).\n
+# - To refactor (e.g., move/rename):\n
+# - Delete the original file with '# DELETE' under its '# --- File: old_path ---'.\n
+# - Add the new file with '# --- File: new_path ---' and its full content.\n
+# - Example: To split a large 'main.py' into smaller files:\n
+# - '# --- File: main.py ---' with '# DELETE'.\n
+# - '# --- File: src/core/main.py ---' with reduced content.\n
+# - '# --- File: src/utils/helper.py ---' with extracted functions.\n
+# - Aim for modularity: Each file should have a single responsibility, making it easier to modify or replace individually.\n
+# - Reply using a single plain text code block for implementing changes to multiple files using 'cfold unfold <singlefile.txt>'.\n
+# - No need to include LLM instructions in the output.\n
+# Please return the cfold formatted output directly in the chat without opening Grok Studio or the canvas panel."\n
+  included_suffix: [".py",".toml"]
 
 doconly:
-  prefix: "# Instructions for LLM:
-# This file uses the cfold format to manage a Python project codebase.
-# - Folding: 'cfold fold <files> -o <output.txt>' captures specified files into this .txt.
-# - Unfolding: 'cfold unfold <modified.txt>' applies changes from this .txt to the directory.
-# Rules:
-# - To modify a file: Keep its '# --- File: path ---' header and provide the full updated content below.
-# - To delete a file: Replace its content with '# DELETE'.
-# - To add a file: Add a new '# --- File: path ---' section with the full content.
-# - To move/rename a file: Delete the old file with '# DELETE' under its original '# --- File: old_path ---' and add a new '# --- File: new_path ---' section with the full content.
-# - Only include modified, new, or deleted files here; unchanged files are preserved from the original directory (if provided with -i).
-# - For Markdown (e.g., .md files): Prefix every line with 'MD:' in full content mode; 'unfold' strips 'MD:' only from .md files.
-# - Always preserve '# --- File: path ---' format for file sections.
-# - Supports .foldignore file with gitignore-style patterns to exclude files during folding (directory mode).
-# - Paths are relative to the current working directory (CWD) by default.
-# - Can you preped 'CFOLD: ' to every line in the output? So for markdown a line starts 'CFOLD: MD: '  
-# Refactoring Guidelines:
-# - Prefer organizing code into subdirectories based on functionality (e.g., 'src/utils/', 'src/core/', 'src/cli/').
-# - Split functionality into small, focused files (e.g., one function or class per file where practical, typically 50-200 lines).
-# - To refactor (e.g., move/rename):
-# - Delete the original file with '# DELETE' under its '# --- File: old_path ---'.
-# - Add the new file with '# --- File: new_path ---' and its full content.
-# - Example: To split a large 'main.py' into smaller files:
-# - '# --- File: main.py ---' with '# DELETE'.
-# - '# --- File: src/core/main.py ---' with reduced content.
-# - '# --- File: src/utils/helper.py ---' with extracted functions.
-# - Aim for modularity: Each file should have a single responsibility, making it easier to modify or replace individually.
-# - Reply using a single plain text code block for implementing changes to multiple files using 'cfold unfold <singlefile.txt>'.
-# - No need to include LLM instructions in the output.
-# Please return the cfold formatted output directly in the chat without opening Grok Studio or the canvas panel."
+  prefix: "# Instructions for LLM:\n
+# This file uses the cfold format to manage a Python project codebase.\n
+# - Folding: 'cfold fold <files> -o <output.txt>' captures specified files into this .txt.\n
+# - Unfolding: 'cfold unfold <modified.txt>' applies changes from this .txt to the directory.\n
+# Rules:\n
+# - To modify a file: Keep its '# --- File: path ---' header and provide the full updated content below.\n
+# - To delete a file: Replace its content with '# DELETE'.\n
+# - To add a file: Add a new '# --- File: path ---' section with the full content.\n
+# - To move/rename a file: Delete the old file with '# DELETE' under its original '# --- File: old_path ---' and add a new '# --- File: new_path ---' section with the full content.\n
+# - Only include modified, new, or deleted files here; unchanged files are preserved from the original directory (if provided with -i).\n
+# - For Markdown (e.g., .md files): Prefix every line with 'MD:' in full content mode; 'unfold' strips 'MD:' only from .md files.\n
+# - Always preserve '# --- File: path ---' format for file sections.\n
+# - Supports .foldignore file with gitignore-style patterns to exclude files during folding (directory mode).\n
+# - Paths are relative to the current working directory (CWD) by default.\n
+# - Can you preped 'CFOLD: ' to every line in the output? So for markdown a line starts 'CFOLD: MD: '  \n
+# Refactoring Guidelines:\n
+# - Prefer organizing code into subdirectories based on functionality (e.g., 'src/utils/', 'src/core/', 'src/cli/').\n
+# - Split functionality into small, focused files (e.g., one function or class per file where practical, typically 50-200 lines).\n
+# - To refactor (e.g., move/rename):\n
+# - Delete the original file with '# DELETE' under its '# --- File: old_path ---'.\n
+# - Add the new file with '# --- File: new_path ---' and its full content.\n
+# - Example: To split a large 'main.py' into smaller files:\n
+# - '# --- File: main.py ---' with '# DELETE'.\n
+# - '# --- File: src/core/main.py ---' with reduced content.\n
+# - '# --- File: src/utils/helper.py ---' with extracted functions.\n
+# - Aim for modularity: Each file should have a single responsibility, making it easier to modify or replace individually.\n
+# - Reply using a single plain text code block for implementing changes to multiple files using 'cfold unfold <singlefile.txt>'.\n
+# - No need to include LLM instructions in the output.\n
+# Please return the cfold formatted output directly in the chat without opening Grok Studio or the canvas panel."\n
 
   included_suffix: [".md", ".yml", ".yaml"]
   
