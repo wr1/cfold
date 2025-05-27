@@ -29,8 +29,10 @@ common:
 # - '# --- File: src/utils/helper.py ---' with extracted functions.\n
 # - Aim for modularity: Each file should have a single responsibility, making it easier to modify or replace individually.\n
 # - Reply using a single plain text code block for implementing changes to multiple files using 'cfold unfold <singlefile.txt>'.\n
-# - No need to include LLM instructions in the output.\n
-# Please return the cfold formatted output directly in the chat without opening Grok Studio or the canvas panel.\n\n"
+# - Don't include LLM instructions in the output.\n
+# - Use high level 1 line docstrings\n
+# Return the cfold formatted output directly in the chat without opening Grok Studio or the canvas panel.\n\n"
+ 
 
 default:
   prefix: "# Prefer poetry for installation, mkdocs for documentation, use vectorisation using numpy.  \n\n"
@@ -39,7 +41,7 @@ default:
 
 codeonly:
   prefix: "# Prefer poetry for installation, mkdocs for documentation, use vectorisation using numpy.  \n\n"
-  included_suffix: [".py"]
+  included_suffix: [".py",".toml"]
   included_dirs: ["src", "tests"]
 
 doconly: 
