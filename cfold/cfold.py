@@ -1,20 +1,28 @@
 #!/usr/bin/env python3
 import os
-import argparse
-import shutil
-import re
 from pathlib import Path
-from importlib import resources
+import click
 from cfold.utils.foldignore import load_foldignore, should_include_file
 from cfold.utils.instructions import load_instructions
+import re
 
-# Define file patterns to exclude
 EXCLUDED_DIRS = {".pytest_cache", "__pycache__", "build", "dist", ".egg-info", "venv"}
 EXCLUDED_FILES = {".pyc"}
 
 
-def fold(files=None, output="codefold.txt", prompt_file=None, dialect="default"):
-    """Wrap specified files or a directory into a single file with LLM instructions and optional prompt, using paths relative to CWD."""
+@click.group()
+def cli():
+    """Fold code or docs tree into a single file with prompting for LLM interaction."""
+    pass
+
+
+@cli.command()
+@click.argument("files", nargs=-1)
+@click.option("--output", "-o", default="codefold.txt", help="Output file")
+@click.option("--prompt", "-p", default=None, help="Prompt file to append")
+@click.option("--dialect", "-d", default="default", help="Instruction dialect")
+def fold(files, output, prompt, dialect):
+    """Fold files or directory into a single text file."""
     cwd = os.getcwd()
     common = load_instructions("common")
     instructions = load_instructions(dialect)
@@ -32,14 +40,11 @@ def fold(files=None, output="codefold.txt", prompt_file=None, dialect="default")
                 ):
                     files.append(filepath)
     else:
-        files = [
-            os.path.abspath(f)
-            for f in files
-            if os.path.isfile(f) and Path(f).suffix in included_suffixes
-        ]
+        # if files are provided, they don't need to have a specific suffix
+        files = [os.path.abspath(f) for f in files if os.path.isfile(f)]
 
     if not files:
-        print("No valid files to fold.")
+        click.echo("No valid files to fold.")
         return
 
     with open(output, "w", encoding="utf-8") as outfile:
@@ -53,31 +58,31 @@ def fold(files=None, output="codefold.txt", prompt_file=None, dialect="default")
                 if filepath.endswith(".md"):
                     content = "\n".join(f"MD:{line}" for line in content.splitlines())
                 outfile.write(content + "\n\n")
-        if prompt_file and os.path.isfile(prompt_file):
-            with open(prompt_file, "r", encoding="utf-8") as prompt_infile:
-                outfile.write("\n# Prompt:\n")
-                outfile.write(prompt_infile.read())
-                outfile.write("\n")
-        elif prompt_file:
-            print(f"Warning: Prompt file '{prompt_file}' does not exist. Skipping.")
-    print(f"Codebase folded into {output}")
+            if prompt and os.path.isfile(prompt):
+                with open(prompt, "r", encoding="utf-8") as prompt_infile:
+                    outfile.write("\n# Prompt:\n")
+                    outfile.write(prompt_infile.read() + "\n")
+            elif prompt:
+                click.echo(f"Warning: Prompt file '{prompt}' does not exist. Skipping.")
+    click.echo(f"Codebase folded into {output}")
 
 
-def unfold(fold_file, original_dir=None, output_dir=None):
-    """Unfold a modified fold file with support for deletes and full rewrites, using paths relative to CWD."""
+@cli.command()
+@click.argument("foldfile")
+@click.option("--original-dir", "-i", help="Original project directory")
+@click.option("--output-dir", "-o", help="Output directory")
+def unfold(foldfile, original_dir, output_dir):
+    """Unfold a modified fold file into a directory."""
     cwd = os.getcwd()
     output_dir = os.path.abspath(output_dir or cwd)
-    instructions = load_instructions(
-        "default"
-    )  # Use default dialect for suffix filtering
+    instructions = load_instructions("default")
     included_suffixes = instructions["included_suffix"]
 
-    with open(fold_file, "r", encoding="utf-8") as infile:
-        # hack to deal with grok sometimes not rendering as code block
+    with open(foldfile, "r", encoding="utf-8") as infile:
         content = infile.read().replace("CFOLD: ", "").replace("CFOLD:", "")
         sections = re.split(r"(# --- File: .+? ---)\n", content)[1:]
         if len(sections) % 2 != 0:
-            print("Warning: Malformed fold file - odd number of sections")
+            click.echo("Warning: Malformed fold file - odd number of sections")
             return
 
         modified_files = {}
@@ -93,12 +98,12 @@ def unfold(fold_file, original_dir=None, output_dir=None):
             modified_files[filepath] = file_content
 
     if os.path.exists(output_dir) and os.listdir(output_dir):
-        print(f"Merging into existing directory: {output_dir}")
+        click.echo(f"Merging into existing directory: {output_dir}")
     else:
         os.makedirs(output_dir, exist_ok=True)
 
     if original_dir and os.path.isdir(original_dir):
-        print(f"Merging with original codebase from {original_dir}")
+        click.echo(f"Merging with original codebase from {original_dir}")
         original_dir = os.path.abspath(original_dir)
         ignore_patterns = load_foldignore(original_dir)
         for dirpath, _, filenames in os.walk(original_dir):
@@ -113,16 +118,16 @@ def unfold(fold_file, original_dir=None, output_dir=None):
                         os.makedirs(os.path.dirname(dst), exist_ok=True)
                         if os.path.abspath(filepath) != os.path.abspath(dst):
                             shutil.copy2(filepath, dst)
-                            print(f"Copied unchanged file: {relpath}")
+                            click.echo(f"Copied unchanged file: {relpath}")
                     elif modified_files[relpath] == "# DELETE":
                         if os.path.exists(dst):
                             os.remove(dst)
-                            print(f"Deleted file: {relpath}")
+                            click.echo(f"Deleted file: {relpath}")
                     else:
                         os.makedirs(os.path.dirname(dst), exist_ok=True)
                         with open(dst, "w", encoding="utf-8") as outfile:
                             outfile.write(modified_files[relpath] + "\n")
-                        print(f"Rewrote file: {relpath}")
+                        click.echo(f"Rewrote file: {relpath}")
 
         for filepath, file_content in modified_files.items():
             if file_content == "# DELETE":
@@ -132,28 +137,37 @@ def unfold(fold_file, original_dir=None, output_dir=None):
                 os.makedirs(os.path.dirname(full_path), exist_ok=True)
                 with open(full_path, "w", encoding="utf-8") as outfile:
                     outfile.write(file_content + "\n")
-                print(f"Wrote new file: {filepath}")
+                click.echo(f"Wrote new file: {filepath}")
     else:
         for filepath, file_content in modified_files.items():
             full_path = os.path.join(output_dir, filepath)
             if file_content == "# DELETE":
                 if os.path.exists(full_path):
                     os.remove(full_path)
-                    print(f"Deleted file: {filepath}")
+                    click.echo(f"Deleted file: {filepath}")
                 continue
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
             try:
                 with open(full_path, "w", encoding="utf-8") as outfile:
                     outfile.write(file_content + "\n")
-                print(f"Wrote file: {filepath}")
+                click.echo(f"Wrote file: {filepath}")
             except Exception as e:
-                print(f"Error writing {filepath}: {e}")
+                click.echo(f"Error writing {filepath}: {e}")
 
-    print(f"Codebase unfolded into {output_dir}")
+    click.echo(f"Codebase unfolded into {output_dir}")
 
 
-def init(output="start.txt", custom_instruction="", dialect="default"):
-    """Create an initial .txt file with LLM instructions for project setup."""
+@cli.command()
+@click.argument("output", default="start.txt")
+@click.option(
+    "--custom",
+    "-c",
+    default="Describe the purpose of your project here.",
+    help="Custom instruction",
+)
+@click.option("--dialect", "-d", default="default", help="Instruction dialect")
+def init(output, custom, dialect):
+    """Initialize a project template with LLM instructions."""
     common = load_instructions("common")
     instructions = load_instructions(dialect)
     with open(output, "w", encoding="utf-8") as outfile:
@@ -162,7 +176,7 @@ def init(output="start.txt", custom_instruction="", dialect="default"):
             "# Project Setup Guidance:\n"
             "# Create a Poetry-managed Python project with:\n"
             "# - pyproject.toml: Define package metadata, dependencies, and scripts.\n"
-            "# - CI: Add .github/workflows/ with .yml files for testing and publishing (e.g., test.yml, publish.yml).\n"
+            "# - CI: Add .github/workflows/ with .yml files for testing and publishing.\n"
             "# - MkDocs: Add docs/ directory with .md files and mkdocs.yml for documentation.\n"
             "# Example structure:\n"
             "#   my_project/pyproject.toml\n"
@@ -171,84 +185,10 @@ def init(output="start.txt", custom_instruction="", dialect="default"):
             "#   my_project/.github/workflows/test.yml\n"
             "#   my_project/docs/index.md\n"
             "#   my_project/mkdocs.yml\n\n"
-            f"# Custom Instruction:\n{common['prefix']}\n\n\n{custom_instruction}\n"
+            f"# Custom Instruction:\n{common['prefix']}\n\n\n{custom}\n"
         )
-    print(f"Initialized project template in {output}")
-
-
-def main():
-    parser = argparse.ArgumentParser(
-        description="Fold and unfold Python projects with paths relative to CWD."
-    )
-    subparsers = parser.add_subparsers(dest="command", required=True)
-
-    fold_parser = subparsers.add_parser(
-        "fold", help="Fold specified files or a directory into a single file."
-    )
-    fold_parser.add_argument(
-        "files",
-        nargs="*",
-        default=None,
-        help="Files to fold (optional; if omitted, folds the current directory)",
-    )
-    fold_parser.add_argument(
-        "--output",
-        "-o",
-        default="codefold.txt",
-        help="Output file (e.g., folded.txt; default: codefold.txt)",
-    )
-    fold_parser.add_argument(
-        "--prompt",
-        "-p",
-        default=None,
-        help="Optional file containing a prompt to append to the output",
-    )
-    fold_parser.add_argument(
-        "--dialect",
-        "-d",
-        default="default",
-        help="Dialect for instructions (e.g., default, codeonly, doconly, latex; default: default)",
-    )
-
-    unfold_parser = subparsers.add_parser(
-        "unfold", help="Unfold a modified file into a project directory."
-    )
-    unfold_parser.add_argument("foldfile", help="File to unfold (e.g., folded.txt)")
-    unfold_parser.add_argument(
-        "--original-dir", "-i", help="Original project directory to merge with"
-    )
-    unfold_parser.add_argument(
-        "--output-dir", "-o", help="Output directory (defaults to current directory)"
-    )
-
-    init_parser = subparsers.add_parser(
-        "init", help="Initialize a project template with LLM instructions."
-    )
-    init_parser.add_argument(
-        "output", nargs="?", default="start.txt", help="Output file (e.g., start.txt)"
-    )
-    init_parser.add_argument(
-        "--custom",
-        "-c",
-        default="Describe the purpose of your project here.",
-        help="Custom instruction for the LLM",
-    )
-    init_parser.add_argument(
-        "--dialect",
-        "-d",
-        default="default",
-        help="Dialect for instructions (e.g., default, codeonly, doconly, latex; default: default)",
-    )
-
-    args = parser.parse_args()
-
-    if args.command == "fold":
-        fold(args.files, args.output, args.prompt, args.dialect)
-    elif args.command == "unfold":
-        unfold(args.foldfile, args.original_dir, args.output_dir)
-    elif args.command == "init":
-        init(args.output, args.custom, args.dialect)
+    click.echo(f"Initialized project template in {output}")
 
 
 if __name__ == "__main__":
-    main()
+    cli()
