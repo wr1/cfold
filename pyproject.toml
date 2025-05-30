@@ -3,7 +3,7 @@ authors = ["wr1 <8971152+wr1@users.noreply.github.com>"]
 description = "A command line tool to fold and unfold Python projects for LLM interaction"
 license = "MIT"
 name = "cfold"
-packages = [{include = "cfold", from = "."}]
+packages = [{include = "cfold", from = "src"}]
 readme = "README.md"
 version = "0.1.3"
 
