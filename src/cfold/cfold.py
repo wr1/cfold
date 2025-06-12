@@ -10,7 +10,10 @@ EXCLUDED_DIRS = {".pytest_cache", "__pycache__", "build", "dist", ".egg-info", "
 EXCLUDED_FILES = {".pyc"}
 
 
-@click.group()
+@click.group(
+    context_settings={"help_option_names": ["-h", "--help"]},
+    invoke_without_command=False,
+)
 def cli():
     """Fold code or docs tree into a single file with prompting for LLM interaction."""
     pass
@@ -27,6 +30,8 @@ def fold(files, output, prompt, dialect):
     common = load_instructions("common")
     instructions = load_instructions(dialect)
     included_suffixes = instructions["included_suffix"]
+
+    print(cwd)
 
     if not files:
         directory = cwd
