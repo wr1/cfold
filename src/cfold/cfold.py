@@ -23,7 +23,7 @@ def cli():
 @click.argument("files", nargs=-1)
 @click.option("--output", "-o", default="codefold.txt", help="Output file")
 @click.option("--prompt", "-p", default=None, help="Prompt file to append")
-@click.option("--dialect", "-d", default="default", help="Instruction dialect")
+@click.option("--dialect", "-d", default="default", help="Instruction dialect (available: default, codeonly, doconly, test, latex)")
 def fold(files, output, prompt, dialect):
     """Fold files or directory into a single text file."""
     cwd = os.getcwd()

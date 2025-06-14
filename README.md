@@ -1,4 +1,4 @@
-[![Tests](https://github.com/wr1/cfold/actions/workflows/python-app.yml/badge.svg)](https://github.com/wr1/cfold/actions/workflows/python-app.yml)
+#![Tests](https://github.com/wr1/cfold/actions/workflows/python-app.yml/badge.svg)](https://github.com/wr1/cfold/actions/workflows/python-app.yml)
 ![Version](https://img.shields.io/github/v/release/wr1/cfold)
 
 # cfold
@@ -11,11 +11,10 @@
 pip install .
 ```
 
-Or install locally with Poetry:
+Or install locally with UV:
 
 ```bash
-poetry install
-python -m pip install .
+uv pip install .
 ```
 
 ## Usage

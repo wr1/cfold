@@ -7,7 +7,7 @@
 - **Fold**: Combine specific files or the current directory into a `.txt` file, with optional prompt inclusion.
 - **Unfold**: Apply changes (modifications, deletions, or new files) back to a directory.
 - **Init**: Generate a project template with custom instructions.
-- Supports Poetry, GitHub CI, MkDocs, and `.foldignore` for file exclusions.
+- Supports UV, GitHub CI, MkDocs, and `.foldignore` for file exclusions.
 
 ## Quick Start
 

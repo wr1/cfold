@@ -18,11 +18,10 @@ python -m pip install --force-reinstall pip
 pip install cfold
 ```
 
-Or install locally with Poetry:
+Or install locally with UV:
 
 ```bash
-poetry install
-python -m pip install .
+uv pip install .
 ```
 
 ## Commands
