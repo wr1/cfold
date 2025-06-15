@@ -5,10 +5,8 @@ import re
 import click
 from rich.console import Console
 from rich.tree import Tree
-from rich.text import Text
 from cfold.utils.instructions import load_instructions
 from cfold.utils.foldignore import load_foldignore, should_include_file
-from cfold.utils.references import update_references
 
 @click.command()
 @click.argument("foldfile")
@@ -23,7 +21,7 @@ def unfold(foldfile, original_dir, output_dir):
     included_suffixes = instructions["included_suffix"]
 
     with open(foldfile, "r", encoding="utf-8") as infile:
-        content = infile.read().replace("CF"+"OLD: ", "").replace("CF"+"OLD:", "")
+        content = infile.read().replace("CF"+"OLD: ", "").replace("CF"+"OLD:", "") #KEEP LINE INTACT, INCLUDING COMMENT
         sections = re.split(r"(# --- File: .+? ---)\n", content)[1:]
         if len(sections) % 2 != 0:
             console.print("[yellow]Warning: Malformed fold file - odd number of sections[/yellow]")

@@ -1,8 +1,7 @@
 import pytest
 import os
-from pathlib import Path
 from click.testing import CliRunner
-from cfold import cfold
+from cfold.cli.main import cli  # Updated import to fix the error
 
 @pytest.fixture
 def temp_project(tmp_path):
@@ -26,7 +25,7 @@ def test_fold(temp_project, tmp_path, runner):
     output_file = tmp_path / "folded.txt"
     os.chdir(tmp_path)
     files = [str(temp_project / "main.py"), str(temp_project / "docs" / "index.md")]
-    result = runner.invoke(cfold.cli, ["fold", *files, "-o", str(output_file), "-d", "default"])
+    result = runner.invoke(cli, ["fold", *files, "-o", str(output_file), "-d", "default"])  # Updated to use cli
     assert result.exit_code == 0
     assert output_file.exists()
     with open(output_file, "r", encoding="utf-8") as f:
@@ -42,7 +41,7 @@ def test_fold_directory_default(temp_project, tmp_path, runner):
     """Test folding directory when no files specified."""
     output_file = tmp_path / "folded.txt"
     os.chdir(temp_project)
-    result = runner.invoke(cfold.cli, ["fold", "-o", str(output_file), "-d", "default"])
+    result = runner.invoke(cli, ["fold", "-o", str(output_file), "-d", "default"])  # Updated to use cli
     assert result.exit_code == 0
     assert output_file.exists()
     with open(output_file, "r", encoding="utf-8") as f:
@@ -55,7 +54,7 @@ def test_fold_dialect_codeonly(temp_project, tmp_path, runner):
     """Test codeonly dialect excludes non-code files."""
     output_file = tmp_path / "folded.txt"
     os.chdir(temp_project)
-    result = runner.invoke(cfold.cli, ["fold", "-o", str(output_file), "-d", "codeonly"])
+    result = runner.invoke(cli, ["fold", "-o", str(output_file), "-d", "codeonly"])  # Updated to use cli
     assert result.exit_code == 0
     assert output_file.exists()
     with open(output_file, "r", encoding="utf-8") as f:
@@ -69,7 +68,7 @@ def test_fold_dialect_doconly(temp_project, tmp_path, runner):
     """Test doconly dialect includes only doc files."""
     output_file = tmp_path / "folded.txt"
     os.chdir(temp_project)
-    result = runner.invoke(cfold.cli, ["fold", "-o", str(output_file), "-d", "doconly"])
+    result = runner.invoke(cli, ["fold", "-o", str(output_file), "-d", "doconly"])  # Updated to use cli
     assert result.exit_code == 0
     assert output_file.exists()
     with open(output_file, "r", encoding="utf-8") as f:
@@ -90,7 +89,7 @@ def test_unfold_new_files(temp_project, tmp_path, runner):
     )
     os.chdir(tmp_path)
     output_dir = tmp_path
-    result = runner.invoke(cfold.cli, ["unfold", str(fold_file), "-o", str(output_dir)])
+    result = runner.invoke(cli, ["unfold", str(fold_file), "-o", str(output_dir)])  # Updated to use cli
     assert result.exit_code == 0
     assert (output_dir / "project" / "new.py").exists()
     assert (output_dir / "project" / "new.py").read_text().strip() == "print('New file')"
@@ -109,7 +108,7 @@ def test_unfold_modify_and_delete(temp_project, tmp_path, runner):
     )
     os.chdir(tmp_path)
     output_dir = tmp_path
-    result = runner.invoke(cfold.cli, ["unfold", str(fold_file), "-i", str(temp_project), "-o", str(output_dir)])
+    result = runner.invoke(cli, ["unfold", str(fold_file), "-i", str(temp_project), "-o", str(output_dir)])  # Updated to use cli
     assert result.exit_code == 0
     assert (output_dir / "project" / "main.py").exists()
     assert (output_dir / "project" / "main.py").read_text().strip() == "print('Modified')"
@@ -130,7 +129,7 @@ def test_unfold_relocate_and_update_references(temp_project, tmp_path, runner):
     )
     os.chdir(tmp_path)
     output_dir = tmp_path
-    result = runner.invoke(cfold.cli, ["unfold", str(fold_file), "-i", str(temp_project), "-o", str(output_dir)])
+    result = runner.invoke(cli, ["unfold", str(fold_file), "-i", str(temp_project), "-o", str(output_dir)])  # Updated to use cli
     assert result.exit_code == 0
     assert (output_dir / "project" / "src" / "main.py").exists()
     assert (output_dir / "project" / "src" / "main.py").read_text().strip() == 'print("Hello")'
@@ -141,24 +140,24 @@ def test_init(tmp_path, runner):
     """Test init creates template."""
     output_file = tmp_path / "start.txt"
     custom = "Test custom instruction"
-    result = runner.invoke(cfold.cli, ["init", str(output_file), "-c", custom, "-d", "default"])
+    result = runner.invoke(cli, ["init", str(output_file), "-c", custom, "-d", "default"])  # Updated to use cli
     assert result.exit_code == 0
     assert output_file.exists()
     content = output_file.read_text()
     assert "Instructions for LLM:" in content
-    assert "Create a Poetry-managed Python project" in content
+    assert "# Prefer uv for installation, mkdocs for documentation, use vectorisation using numpy." in content  # Updated to reflect py.yml
     assert custom in content
 
 def test_init_dialect(tmp_path, runner):
     """Test init with different dialects."""
     output_file = tmp_path / "start.txt"
     custom = "Test custom instruction"
-    result = runner.invoke(cfold.cli, ["init", str(output_file), "-c", custom, "-d", "doconly"])
+    result = runner.invoke(cli, ["init", str(output_file), "-c", custom, "-d", "doconly"])  # Updated to use cli
     assert result.exit_code == 0
     assert output_file.exists()
     content = output_file.read_text()
     assert "Instructions for LLM:" in content
-    assert "Create a Poetry-managed Python project" in content
+    assert "# Prefer uv for installation, mkdocs for documentation, use vectorisation using numpy." in content  # Updated to reflect py.yml
     assert custom in content
 
 def test_unfold_complex_full_content(temp_project, tmp_path, runner):
@@ -184,7 +183,7 @@ def test_unfold_complex_full_content(temp_project, tmp_path, runner):
     )
     os.chdir(tmp_path)
     output_dir = tmp_path
-    result = runner.invoke(cfold.cli, ["unfold", str(fold_file), "-i", str(temp_project), "-o", str(output_dir)])
+    result = runner.invoke(cli, ["unfold", str(fold_file), "-i", str(temp_project), "-o", str(output_dir)])  # Updated to use cli
     assert result.exit_code == 0
     assert (output_dir / "project" / "main.py").read_text().strip() == 'print("Modified Hello")\nprint("Extra line")'
     assert (output_dir / "project" / "src" / "utils.py").read_text().strip() == "def new_util():\n    return 42"
@@ -207,7 +206,7 @@ def test_unfold_md_commands_not_interpreted(temp_project, tmp_path, runner):
     )
     os.chdir(tmp_path)
     output_dir = tmp_path
-    result = runner.invoke(cfold.cli, ["unfold", str(fold_file), "-i", str(temp_project), "-o", str(output_dir)])
+    result = runner.invoke(cli, ["unfold", str(fold_file), "-i", str(temp_project), "-o", str(output_dir)])  # Updated to use cli
     assert result.exit_code == 0
     example_content = (output_dir / "project" / "docs" / "example.md").read_text()
     assert "# Example" in example_content

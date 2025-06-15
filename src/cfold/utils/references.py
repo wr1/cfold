@@ -1,6 +1,5 @@
 from pathlib import Path
 import ast
-import os
 
 def update_references(modified_files, moves, cwd):
     """Update file references in Python files affected by moves."""

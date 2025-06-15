@@ -3,6 +3,8 @@ import os
 import click
 from cfold.utils.instructions import load_instructions
 from cfold.utils.foldignore import load_foldignore, should_include_file
+from rich.console import Console
+from cfold.utils.treeviz import get_folded_tree  # Updated import for Rich Tree
 
 @click.command()
 @click.argument("files", nargs=-1)
@@ -10,7 +12,7 @@ from cfold.utils.foldignore import load_foldignore, should_include_file
 @click.option("--prompt", "-p", default=None, help="Prompt file to append")
 @click.option("--dialect", "-d", default="default", help="Instruction dialect")
 def fold(files, output, prompt, dialect):
-    """Fold files or directory into a single text file."""
+    """Fold files or directory into a single text file and visualize the structure."""
     cwd = os.getcwd()
     common = load_instructions("common")
     instructions = load_instructions(dialect)
@@ -51,4 +53,10 @@ def fold(files, output, prompt, dialect):
                     outfile.write(prompt_infile.read() + "\n")
             elif prompt:
                 click.echo(f"Warning: Prompt file '{prompt}' does not exist. Skipping.")
+
+    console = Console()
+    tree = get_folded_tree(files, cwd)  # Use updated function to get Rich Tree
+    if tree:  # Check if tree has content
+        console.print("[bold]Folded files tree:[/bold]")
+        console.print(tree)  # Print the Rich Tree object
     click.echo(f"Codebase folded into {output}")
