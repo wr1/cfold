@@ -1,7 +1,7 @@
 
 common:
   prefix: "# Instructions for LLM:\n
-# This file uses the cfold format to manage a Python project codebase.\n
+# This file uses the cfold format to manage a project codebase.\n
 # - Folding: 'cfold fold <files> -o <output.txt>' captures specified files into this .txt.\n
 # - Unfolding: 'cfold unfold <modified.txt>' applies changes from this .txt to the directory.\n
 # Rules:\n
@@ -18,7 +18,7 @@ common:
 #   So for markdown a line starts 'CFOLD: MD: '  \n
 #   For non-markdown just write 'CFOLD: '  \n
 # Refactoring Guidelines:\n
-# - Prefer organizing code into subdirectories based on functionality (e.g., 'src/utils/', 'src/core/', 'src/cli/').\n
+# - Prefer organizing code into subdirectories based on functionality (e.g., 'src/<project>/utils/', 'src/<project>/core/', 'src/<project>/cli/').\n
 # - Split functionality into small, focused files (e.g., one function or class per file where practical, typically 50-200 lines).\n
 # - To refactor (e.g., move/rename):\n
 # - Delete the original file with '# DELETE' under its '# --- File: old_path ---'.\n
@@ -32,11 +32,12 @@ common:
 # - Don't include LLM instructions in the output.\n
 # - Use high level 1 line docstrings\n
 # Return the cfold formatted output directly in the chat without opening Grok Studio or the canvas panel.\n\n
+# Add one character alternatives to command line options i.e. --file and -f
 # NOTE, there is no syntax to only include parts of files, so avoid '... rest of file remains unchanged ' type output"
 
 
 default:
-  prefix: "# Prefer uv for installation, mkdocs for documentation, use vectorisation using numpy.  \n\n"
+  prefix: "# For Python, prefer uv for installation, mkdocs for documentation, use vectorisation using numpy.   \n\n"
   included_suffix: [".py", ".toml", ".md", ".yml", ".yaml"]
 
 
@@ -57,5 +58,5 @@ doconly:
   included_dirs: ["src", "docs"]
 
 latex:
-  prefix: "# use article class, tikz, biber, hyperref \n\n"
+  prefix: "# for latex, use article class, tikz, biber/biblatex, hyperref. Use a main.tex and include the sections. Use the cenum environment for continuously increased numbering through the document.  \n\n"
   included_suffix: [".tex",".bib","makefile"]

@@ -1,10 +1,10 @@
 """Handle folding command for cfold."""
 import os
 import click
-from cfold.utils.instructions import load_instructions
+from cfold.utils.instructions import load_instructions, get_available_dialects
 from cfold.utils.foldignore import load_foldignore, should_include_file
 from rich.console import Console
-from cfold.utils.treeviz import get_folded_tree  # Updated import for Rich Tree
+from cfold.utils.treeviz import get_folded_tree
 
 @click.command()
 @click.argument("files", nargs=-1)
@@ -15,7 +15,14 @@ def fold(files, output, prompt, dialect):
     """Fold files or directory into a single text file and visualize the structure."""
     cwd = os.getcwd()
     common = load_instructions("common")
-    instructions = load_instructions(dialect)
+    try:
+        instructions = load_instructions(dialect)
+    except ValueError as e:
+        # click.echo(str(e))
+        available = get_available_dialects()
+        click.echo(f"Available dialects: {', '.join(available)}")
+        raise click.ClickException("Invalid dialect specified.")
+
     included_suffixes = instructions["included_suffix"]
 
     if not files:
@@ -55,8 +62,8 @@ def fold(files, output, prompt, dialect):
                 click.echo(f"Warning: Prompt file '{prompt}' does not exist. Skipping.")
 
     console = Console()
-    tree = get_folded_tree(files, cwd)  # Use updated function to get Rich Tree
-    if tree:  # Check if tree has content
+    tree = get_folded_tree(files, cwd)
+    if tree:
         console.print("[bold]Folded files tree:[/bold]")
-        console.print(tree)  # Print the Rich Tree object
+        console.print(tree)
     click.echo(f"Codebase folded into {output}")
