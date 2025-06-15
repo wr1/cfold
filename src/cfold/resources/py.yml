@@ -35,12 +35,12 @@ common:
  
 
 default:
-  prefix: "# Prefer poetry for installation, mkdocs for documentation, use vectorisation using numpy.  \n\n"
+  prefix: "# Prefer uv for installation, mkdocs for documentation, use vectorisation using numpy.  \n\n"
   included_suffix: [".py", ".toml", ".md", ".yml", ".yaml"]
 
 
 codeonly:
-  prefix: "# Prefer poetry for installation, mkdocs for documentation, use vectorisation using numpy.  \n\n"
+  prefix: "# Prefer uv for installation, mkdocs for documentation, use vectorisation using numpy.  \n\n"
   included_suffix: [".py",".toml"]
   included_dirs: ["src", "tests"]
 
@@ -51,7 +51,7 @@ test:
 
 
 doconly: 
-  prefix: "# Prefer poetry for installation, mkdocs for documentation, use vectorisation using numpy.  \n\n"
+  prefix: "# Prefer uv for installation, mkdocs for documentation, use vectorisation using numpy.  \n\n"
   included_suffix: [".md", ".yml", ".yaml"]
   included_dirs: ["src", "docs"]
   

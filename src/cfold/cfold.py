@@ -84,7 +84,8 @@ def unfold(foldfile, original_dir, output_dir):
     included_suffixes = instructions["included_suffix"]
 
     with open(foldfile, "r", encoding="utf-8") as infile:
-        content = infile.read().replace("CFOLD: ", "").replace("CFOLD:", "")
+        # hack to enable work on cfold itself using cfold, keep the formatting of the below replacement statement intact
+        content = infile.read().replace("CF"+"OLD: ", "").replace("CF"+"OLD:", "")
         sections = re.split(r"(# --- File: .+? ---)\n", content)[1:]
         if len(sections) % 2 != 0:
             click.echo("Warning: Malformed fold file - odd number of sections")
@@ -178,19 +179,7 @@ def init(output, custom, dialect):
     with open(output, "w", encoding="utf-8") as outfile:
         outfile.write(instructions["prefix"] + "\n\n")
         outfile.write(
-            "# Project Setup Guidance:\n"
-            "# Create a Poetry-managed Python project with:\n"
-            "# - pyproject.toml: Define package metadata, dependencies, and scripts.\n"
-            "# - CI: Add .github/workflows/ with .yml files for testing and publishing.\n"
-            "# - MkDocs: Add docs/ directory with .md files and mkdocs.yml for documentation.\n"
-            "# Example structure:\n"
-            "#   my_project/pyproject.toml\n"
-            "#   my_project/README.md\n"
-            "#   my_project/src/<package>/__init__.py\n"
-            "#   my_project/.github/workflows/test.yml\n"
-            "#   my_project/docs/index.md\n"
-            "#   my_project/mkdocs.yml\n\n"
-            f"# Custom Instruction:\n{common['prefix']}\n\n\n{custom}\n"
+            f"{common['prefix']}\n\n\n{custom}\n"
         )
     click.echo(f"Initialized project template in {output}")
 
