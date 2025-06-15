@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.scripts]
-cfold = "cfold.cfold:cli"
+cfold = "cfold.cli.main:cli"
 
 [dependency-groups]
 dev = [
