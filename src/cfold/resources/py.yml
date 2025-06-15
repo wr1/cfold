@@ -31,8 +31,9 @@ common:
 # - Reply using a single plain text code block for implementing changes to multiple files using 'cfold unfold <singlefile.txt>'.\n
 # - Don't include LLM instructions in the output.\n
 # - Use high level 1 line docstrings\n
-# Return the cfold formatted output directly in the chat without opening Grok Studio or the canvas panel.\n\n"
- 
+# Return the cfold formatted output directly in the chat without opening Grok Studio or the canvas panel.\n\n
+# NOTE, there is no syntax to only include parts of files, so avoid '... rest of file remains unchanged ' type output"
+
 
 default:
   prefix: "# Prefer uv for installation, mkdocs for documentation, use vectorisation using numpy.  \n\n"
@@ -42,21 +43,19 @@ default:
 codeonly:
   prefix: "# Prefer uv for installation, mkdocs for documentation, use vectorisation using numpy.  \n\n"
   included_suffix: [".py",".toml"]
-  included_dirs: ["src", "tests"]
+  included_dirs: ["src"]
 
 test:
   prefix: "# Rewrite tests/test_ansys.py to follow pytest best practices. Use session-scoped fixtures for setup and conversion, parametrize tests for load case files, and ensure each test is independent. Verify file existence, line counts, and specific ANSYS commands (e.g., '/solu', 'f,'). Include detailed assert messages, log actual vs. expected values, and skip tests if input files are missing. Follow PEP 8, use helper functions to avoid duplication, and ensure the conversion runs only once.\n\n"
-  included_suffix: [".py"]
+  included_suffix: [".py",".log"]
   included_dirs: ["tests"]
 
 
-doconly: 
+doconly:
   prefix: "# Prefer uv for installation, mkdocs for documentation, use vectorisation using numpy.  \n\n"
   included_suffix: [".md", ".yml", ".yaml"]
   included_dirs: ["src", "docs"]
-  
+
 latex:
   prefix: "# use article class, tikz, biber, hyperref \n\n"
   included_suffix: [".tex",".bib","makefile"]
-
-
