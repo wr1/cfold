@@ -1,4 +1,5 @@
 """Handle unfolding command for cfold."""
+
 import os
 import shutil
 import re
@@ -7,6 +8,7 @@ from rich.console import Console
 from rich.tree import Tree
 from cfold.utils.instructions import load_instructions
 from cfold.utils.foldignore import load_foldignore, should_include_file
+
 
 @click.command()
 @click.argument("foldfile")
@@ -21,10 +23,14 @@ def unfold(foldfile, original_dir, output_dir):
     included_suffixes = instructions["included_suffix"]
 
     with open(foldfile, "r", encoding="utf-8") as infile:
-        content = infile.read().replace("CF"+"OLD: ", "").replace("CF"+"OLD:", "") #KEEP LINE INTACT, INCLUDING COMMENT
+        content = (
+            infile.read().replace("CF" + "OLD: ", "").replace("CF" + "OLD:", "")
+        )  # KEEP LINE INTACT, INCLUDING COMMENT
         sections = re.split(r"(# --- File: .+? ---)\n", content)[1:]
         if len(sections) % 2 != 0:
-            console.print("[yellow]Warning: Malformed fold file - odd number of sections[/yellow]")
+            console.print(
+                "[yellow]Warning: Malformed fold file - odd number of sections[/yellow]"
+            )
             return
 
         modified_files = {}
@@ -97,7 +103,10 @@ def unfold(foldfile, original_dir, output_dir):
             added_files.append(filepath)
 
     # Output summary tree
-    tree = Tree(f"[bold dim]Operations in[/bold dim] [blue]{output_dir}[/blue]", guide_style="dim")
+    tree = Tree(
+        f"[bold dim]Operations in[/bold dim] [blue]{output_dir}[/blue]",
+        guide_style="dim",
+    )
     if added_files:
         added_node = tree.add("[green]Added files[/green]")
         for file in added_files:
