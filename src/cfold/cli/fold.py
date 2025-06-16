@@ -66,6 +66,6 @@ def fold(files, output, prompt, dialect):
    console = Console()
    tree = get_folded_tree(files, cwd)
    if tree:
-       console.print("[bold]Folded files tree:[/bold]")
+       #console.print("[bold]Folded files tree:[/bold]")
        console.print(tree)
    click.echo(f"Codebase folded into {output}")
