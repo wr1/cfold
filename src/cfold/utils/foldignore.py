@@ -27,6 +27,7 @@ def should_include_file(filepath, ignore_patterns=None, root_dir=None, suffixes=
         ".egg-info",
         "venv",
         ".venv",
+        "node_modules",  # Added to ignore common directories as per request
     }
     EXCLUDED_FILES = {".pyc"}
 
