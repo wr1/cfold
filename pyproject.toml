@@ -10,7 +10,8 @@ dependencies = [
     "pytest-cov>5.0.0",
     "pyyaml>=6.0.2,<7",
     "click>=8.1.7,<9",
-    "rich>=13.7.1",  # Added for formatted text output
+    "rich>=13.7.1",
+    "rich-click>=1.7.0",  # Added for Rich-styled Click help
 ]
 
 [project.scripts]

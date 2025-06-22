@@ -1,6 +1,6 @@
 """Main CLI group for cfold. Available dialects: default, codeonly, test, doconly, latex."""
 
-import click
+import rich_click as click  # Replaced for Rich-styled help
 from .fold import fold as fold_command
 from .unfold import unfold as unfold_command
 from .init import init as init_command

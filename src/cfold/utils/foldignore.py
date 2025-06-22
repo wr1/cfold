@@ -17,8 +17,14 @@ def load_foldignore(directory):
     return ignore_patterns
 
 
-def should_include_file(filepath, ignore_patterns=None, root_dir=None, suffixes=None):
-    """Check if a file should be included based on extension, exclusion rules, and .foldignore patterns."""
+def should_include_file(
+    filepath,
+    ignore_patterns=None,
+    root_dir=None,
+    included_patterns=None,
+    excluded_patterns=None,
+):
+    """Check if a file should be included based on patterns."""
     EXCLUDED_DIRS = {
         ".pytest_cache",
         "__pycache__",
@@ -27,23 +33,41 @@ def should_include_file(filepath, ignore_patterns=None, root_dir=None, suffixes=
         ".egg-info",
         "venv",
         ".venv",
-        "node_modules",  # Added to ignore common directories as per request
+        ".ruff_cache",
+        ".git",
+        "node_modules",  # Added to ignore common directories
     }
-    EXCLUDED_FILES = {".pyc"}
+    EXCLUDED_FILES = {".pyc", ".egg-info"}
 
     path = Path(filepath)
     if root_dir:
         relpath = os.path.relpath(filepath, root_dir)
     else:
         relpath = str(path)
-    if suffixes and path.suffix not in suffixes:
-        return False
+
+    EXCLUDED_PATTERNS = ["*.egg-info/*", ".*rc", "*.txt", "*.json"]
+
+    for i in EXCLUDED_PATTERNS:
+        if i not in excluded_patterns:
+            excluded_patterns.append(i)
+
+    # excluded_patterns.append("*.egg-info/*")
+
     if any(part in EXCLUDED_DIRS for part in path.parts):
         return False
     if path.suffix in EXCLUDED_FILES:
         return False
-    if ignore_patterns:
-        for pattern in ignore_patterns:
-            if fnmatch.fnmatch(relpath, pattern):
-                return False
+
+    if included_patterns and not any(
+        fnmatch.fnmatch(relpath, pattern) for pattern in included_patterns
+    ):
+        return False
+    if excluded_patterns and any(
+        fnmatch.fnmatch(relpath, pattern) for pattern in excluded_patterns
+    ):
+        return False
+    if ignore_patterns and any(
+        fnmatch.fnmatch(relpath, pattern) for pattern in ignore_patterns
+    ):
+        return False
     return True

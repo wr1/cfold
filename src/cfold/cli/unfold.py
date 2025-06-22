@@ -3,7 +3,7 @@
 import os
 import shutil
 import re
-import click
+import rich_click as click  # Replaced for Rich-styled help
 from rich.console import Console
 from rich.tree import Tree
 from cfold.utils.instructions import load_instructions
@@ -20,7 +20,8 @@ def unfold(foldfile, original_dir, output_dir):
     cwd = os.getcwd()
     output_dir = os.path.abspath(output_dir or cwd)
     instructions = load_instructions("default")
-    included_suffixes = instructions["included_suffix"]
+    included_patterns = instructions.get("included", [])
+    excluded_patterns = instructions.get("excluded", [])
 
     with open(foldfile, "r", encoding="utf-8") as infile:
         content = (
@@ -61,7 +62,7 @@ def unfold(foldfile, original_dir, output_dir):
             for filename in filenames:
                 filepath = os.path.join(dirpath, filename)
                 if should_include_file(
-                    filepath, ignore_patterns, original_dir, included_suffixes
+                    filepath, ignore_patterns, original_dir, included_patterns, excluded_patterns
                 ):
                     relpath = os.path.relpath(filepath, cwd)
                     dst = os.path.join(output_dir, relpath)
