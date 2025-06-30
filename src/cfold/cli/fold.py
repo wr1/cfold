@@ -55,23 +55,26 @@ def fold(files, output, prompt, dialect):
         click.echo("No valid files to fold.")
         return
 
-    with open(output, "w", encoding="utf-8") as outfile:
-        outfile.write(common["prefix"] + "\n\n")
-        outfile.write(instructions["prefix"] + "\n\n")
-        for filepath in files:
-            relpath = os.path.relpath(filepath, cwd)
-            outfile.write(f"# --- File: {relpath} ---\n")
-            with open(filepath, "r", encoding="utf-8") as infile:
-                content = infile.read()
-                if filepath.endswith(".md"):
-                    content = "\n".join(f"MD:{line}" for line in content.splitlines())
-                outfile.write(content + "\n\n")
-            if prompt and os.path.isfile(prompt):
-                with open(prompt, "r", encoding="utf-8") as prompt_infile:
-                    outfile.write("\n# Prompt:\n")
-                    outfile.write(prompt_infile.read() + "\n")
-            elif prompt:
-                click.echo(f"Warning: Prompt file '{prompt}' does not exist. Skipping.")
+    try:
+        with open(output, "w", encoding="utf-8") as outfile:
+            outfile.write(common["prefix"] + "\n\n")
+            outfile.write(instructions["prefix"] + "\n\n")
+            for filepath in files:
+                relpath = os.path.relpath(filepath, cwd)
+                outfile.write(f"# --- File: {relpath} ---\n")
+                with open(filepath, "r", encoding="utf-8") as infile:
+                    content = infile.read()
+                    if filepath.endswith(".md"):
+                        content = "\n".join(f"MD:{line}" for line in content.splitlines())
+                    outfile.write(content + "\n\n")
+                if prompt and os.path.isfile(prompt):
+                    with open(prompt, "r", encoding="utf-8") as prompt_infile:
+                        outfile.write("\n# Prompt:\n")
+                        outfile.write(prompt_infile.read() + "\n")
+                elif prompt:
+                    click.echo(f"Warning: Prompt file '{prompt}' does not exist. Skipping.")
+    except:
+        click.echo(f"Warning: failing to load {output}")
 
     console = Console()
     tree = get_folded_tree(files, cwd)

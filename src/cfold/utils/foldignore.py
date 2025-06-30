@@ -45,7 +45,24 @@ def should_include_file(
     else:
         relpath = str(path)
 
-    EXCLUDED_PATTERNS = ["*.egg-info/*", ".*rc", "*.txt", "*.json"]
+    EXCLUDED_PATTERNS = [
+        "*.egg-info/*",
+        ".*rc",
+        "*.txt",
+        "*.json",
+        "build/*",
+        "dist/*",
+        ".venv/*",
+        "example*",
+        "htmlcov/*",
+        "*png",
+        "*vtu",
+        "*xdmf",
+        "*data/*",
+        "*log",
+        ".*",
+        "*sh",
+    ]
 
     for i in EXCLUDED_PATTERNS:
         if i not in excluded_patterns:

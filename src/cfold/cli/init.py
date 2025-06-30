@@ -1,6 +1,6 @@
 """Handle init command for cfold."""
 
-import click
+import rich_click as click
 from cfold.utils.instructions import load_instructions  # Assuming this is needed
 
 
