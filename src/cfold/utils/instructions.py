@@ -1,3 +1,4 @@
+"""Load instructions and patterns for specified dialect."""
 from importlib import resources
 import yaml
 
@@ -12,8 +13,8 @@ def load_instructions(dialect="default"):
             raise ValueError(f"Dialect '{dialect}' not found in py.yml")
         return {
             "prefix": config[dialect]["prefix"],
-            "included": config[dialect].get("included", []),  # List of fnmatch patterns to include
-            "excluded": config[dialect].get("excluded", []),  # List of fnmatch patterns to exclude
+            "included": [f"*{pat}" for pat in config[dialect].get("included_suffix", [])],  # Convert suffixes to fnmatch patterns
+            "excluded": config[dialect].get("excluded", []),
         }
     except Exception as e:
         raise RuntimeError(

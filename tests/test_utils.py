@@ -4,31 +4,31 @@ from cfold.utils import foldignore
 def test_should_include_file():
     """Test file inclusion/exclusion rules."""
     assert (
-        foldignore.should_include_file("src/main.py", suffixes=[".py", ".md", ".yml"])
+        foldignore.should_include_file("src/main.py", included_patterns=["*.py", "*.md", "*.yml"])
         is True
     )
     assert (
-        foldignore.should_include_file("docs/index.md", suffixes=[".py", ".md", ".yml"])
+        foldignore.should_include_file("docs/index.md", included_patterns=["*.py", "*.md", "*.yml"])
         is True
     )
     assert (
-        foldignore.should_include_file("config.yml", suffixes=[".py", ".md", ".yml"])
+        foldignore.should_include_file("config.yml", included_patterns=["*.py", "*.md", "*.yml"])
         is True
     )
     assert (
         foldignore.should_include_file(
-            "build/output.o", suffixes=[".py", ".md", ".yml"]
+            "build/output.o", included_patterns=["*.py", "*.md", "*.yml"]
         )
         is False
     )
     assert (
         foldignore.should_include_file(
-            "src/__pycache__/main.pyc", suffixes=[".py", ".md", ".yml"]
+            "src/__pycache__/main.pyc", included_patterns=["*.py", "*.md", "*.yml"]
         )
         is False
     )
     assert (
-        foldignore.should_include_file("test.txt", suffixes=[".py", ".md", ".yml"])
+        foldignore.should_include_file("test.txt", included_patterns=["*.py", "*.md", "*.yml"])
         is False
     )
 

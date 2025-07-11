@@ -5,7 +5,6 @@ import os
 
 def load_foldignore(directory):
     """Load and parse .foldignore file if it exists."""
-    print(f"Loading .foldignore from {directory}")
     ignore_file = Path(directory) / ".foldignore"
     ignore_patterns = []
     if ignore_file.exists():
@@ -64,11 +63,11 @@ def should_include_file(
         "*sh",
     ]
 
+    if excluded_patterns is None:
+        excluded_patterns = []
     for i in EXCLUDED_PATTERNS:
         if i not in excluded_patterns:
             excluded_patterns.append(i)
-
-    # excluded_patterns.append("*.egg-info/*")
 
     if any(part in EXCLUDED_DIRS for part in path.parts):
         return False
