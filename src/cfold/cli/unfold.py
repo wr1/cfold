@@ -26,7 +26,8 @@ def unfold(foldfile, original_dir, output_dir):
     with open(foldfile, "r", encoding="utf-8") as infile:
         content = (
             infile.read().replace("CF" + "OLD: ", "").replace("CF" + "OLD:", "")
-        )  # KEEP LINE INTACT, INCLUDING COMMENT
+        ).strip()  # KEEP LINE INTACT, INCLUDING COMMENT
+        content = content.strip("```")
         sections = re.split(r"(# --- File: .+? ---)\n", content)[1:]
         if len(sections) % 2 != 0:
             console.print(
@@ -41,7 +42,7 @@ def unfold(foldfile, original_dir, output_dir):
             filepath = header.replace("# --- File: ", "").replace(" ---", "").strip()
             if filepath.endswith(".md"):
                 file_content = "\n".join(
-                    line[3:] if line.startswith("MD:") else line
+                    line[3:].lstrip() if line.startswith("MD:") else line
                     for line in file_content.splitlines()
                 )
             modified_files[filepath] = file_content
@@ -62,7 +63,11 @@ def unfold(foldfile, original_dir, output_dir):
             for filename in filenames:
                 filepath = os.path.join(dirpath, filename)
                 if should_include_file(
-                    filepath, ignore_patterns, original_dir, included_patterns, excluded_patterns
+                    filepath,
+                    ignore_patterns,
+                    original_dir,
+                    included_patterns,
+                    excluded_patterns,
                 ):
                     relpath = os.path.relpath(filepath, cwd)
                     dst = os.path.join(output_dir, relpath)

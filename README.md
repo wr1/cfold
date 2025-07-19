@@ -39,6 +39,12 @@ Example (fold only code files):
 cfold fold -o folded.txt --dialect codeonly
 ```
 
+Or simply
+```bash
+cfold fold
+```
+![alt text](docs/assets/image.png)
+
 ### Unfolding a codebase
 
 Unfold a modified fold file back into a directory structure:
