@@ -1,4 +1,4 @@
-#![Tests](https://github.com/wr1/cfold/actions/workflows/python-app.yml/badge.svg)](https://github.com/wr1/cfold/actions/workflows/python-app.yml)
+#![Tests](https://github.com/wr1/cfold/actions/workflows/tests.yml/badge.svg)](https://github.com/wr1/cfold/actions/workflows/tests.yml)
 ![Version](https://img.shields.io/github/v/release/wr1/cfold)
 
 # cfold
