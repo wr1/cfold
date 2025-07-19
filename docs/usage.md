@@ -18,11 +18,10 @@ python -m pip install --force-reinstall pip
 pip install cfold
 ```
 
-Or install locally with Poetry:
+Or install locally with UV:
 
 ```bash
-poetry install
-python -m pip install .
+uv pip install .
 ```
 
 ## Commands
@@ -37,7 +36,7 @@ cfold init [<output_file>] [--custom <instruction>] [--dialect <dialect>]
 
 - `<output_file>`: Output file (default: `start.txt`).
 - `--custom <instruction>`: Custom instruction for the LLM (e.g., project purpose).
-- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `codeonly`, `doconly`; default: `default`).
+- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `codeonly`, `test`, `doconly`, `latex`; default: `default`).
 
 Example:
 
@@ -68,7 +67,7 @@ options:
   --prompt PROMPT, -p PROMPT
                         Optional file containing a prompt to append to the output
   --dialect DIALECT, -d DIALECT
-                        Dialect for instructions (e.g., default, codeonly, doconly; default: default)
+                        Dialect for instructions (e.g., default, codeonly, test, doconly, latex; default: default)
 ```
 
 Example:
