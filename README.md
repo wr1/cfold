@@ -43,6 +43,8 @@ cfold fold
 ```
 ![alt text](docs/assets/image.png)
 
+The output file can then be sent to an LLM either through the GUI or through a tool like ![grk](https://github.com/wr1/grk). 
+
 ### Unfolding a codebase
 
 Unfold a modified fold file back into a directory structure:
