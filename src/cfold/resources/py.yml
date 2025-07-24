@@ -33,7 +33,8 @@ common:
 # - Use high level 1 line docstrings\n
 # Return the cfold formatted output directly in the chat without opening Grok Studio or the canvas panel.\n\n
 # Add one character alternatives to command line options i.e. --file and -f \n
-# NOTE, there is no syntax to only include parts of files, so avoid '... rest of file remains unchanged ' type output"
+# NOTE, there is no syntax to only include parts of files, so avoid '... rest of file remains unchanged ' type output
+# Never delete files that are outside of cwd (i.e. starting with ../ or the like)"
 
 
 default:
