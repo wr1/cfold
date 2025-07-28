@@ -3,6 +3,7 @@
 import os
 from pathlib import Path
 import rich_click as click  # Replaced for Rich-styled help
+import pyperclip  # Added for clipboard functionality
 from cfold.utils.instructions import load_instructions, get_available_dialects
 from cfold.utils.foldignore import load_foldignore, should_include_file
 from rich.console import Console
@@ -14,10 +15,7 @@ from cfold.utils.treeviz import get_folded_tree
 @click.option("--output", "-o", default="codefold.txt", help="Output file")
 @click.option("--prompt", "-p", default=None, help="Prompt file to append")
 @click.option(
-    "--dialect",
-    "-d",
-    default="default",
-    help="Instruction dialect (available: default, codeonly, test, doconly, latex)",
+    "--dialect", "-d", default="default", help="Instruction dialect (available: default, codeonly, test, doconly, latex)"
 )
 def fold(files, output, prompt, dialect):
     """Fold files or directory into a single text file and visualize the structure."""
@@ -73,6 +71,11 @@ def fold(files, output, prompt, dialect):
                     outfile.write(prompt_infile.read() + "\n")
             elif prompt:
                 click.echo(f"Warning: Prompt file '{prompt}' does not exist. Skipping.")
+        # Copy content to clipboard after writing the file
+        with open(output, "r", encoding="utf-8") as outfile:
+            content = outfile.read()
+            pyperclip.copy(content)
+            click.echo(f"Codebase folded into {output} and content copied to clipboard.")
     except IOError as e:
         click.echo(f"Error writing to {output}: {e}")
         raise
@@ -81,4 +84,3 @@ def fold(files, output, prompt, dialect):
     tree = get_folded_tree(files, cwd)
     if tree:
         console.print(tree)
-    click.echo(f"Codebase folded into {output}")
