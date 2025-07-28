@@ -28,7 +28,7 @@ cfold fold [files...] -o <output_file> [--prompt <prompt_file>] [--dialect <dial
 - `[files...]`: Specific files to fold (optional; if omitted, folds the entire current directory).
 - `-o <output_file>`: Output file (default: `codefold.txt`).
 - `--prompt <prompt_file>`: Optional file to append as a prompt in the output.
-- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `codeonly`, `doconly`; default: `default`).
+- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `codeonly`, `doconly`, `latex`, `typst`; default: `default`).
 - Supports `.foldignore` for excluding files when folding a directory.
 
 Example (fold only code files):

@@ -61,3 +61,7 @@ doconly:
 latex:
   prefix: "# for latex, use article class, tikz, biber/biblatex, hyperref. Use a main.tex and include the sections. Use the cenum environment for continuously increased numbering through the document.  \n\n"
   included_suffix: [".tex","makefile"]
+
+typst:
+  prefix: "# for typst, follow typst syntax. Structure the document with sections and subsections as needed.  \n\n"
+  included_suffix: [".typ"]
