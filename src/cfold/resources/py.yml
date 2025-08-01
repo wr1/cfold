@@ -21,7 +21,7 @@ common:
   # Return the updated JSON directly in the chat without opening Grok Studio or the canvas panel.
   # Add one character alternatives to command line options i.e. --file and -f 
   # NOTE, there is no syntax to only include parts of files, so avoid '... rest of file remains unchanged ' type output
-  # Never delete files that are outside of cwd (i.e. starting with ../ or /)"
+  # Never delete files that are outside of cwd (i.e. starting with ../ or / or otherwise outside of the cwd)"
 
 default:
   prefix: "# For Python, prefer uv for installation, mkdocs for documentation, use vectorisation using numpy.   "
