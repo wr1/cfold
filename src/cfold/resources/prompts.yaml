@@ -6,18 +6,18 @@ default:
   included_suffix: [".py", ".toml", ".md", ".yml", ".yaml"]
 
 
-codeonly:
+py:
   user: "# Prefer uv for installation, mkdocs for documentation, use vectorisation using numpy. "
   included_suffix: [".py",".toml"]
   included_dirs: ["src"]
 
-test:
+pytest:
   user: "# Rewrite tests/test_ansys.py to follow pytest best practices. Use session-scoped fixtures for setup and conversion, parametrize tests for load case files, and ensure each test is independent. Verify file existence, line counts, and specific ANSYS commands (e.g., '/solu', 'f,'). Include detailed assert messages, log actual vs. expected values, and skip tests if input files are missing. Follow PEP 8, use helper functions to avoid duplication, and ensure the conversion runs only once."
   included_suffix: [".py",".log"]
   included_dirs: ["tests"]
 
 
-doconly:
+doc:
   system: "# Prefer uv for installation, mkdocs for documentation, use vectorisation using numpy.  "
   included_suffix: [".md", ".yml", ".yaml"]
   included_dirs: ["src", "docs"]
