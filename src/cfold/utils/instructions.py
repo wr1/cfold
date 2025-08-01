@@ -31,3 +31,4 @@ def get_available_dialects():
         return list(config.keys())
     except Exception as e:
         raise RuntimeError(f"Failed to load dialects: {e}")
+

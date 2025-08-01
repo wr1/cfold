@@ -1,6 +1,7 @@
 """Handle folding command for cfold."""
 
 import os
+import json
 from pathlib import Path
 import rich_click as click  # Replaced for Rich-styled help
 import pyperclip  # Added for clipboard functionality
@@ -12,10 +13,13 @@ from cfold.utils.treeviz import get_folded_tree
 
 @click.command()
 @click.argument("files", nargs=-1)
-@click.option("--output", "-o", default="codefold.txt", help="Output file")
+@click.option("--output", "-o", default="codefold.json", help="Output file")
 @click.option("--prompt", "-p", default=None, help="Prompt file to append")
 @click.option(
-    "--dialect", "-d", default="default", help="Instruction dialect (available: default, codeonly, test, doconly, latex)"
+    "--dialect",
+    "-d",
+    default="default",
+    help="Instruction dialect (available: default, codeonly, test, doconly, latex)",
 )
 def fold(files, output, prompt, dialect):
     """Fold files or directory into a single text file and visualize the structure."""
@@ -53,29 +57,30 @@ def fold(files, output, prompt, dialect):
         click.echo("No valid files to fold.")
         return
 
+    data = {
+        "instructions": common["prefix"] + "\n\n" + instructions["prefix"],
+        "files": [],
+        "prompt": "",
+    }
+
+    for filepath in files:
+        relpath = filepath.relative_to(cwd)
+        with open(filepath, "r", encoding="utf-8") as infile:
+            content = infile.read()
+        data["files"].append({"path": str(relpath), "content": content})
+
+    if prompt and os.path.isfile(prompt):
+        with open(prompt, "r", encoding="utf-8") as prompt_infile:
+            data["prompt"] = prompt_infile.read()
+    elif prompt:
+        click.echo(f"Warning: Prompt file '{prompt}' does not exist. Skipping.")
+
     try:
         with open(output, "w", encoding="utf-8") as outfile:
-            outfile.write(common["prefix"] + "\n\n")
-            outfile.write(instructions["prefix"] + "\n\n")
-            for filepath in files:
-                relpath = filepath.relative_to(cwd)
-                outfile.write(f"# --- File: {relpath} ---\n")
-                with open(filepath, "r", encoding="utf-8") as infile:
-                    content = infile.read()
-                    if filepath.suffix == ".md":
-                        content = "\n".join(f"MD:{line}" for line in content.splitlines())
-                    outfile.write(content + "\n\n")
-            if prompt and os.path.isfile(prompt):
-                with open(prompt, "r", encoding="utf-8") as prompt_infile:
-                    outfile.write("\n# Prompt:\n")
-                    outfile.write(prompt_infile.read() + "\n")
-            elif prompt:
-                click.echo(f"Warning: Prompt file '{prompt}' does not exist. Skipping.")
+            json.dump(data, outfile, indent=2)
         # Copy content to clipboard after writing the file
-        with open(output, "r", encoding="utf-8") as outfile:
-            content = outfile.read()
-            pyperclip.copy(content)
-            click.echo(f"Codebase folded into {output} and content copied to clipboard.")
+        pyperclip.copy(json.dumps(data))
+        click.echo(f"Codebase folded into {output} and content copied to clipboard.")
     except IOError as e:
         click.echo(f"Error writing to {output}: {e}")
         raise

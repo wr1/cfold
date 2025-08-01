@@ -1,5 +1,6 @@
 import pytest
 import os
+import json
 from click.testing import CliRunner
 from cfold.cli.main import cli  # Updated import to fix the error
 
@@ -34,13 +35,13 @@ def test_fold(temp_project, tmp_path, runner):
     assert result.exit_code == 0
     assert output_file.exists()
     with open(output_file, "r", encoding="utf-8") as f:
-        content = f.read()
-    assert content.startswith("# Instructions for LLM:")
-    assert "# --- File: project/main.py ---" in content
-    assert 'print("Hello")' in content
-    assert "# --- File: project/docs/index.md ---" in content
-    assert "MD:# Docs" in content
-    assert "utils.py" not in content
+        data = json.load(f)
+    assert "instructions" in data
+    assert len(data["files"]) == 2
+    assert data["files"][0]["path"] == "project/main.py"
+    assert data["files"][0]["content"] == 'print("Hello")\n'
+    assert data["files"][1]["path"] == "project/docs/index.md"
+    assert data["files"][1]["content"] == "# Docs\n"
 
 
 def test_fold_directory_default(temp_project, tmp_path, runner):
@@ -53,10 +54,10 @@ def test_fold_directory_default(temp_project, tmp_path, runner):
     assert result.exit_code == 0
     assert output_file.exists()
     with open(output_file, "r", encoding="utf-8") as f:
-        content = f.read()
-    assert "# --- File: main.py ---" in content
-    assert "# --- File: docs/index.md ---" in content
-    assert "# --- File: utils.py ---" in content
+        data = json.load(f)
+    assert any(f["path"] == "main.py" for f in data["files"])
+    assert any(f["path"] == "docs/index.md" for f in data["files"])
+    assert any(f["path"] == "utils.py" for f in data["files"])
 
 
 def test_fold_dialect_codeonly(temp_project, tmp_path, runner):
@@ -69,11 +70,11 @@ def test_fold_dialect_codeonly(temp_project, tmp_path, runner):
     assert result.exit_code == 0
     assert output_file.exists()
     with open(output_file, "r", encoding="utf-8") as f:
-        content = f.read()
-    assert "# --- File: main.py ---" in content
-    assert "# --- File: utils.py ---" in content
-    assert "# --- File: importer.py ---" in content
-    assert "# --- File: docs/index.md ---" not in content
+        data = json.load(f)
+    assert any(f["path"] == "main.py" for f in data["files"])
+    assert any(f["path"] == "utils.py" for f in data["files"])
+    assert any(f["path"] == "importer.py" for f in data["files"])
+    assert not any(f["path"] == "docs/index.md" for f in data["files"])
 
 
 def test_fold_dialect_doconly(temp_project, tmp_path, runner):
@@ -86,26 +87,28 @@ def test_fold_dialect_doconly(temp_project, tmp_path, runner):
     assert result.exit_code == 0
     assert output_file.exists()
     with open(output_file, "r", encoding="utf-8") as f:
-        content = f.read()
-    assert "# --- File: docs/index.md ---" in content
-    assert "# --- File: utils.py ---" not in content
-    assert "# --- File: importer.py ---" not in content
+        data = json.load(f)
+    assert any(f["path"] == "docs/index.md" for f in data["files"])
+    assert not any(f["path"] == "utils.py" for f in data["files"])
+    assert not any(f["path"] == "importer.py" for f in data["files"])
 
 
 def test_unfold_new_files(temp_project, tmp_path, runner):
     """Test unfolding creates new files."""
     fold_file = tmp_path / "folded.txt"
-    fold_file.write_text(
-        "# Instructions for LLM:\n\n"
-        "# --- File: project/new.py ---\n"
-        "print('New file')\n\n"
-        "# --- File: project/docs/new.md ---\n"
-        "# New Doc\n\n"
-    )
+    data = {
+        "instructions": "# Instructions for LLM:\n\n",
+        "files": [
+            {"path": "project/new.py", "content": "print('New file')\n"},
+            {"path": "project/docs/new.md", "content": "# New Doc\n"}
+        ]
+    }
+    with open(fold_file, "w", encoding="utf-8") as f:
+        json.dump(data, f)
     os.chdir(tmp_path)
     output_dir = tmp_path
     result = runner.invoke(
-        cli, ["unfold", str(fold_file), "-o", str(output_dir)]
+        cli, ["unfold", "-f", str(fold_file), "-o", str(output_dir)]
     )  # Updated to use cli
     assert result.exit_code == 0
     assert (output_dir / "project" / "new.py").exists()
@@ -121,17 +124,19 @@ def test_unfold_new_files(temp_project, tmp_path, runner):
 def test_unfold_modify_and_delete(temp_project, tmp_path, runner):
     """Test unfolding with modifications and deletions."""
     fold_file = tmp_path / "folded.txt"
-    fold_file.write_text(
-        "# Instructions for LLM:\n\n"
-        "# --- File: project/main.py ---\n"
-        "print('Modified')\n"
-        "# --- File: project/utils.py ---\n"
-        "# DELETE\n\n"
-    )
+    data = {
+        "instructions": "# Instructions for LLM:\n\n",
+        "files": [
+            {"path": "project/main.py", "content": "print('Modified')\n"},
+            {"path": "project/utils.py", "content": "# DELETE\n"}
+        ]
+    }
+    with open(fold_file, "w", encoding="utf-8") as f:
+        json.dump(data, f)
     os.chdir(tmp_path)
     output_dir = tmp_path
     result = runner.invoke(
-        cli, ["unfold", str(fold_file), "-i", str(temp_project), "-o", str(output_dir)]
+        cli, ["unfold", "-f", str(fold_file), "-i", str(temp_project), "-o", str(output_dir)]
     )  # Updated to use cli
     assert result.exit_code == 0
     assert (output_dir / "project" / "main.py").exists()
@@ -145,19 +150,20 @@ def test_unfold_modify_and_delete(temp_project, tmp_path, runner):
 def test_unfold_relocate_and_update_references(temp_project, tmp_path, runner):
     """Test unfolding with file relocation."""
     fold_file = tmp_path / "folded.txt"
-    fold_file.write_text(
-        "# Instructions for LLM:\n\n"
-        "# --- File: project/main.py ---\n"
-        "# DELETE\n"
-        "# --- File: project/src/main.py ---\n"
-        'print("Hello")\n'
-        "# --- File: project/importer.py ---\n"
-        "import project.src.main\n"
-    )
+    data = {
+        "instructions": "# Instructions for LLM:\n\n",
+        "files": [
+            {"path": "project/main.py", "content": "# DELETE"},
+            {"path": "project/src/main.py", "content": 'print("Hello")\n'},
+            {"path": "project/importer.py", "content": "import project.src.main\n"}
+        ]
+    }
+    with open(fold_file, "w", encoding="utf-8") as f:
+        json.dump(data, f)
     os.chdir(tmp_path)
     output_dir = tmp_path
     result = runner.invoke(
-        cli, ["unfold", str(fold_file), "-i", str(temp_project), "-o", str(output_dir)]
+        cli, ["unfold", "-f", str(fold_file), "-i", str(temp_project), "-o", str(output_dir)]
     )  # Updated to use cli
     assert result.exit_code == 0
     assert (output_dir / "project" / "src" / "main.py").exists()
@@ -175,13 +181,14 @@ def test_init(tmp_path, runner):
     output_file = tmp_path / "start.txt"
     custom = "Test custom instruction"
     result = runner.invoke(
-        cli, ["init", str(output_file), "-c", custom, "-d", "default"]
+        cli, ["init", "-o", str(output_file), "-c", custom, "-d", "default"]
     )  # Updated to use cli
     assert result.exit_code == 0
     assert output_file.exists()
-    content = output_file.read_text()
-    assert "Instructions for LLM:" in content  # Adjusted to check for key phrase
-    # The specific string is now ensured in py.yml
+    with open(output_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    assert "instructions" in data
+    assert data["prompt"] == custom
 
 
 def test_init_dialect(tmp_path, runner):
@@ -189,39 +196,35 @@ def test_init_dialect(tmp_path, runner):
     output_file = tmp_path / "start.txt"
     custom = "Test custom instruction"
     result = runner.invoke(
-        cli, ["init", str(output_file), "-c", custom, "-d", "doconly"]
+        cli, ["init", "-o", str(output_file), "-c", custom, "-d", "doconly"]
     )  # Updated to use cli
     assert result.exit_code == 0
     assert output_file.exists()
-    content = output_file.read_text()
-    assert "Instructions for LLM:" in content  # Adjusted to check for key phrase
+    with open(output_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    assert "instructions" in data
 
 
 def test_unfold_complex_full_content(temp_project, tmp_path, runner):
     """Test unfolding complex full-content file."""
     fold_file = tmp_path / "complex_full.txt"
-    fold_file.write_text(
-        "# Instructions for LLM:\n\n"
-        "# --- File: project/main.py ---\n"
-        'print("Modified Hello")\n'
-        'print("Extra line")\n'
-        "# --- File: project/utils.py ---\n"
-        "# DELETE\n"
-        "# --- File: project/src/utils.py ---\n"
-        "def new_util():\n"
-        "    return 42\n"
-        "# --- File: project/importer.py ---\n"
-        "from project.main import *\n"
-        "print('Imported')\n"
-        "# --- File: project/docs/index.md ---\n"
-        "# DELETE\n"
-        "# --- File: project/new_file.py ---\n"
-        "print('Brand new file')\n"
-    )
+    data = {
+        "instructions": "# Instructions for LLM:\n\n",
+        "files": [
+            {"path": "project/main.py", "content": 'print("Modified Hello")\nprint("Extra line")\n'},
+            {"path": "project/utils.py", "content": "# DELETE"},
+            {"path": "project/src/utils.py", "content": "def new_util():\n    return 42\n"},
+            {"path": "project/importer.py", "content": "from project.main import *\nprint('Imported')\n"},
+            {"path": "project/docs/index.md", "content": "# DELETE"},
+            {"path": "project/new_file.py", "content": "print('Brand new file')\n"}
+        ]
+    }
+    with open(fold_file, "w", encoding="utf-8") as f:
+        json.dump(data, f)
     os.chdir(tmp_path)
     output_dir = tmp_path
     result = runner.invoke(
-        cli, ["unfold", str(fold_file), "-i", str(temp_project), "-o", str(output_dir)]
+        cli, ["unfold", "-f", str(fold_file), "-i", str(temp_project), "-o", str(output_dir)]
     )  # Updated to use cli
     assert result.exit_code == 0
     assert (
@@ -243,21 +246,22 @@ def test_unfold_complex_full_content(temp_project, tmp_path, runner):
 def test_unfold_md_commands_not_interpreted(temp_project, tmp_path, runner):
     """Test MOVE/DELETE in .md files not interpreted."""
     fold_file = tmp_path / "folded.txt"
-    fold_file.write_text(
-        "# Instructions for LLM:\n\n"
-        "# --- File: project/docs/example.md ---\n"
-        "MD:# Example\n"
-        "MD:\n"
-        "MD:Here's how to delete a file:\n"
-        "MD:# DELETE\n"
-        "# MOVE: project/main.py -> project/src/main.py\n"
-    )
+    data = {
+        "instructions": "# Instructions for LLM:\n\n",
+        "files": [
+            {"path": "project/docs/example.md", "content": "# Example\n\nHere's how to delete a file:\n# DELETE\n# MOVE: project/main.py -> project/src/main.py\n"}
+        ]
+    }
+    with open(fold_file, "w", encoding="utf-8") as f:
+        json.dump(data, f)
     os.chdir(tmp_path)
     output_dir = tmp_path
     result = runner.invoke(
-        cli, ["unfold", str(fold_file), "-i", str(temp_project), "-o", str(output_dir)]
+        cli, ["unfold", "-f", str(fold_file), "-i", str(temp_project), "-o", str(output_dir)]
     )  # Updated to use cli
     assert result.exit_code == 0
     example_content = (output_dir / "project" / "docs" / "example.md").read_text()
     assert "# Example" in example_content
+    assert "# DELETE" in example_content
     assert (output_dir / "project" / "utils.py").exists()  # Assuming it's copied
+
