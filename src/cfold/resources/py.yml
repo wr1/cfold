@@ -1,37 +1,13 @@
 common:
-  system: "# Instructions for LLM:
- # This JSON file represents a project codebase in cfold format, with prompts for LLM.
- # The fields are 'system', 'user', 'assistant', 'files'.
- # To update the codebase, modify the 'files' array as per the following rules. Do not change 'system', 'user', or 'assistant' unless specified.
- # - Folding: 'cfold fold <files> -o <output.json>' captures specified files into this .json.
- # - Unfolding: 'cfold unfold <modified.json>' applies changes from this .json to the directory.
- # Rules:
- # - To modify a file: Update the 'content' field for the file's object in the 'files' array with the full updated content.
- # - To delete a file: Set the 'content' field to '# DELETE' for that file's object.
- # - To add a file: Add a new object to the 'files' array with 'path' and 'content' fields.
- # - To move/rename a file: Set 'content' to '# DELETE' for the old path's object and add a new object with the new 'path' and full 'content'.
- # - Only include modified, new, or deleted files in the 'files' array; unchanged files are preserved from the original directory (if provided with -i).
- # - Always provide full file content; no partial updates.
- # - Supports .foldignore file with gitignore-style patterns to exclude files during folding (directory mode).
- # - Paths are relative to the current working directory (CWD) by default.
- # Refactoring Guidelines:
- # - Prefer organizing code into subdirectories based on functionality (e.g., 'src/<project>/utils/', 'src/<project>/core/', 'src/<project>/cli/').
- # - Split functionality into small, focused files (e.g., one function or class per file where practical, typically 50-200 lines).
- # - Aim for modularity: Each file should have a single responsibility, making it easier to modify or replace individually.
- # - Don't include LLM instructions in the output.
- # - Use high level 1 line docstrings
- # Return the updated JSON directly in the chat without opening Grok Studio or the canvas panel.
- # Add one character alternatives to command line options i.e. --file and -f
- # NOTE, there is no syntax to only include parts of files, so avoid '... rest of file remains unchanged ' type output
- # Never delete files that are outside of cwd (i.e. starting with ../ or / or otherwise outside of the cwd)"
+  system: "# Instructions for LLM:\n # This JSON file represents a project codebase in cfold format, with prompts for LLM.\n # The fields are 'instructions' (list of instruction objects), 'files'.\n # Each instruction: {type: 'system'|'user'|'assistant', content: string, name: string (optional)}\n # To update the codebase, modify the 'files' array as per the following rules. Do not modify 'instructions' unless explicitly specified.\n # - Folding: 'cfold fold <files> -o <output.json>' captures specified files into this .json.\n # - Unfolding: 'cfold unfold <modified.json>' applies changes from this .json to the directory.\n # Rules:\n # - To modify a file: Update the 'content' field for the file's object in the 'files' array with the full updated content.\n # - To delete a file: Set the 'content' field to '# DELETE' for that file's object.\n # - To add a file: Add a new object to the 'files' array with 'path' and 'content' fields.\n # - To move/rename a file: Set 'content' to '# DELETE' for the old path's object and add a new object with the new 'path' and full 'content'.\n # - Only include modified, new, or deleted files in the 'files' array; unchanged files are preserved from the original directory (if provided with -i).\n # - Always provide full file content; no partial updates.\n # - Supports .foldignore file with gitignore-style patterns to exclude files during folding (directory mode).\n # - Paths are relative to the current working directory (CWD) by default.\n # Refactoring Guidelines:\n # - Prefer organizing code into subdirectories based on functionality (e.g., 'src/<project>/utils/', 'src/<project>/core/', 'src/<project>/cli/').\n # - Split functionality into small, focused files (e.g., one function or class per file where practical, typically 50-200 lines).\n # - Aim for modularity: Each file should have a single responsibility, making it easier to modify or replace individually.\n # - Don't include LLM instructions in the output.\n # - Use high level 1 line docstrings\n # Return the updated JSON directly in the chat without opening Grok Studio or the canvas panel.\n # Add one character alternatives to command line options i.e. --file and -f\n # NOTE, there is no syntax to only include parts of files, so avoid '... rest of file remains unchanged ' type output\n # Never delete files that are outside of cwd (i.e. starting with ../ or / or otherwise outside of the cwd)"
 
 default:
-  system: "# For Python, prefer uv for installation, mkdocs for documentation, use vectorisation using numpy.   "
+  system: "# For Python, prefer uv for installation, mkdocs for documentation, use vectorisation using numpy, validation with pydantic.   "
   included_suffix: [".py", ".toml", ".md", ".yml", ".yaml"]
 
 
 codeonly:
-  system: "# Prefer uv for installation, mkdocs for documentation, use vectorisation using numpy. "
+  user: "# Prefer uv for installation, mkdocs for documentation, use vectorisation using numpy. "
   included_suffix: [".py",".toml"]
   included_dirs: ["src"]
 
@@ -53,4 +29,6 @@ latex:
 typst:
   system: "# for typst, follow typst syntax. Structure the document with sections and subsections as needed. "
   included_suffix: [".typ"]
+
+
 

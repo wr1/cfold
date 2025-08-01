@@ -10,7 +10,7 @@ Fold specific files or the current directory into a single JSON file.
 - `output`: Output file path (default: `"codefold.json"`).
 - `prompt_file`: Path to an optional prompt file to append (default: `None`).
 
-When `files` is `None`, the function folds all valid files in the current directory, respecting `.foldignore` patterns. Outputs JSON validated by Pydantic and visualizes file tree + instruction categories.
+When `files` is `None`, the function folds all valid files in the current directory, respecting `.foldignore` patterns. Outputs JSON validated by Pydantic and visualizes file tree + instruction list.
 
 ## `cfold.unfold(fold_file, original_dir=None, output_dir=None)`
 
@@ -28,4 +28,5 @@ Initialize a project template with LLM instructions.
 
 - `output`: Output file path (default: `"start.json"`).
 - `custom_instruction`: Custom instruction for the LLM (default: `""`).
+
 

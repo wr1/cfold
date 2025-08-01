@@ -32,3 +32,4 @@ def get_folded_tree(files, cwd):
     return main_tree  # Return the Rich Tree object
 
 
+

@@ -51,3 +51,4 @@ def test_load_foldignore(tmp_path):
     assert patterns == ["*.log", "temp/*", "secret.conf"]
 
 
+

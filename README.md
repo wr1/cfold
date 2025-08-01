@@ -45,7 +45,7 @@ cfold fold
 
 The output file can then be sent to an LLM either through the GUI or through a tool like [grk](https://github.com/wr1/grk). 
 
-After folding, a visualization of the file tree and added instructions (by category: Common System, Dialect System, User, Assistant) is printed.
+After folding, a visualization of the file tree and added instructions (by type and name) is printed.
 
 ### Unfolding a codebase
 
@@ -85,13 +85,13 @@ cfold init start.json --custom "Build a Python CLI tool." --dialect default
 
 ## Fold File Format
 
-- JSON structure with keys: `system`, `user`, `assistant`, `files`.
-- `system`: LLM system instructions (common + dialect-specific).
-- `user`: User prompt (optional, can include custom prompt).
-- `assistant`: Assistant instructions (optional).
+- JSON structure with keys: `instructions` (list of objects), `files`.
+- Each instruction object: `{type: 'system'|'user'|'assistant', content: string, name: string (optional)}`.
 - `files`: Array of objects with `path` (relative to CWD) and `content` (full file content).
 - Modify files by updating `content`.
 - Delete files with `content: "# DELETE"`.
 - Add new files by adding new objects.
 - Move/rename: Delete old and add new with updated path and content.
+
+
 

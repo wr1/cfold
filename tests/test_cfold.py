@@ -36,7 +36,7 @@ def test_fold(temp_project, tmp_path, runner):
     assert output_file.exists()
     with open(output_file, "r", encoding="utf-8") as f:
         data = json.load(f)
-    assert "system" in data
+    assert "instructions" in data
     assert len(data["files"]) == 2
     assert data["files"][0]["path"] == "project/main.py"
     assert data["files"][0]["content"] == 'print("Hello")\n'
@@ -97,9 +97,7 @@ def test_unfold_new_files(temp_project, tmp_path, runner):
     """Test unfolding creates new files."""
     fold_file = tmp_path / "folded.json"
     data = {
-        "system": "",
-        "user": "",
-        "assistant": "",
+        "instructions": [],
         "files": [
             {"path": "project/new.py", "content": "print('New file')\n"},
             {"path": "project/docs/new.md", "content": "# New Doc\n"}
@@ -127,9 +125,7 @@ def test_unfold_modify_and_delete(temp_project, tmp_path, runner):
     """Test unfolding with modifications and deletions."""
     fold_file = tmp_path / "folded.json"
     data = {
-        "system": "",
-        "user": "",
-        "assistant": "",
+        "instructions": [],
         "files": [
             {"path": "project/main.py", "content": "print('Modified')\n"},
             {"path": "project/utils.py", "content": "# DELETE\n"}
@@ -155,9 +151,7 @@ def test_unfold_relocate_and_update_references(temp_project, tmp_path, runner):
     """Test unfolding with file relocation."""
     fold_file = tmp_path / "folded.json"
     data = {
-        "system": "",
-        "user": "",
-        "assistant": "",
+        "instructions": [],
         "files": [
             {"path": "project/main.py", "content": "# DELETE"},
             {"path": "project/src/main.py", "content": 'print("Hello")\n'},
@@ -193,8 +187,8 @@ def test_init(tmp_path, runner):
     assert output_file.exists()
     with open(output_file, "r", encoding="utf-8") as f:
         data = json.load(f)
-    assert "system" in data
-    assert data["user"] == custom
+    assert "instructions" in data
+    assert any(i["type"] == "user" and i["content"] == custom for i in data["instructions"])
 
 
 def test_init_dialect(tmp_path, runner):
@@ -208,16 +202,14 @@ def test_init_dialect(tmp_path, runner):
     assert output_file.exists()
     with open(output_file, "r", encoding="utf-8") as f:
         data = json.load(f)
-    assert "system" in data
+    assert "instructions" in data
 
 
 def test_unfold_complex_full_content(temp_project, tmp_path, runner):
     """Test unfolding complex full-content file."""
     fold_file = tmp_path / "complex_full.json"
     data = {
-        "system": "",
-        "user": "",
-        "assistant": "",
+        "instructions": [],
         "files": [
             {"path": "project/main.py", "content": 'print("Modified Hello")\nprint("Extra line")\n'},
             {"path": "project/utils.py", "content": "# DELETE"},
@@ -255,9 +247,7 @@ def test_unfold_md_commands_not_interpreted(temp_project, tmp_path, runner):
     """Test MOVE/DELETE in .md files not interpreted."""
     fold_file = tmp_path / "folded.json"
     data = {
-        "system": "",
-        "user": "",
-        "assistant": "",
+        "instructions": [],
         "files": [
             {"path": "project/docs/example.md", "content": "# Example\n\nHere's how to delete a file:\n# DELETE\n# MOVE: project/main.py -> project/src/main.py\n"}
         ]
@@ -274,5 +264,7 @@ def test_unfold_md_commands_not_interpreted(temp_project, tmp_path, runner):
     assert "# Example" in example_content
     assert "# DELETE" in example_content
     assert (output_dir / "project" / "utils.py").exists()  # Assuming it's copied
+
+
 
 

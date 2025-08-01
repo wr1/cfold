@@ -70,7 +70,7 @@ options:
                         Dialect for instructions (e.g., default, codeonly, test, doconly, latex; default: default)
 ```
 
-After folding, visualizes the file tree and instruction categories (Common System, Dialect System, User, Assistant).
+After folding, visualizes the file tree and instruction list (by type and name).
 
 Example:
 
@@ -122,4 +122,7 @@ cfold unfold folded.json -i original_project -o output_dir
 - **Move/Rename**: Add `# DELETE` for old path and new object with updated path and content.
 - Paths are relative to the CWD.
 - JSON is validated using Pydantic models.
+- `instructions` is a list of objects; do not modify unless specified.
+
+
 
