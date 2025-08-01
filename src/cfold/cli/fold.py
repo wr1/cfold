@@ -27,15 +27,15 @@ def fold(files, output, prompt, dialect):
     """Fold files or directory into a single text file and visualize the structure."""
     cwd = Path.cwd()
     try:
-        instructions_list = load_instructions(dialect)
+        instructions, patterns = load_instructions(dialect)
     except ValueError:
         available = get_available_dialects()
         click.echo(f"Available dialects: {', '.join(available)}")
         raise click.ClickException("Invalid dialect specified.")
 
-    included_patterns = instructions_list[1].get("included", [])  # Adjust if needed
-    excluded_patterns = instructions_list[1].get("excluded", [])
-    included_dirs = instructions_list[1].get("included_dirs", [])
+    included_patterns = patterns.get("included", [])  # Adjust if needed
+    excluded_patterns = patterns.get("excluded", [])
+    included_dirs = patterns.get("included_dirs", [])
 
     if not files:
         directory = cwd
@@ -61,7 +61,7 @@ def fold(files, output, prompt, dialect):
         return
 
     data = Codebase(
-        instructions=instructions_list[0],
+        instructions=instructions,
         files=[
             FileEntry(
                 path=str(filepath.relative_to(cwd)),
@@ -106,3 +106,4 @@ def fold(files, output, prompt, dialect):
             label += f" ({instr.name})"
         instr_tree.add(label)
     console.print(instr_tree)
+

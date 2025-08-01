@@ -22,9 +22,9 @@ from cfold.models import Codebase, Instruction
 )
 def init(output, custom, dialect):
     """Initialize a project template with LLM instructions."""
-    instructions_list = load_instructions(dialect)
+    instructions, _ = load_instructions(dialect)
     data = Codebase(
-        instructions=instructions_list,
+        instructions=instructions,
         files=[],
     )
     if custom:
@@ -32,6 +32,7 @@ def init(output, custom, dialect):
     with open(output, "w", encoding="utf-8") as outfile:
         json.dump(data.model_dump(), outfile, indent=2)
     click.echo(f"Initialized project template in {output}")
+
 
 
 

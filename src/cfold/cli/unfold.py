@@ -6,7 +6,6 @@ import json
 import rich_click as click  # Replaced for Rich-styled help
 from rich.console import Console
 from rich.tree import Tree
-from cfold.utils.instructions import load_instructions
 from cfold.utils.foldignore import load_foldignore, should_include_file
 from cfold.models import Codebase, FileEntry  # Added for Pydantic model
 
@@ -20,7 +19,6 @@ def unfold(foldfile, original_dir, output_dir):
     console = Console()
     cwd = os.getcwd()
     output_dir = os.path.abspath(output_dir or cwd)
-    _, _ = load_instructions("default")  # Updated, ignore return values since not used
     # Note: included_patterns etc. seem unused in unfold; if needed, adjust
 
     with open(foldfile, "r", encoding="utf-8") as infile:
@@ -112,6 +110,7 @@ def unfold(foldfile, original_dir, output_dir):
             modified_node.add("[dim]" + file + "[/dim]")
     console.print(tree)
     console.print(f"[bold dim]Codebase unfolded into {output_dir}[/bold dim]")
+
 
 
 
