@@ -19,9 +19,10 @@ def unfold(foldfile, original_dir, output_dir):
     console = Console()
     cwd = os.getcwd()
     output_dir = os.path.abspath(output_dir or cwd)
-    instructions = load_instructions("default")
+    _, instructions = load_instructions("default")  # Updated, ignore common_system
     included_patterns = instructions.get("included", [])
     excluded_patterns = instructions.get("excluded", [])
+    included_dirs = instructions.get("included_dirs", [])
 
     with open(foldfile, "r", encoding="utf-8") as infile:
         data = json.load(infile)
@@ -49,6 +50,7 @@ def unfold(foldfile, original_dir, output_dir):
                     original_dir,
                     included_patterns,
                     excluded_patterns,
+                    included_dirs,
                 ):
                     relpath = os.path.relpath(
                         filepath, original_dir
@@ -110,3 +112,4 @@ def unfold(foldfile, original_dir, output_dir):
             modified_node.add("[dim]" + file + "[/dim]")
     console.print(tree)
     console.print(f"[bold dim]Codebase unfolded into {output_dir}[/bold dim]")
+

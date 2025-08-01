@@ -21,14 +21,20 @@ from cfold.utils.instructions import load_instructions
 )
 def init(output, custom, dialect):
     """Initialize a project template with LLM instructions."""
-    common = load_instructions("common")
-    instructions = load_instructions(dialect)
+    common_system, instructions = load_instructions(dialect)
     data = {
-        "instructions": common["prefix"] + "\n\n" + instructions["prefix"],
+        "system": common_system + "\n\n" + instructions.get("system", ""),
+        "user": instructions.get("user", ""),
+        "assistant": instructions.get("assistant", ""),
         "files": [],
-        "prompt": custom
     }
+    if custom:
+        if data["user"]:
+            data["user"] += "\n\n" + custom
+        else:
+            data["user"] = custom
     with open(output, "w", encoding="utf-8") as outfile:
         json.dump(data, outfile, indent=2)
     click.echo(f"Initialized project template in {output}")
+
 

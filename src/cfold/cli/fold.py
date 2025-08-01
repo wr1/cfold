@@ -24,9 +24,9 @@ from cfold.utils.treeviz import get_folded_tree
 def fold(files, output, prompt, dialect):
     """Fold files or directory into a single text file and visualize the structure."""
     cwd = Path.cwd()
-    common = load_instructions("common")
+    common_system, instructions = load_instructions(dialect)  # Updated to get common_system
     try:
-        instructions = load_instructions(dialect)
+        pass  # No need for separate common load
     except ValueError:
         available = get_available_dialects()
         click.echo(f"Available dialects: {', '.join(available)}")
@@ -34,6 +34,7 @@ def fold(files, output, prompt, dialect):
 
     included_patterns = instructions.get("included", [])
     excluded_patterns = instructions.get("excluded", [])
+    included_dirs = instructions.get("included_dirs", [])
 
     if not files:
         directory = cwd
@@ -48,6 +49,7 @@ def fold(files, output, prompt, dialect):
                     directory,
                     included_patterns,
                     excluded_patterns,
+                    included_dirs,
                 ):
                     files.append(filepath)
     else:
@@ -58,9 +60,10 @@ def fold(files, output, prompt, dialect):
         return
 
     data = {
-        "instructions": common["prefix"] + "\n\n" + instructions["prefix"],
+        "system": common_system + "\n\n" + instructions.get("system", ""),
+        "user": instructions.get("user", ""),
+        "assistant": instructions.get("assistant", ""),
         "files": [],
-        "prompt": "",
     }
 
     for filepath in files:
@@ -69,11 +72,18 @@ def fold(files, output, prompt, dialect):
             content = infile.read()
         data["files"].append({"path": str(relpath), "content": content})
 
+    prompt_content = ""
     if prompt and os.path.isfile(prompt):
         with open(prompt, "r", encoding="utf-8") as prompt_infile:
-            data["prompt"] = prompt_infile.read()
+            prompt_content = prompt_infile.read()
     elif prompt:
         click.echo(f"Warning: Prompt file '{prompt}' does not exist. Skipping.")
+
+    if prompt_content:
+        if data["user"]:
+            data["user"] += "\n\n" + prompt_content
+        else:
+            data["user"] = prompt_content
 
     try:
         with open(output, "w", encoding="utf-8") as outfile:
@@ -89,3 +99,4 @@ def fold(files, output, prompt, dialect):
     tree = get_folded_tree(files, cwd)
     if tree:
         console.print(tree)
+
