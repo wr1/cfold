@@ -29,7 +29,10 @@ def test_fold(temp_project, tmp_path, runner):
     """Test fold command creates correct output."""
     output_file = tmp_path / "folded.json"
     os.chdir(tmp_path)
-    files = [str(temp_project / "src" / "project" / "main.py"), str(temp_project / "docs" / "index.md")]
+    files = [
+        str(temp_project / "src" / "project" / "main.py"),
+        str(temp_project / "docs" / "index.md"),
+    ]
     result = runner.invoke(
         cli, ["fold", *files, "-o", str(output_file), "-d", "default"]
     )  # Updated to use cli
@@ -66,7 +69,7 @@ def test_fold_dialect_codeonly(temp_project, tmp_path, runner):
     output_file = tmp_path / "folded.json"
     os.chdir(temp_project)
     result = runner.invoke(
-        cli, ["fold", "-o", str(output_file), "-d", "codeonly"]
+        cli, ["fold", "-o", str(output_file), "-d", "py"]
     )  # Updated to use cli
     assert result.exit_code == 0
     assert output_file.exists()
@@ -83,7 +86,7 @@ def test_fold_dialect_doconly(temp_project, tmp_path, runner):
     output_file = tmp_path / "folded.json"
     os.chdir(temp_project)
     result = runner.invoke(
-        cli, ["fold", "-o", str(output_file), "-d", "doconly"]
+        cli, ["fold", "-o", str(output_file), "-d", "doc"]
     )  # Updated to use cli
     assert result.exit_code == 0
     assert output_file.exists()
@@ -101,8 +104,8 @@ def test_unfold_new_files(temp_project, tmp_path, runner):
         "instructions": [],
         "files": [
             {"path": "src/project/new.py", "content": "print('New file')\n"},
-            {"path": "docs/new.md", "content": "# New Doc\n"}
-        ]
+            {"path": "docs/new.md", "content": "# New Doc\n"},
+        ],
     }
     with open(fold_file, "w", encoding="utf-8") as f:
         json.dump(data, f)
@@ -118,9 +121,7 @@ def test_unfold_new_files(temp_project, tmp_path, runner):
         output_dir / "src" / "project" / "new.py"
     ).read_text().strip() == "print('New file')"
     assert (output_dir / "docs" / "new.md").exists()
-    assert (
-        output_dir / "docs" / "new.md"
-    ).read_text().strip() == "# New Doc"
+    assert (output_dir / "docs" / "new.md").read_text().strip() == "# New Doc"
 
 
 def test_unfold_modify_and_delete(temp_project, tmp_path, runner):
@@ -130,8 +131,8 @@ def test_unfold_modify_and_delete(temp_project, tmp_path, runner):
         "instructions": [],
         "files": [
             {"path": "src/project/main.py", "content": "print('Modified')\n"},
-            {"path": "src/project/utils.py", "content": "# DELETE"}
-        ]
+            {"path": "src/project/utils.py", "delete": True, "content": None},
+        ],
     }
     with open(fold_file, "w", encoding="utf-8") as f:
         json.dump(data, f)
@@ -156,10 +157,13 @@ def test_unfold_relocate_and_update_references(temp_project, tmp_path, runner):
     data = {
         "instructions": [],
         "files": [
-            {"path": "src/project/main.py", "content": "# DELETE"},
+            {"path": "src/project/main.py", "delete": True, "content": None},
             {"path": "src/project/core/main.py", "content": 'print("Hello")\n'},
-            {"path": "src/project/importer.py", "content": "from project.core.main import *\n"}
-        ]
+            {
+                "path": "src/project/importer.py",
+                "content": "from project.core.main import *\n",
+            },
+        ],
     }
     with open(fold_file, "w", encoding="utf-8") as f:
         json.dump(data, f)
@@ -192,7 +196,9 @@ def test_init(tmp_path, runner):
     with open(output_file, "r", encoding="utf-8") as f:
         data = json.load(f)
     assert "instructions" in data
-    assert any(i["type"] == "user" and i["content"] == custom for i in data["instructions"])
+    assert any(
+        i["type"] == "user" and i["content"] == custom for i in data["instructions"]
+    )
 
 
 def test_init_dialect(tmp_path, runner):
@@ -200,7 +206,7 @@ def test_init_dialect(tmp_path, runner):
     output_file = tmp_path / "start.json"
     custom = "Test custom instruction"
     result = runner.invoke(
-        cli, ["init", "-o", str(output_file), "-c", custom, "-d", "doconly"]
+        cli, ["init", "-o", str(output_file), "-c", custom, "-d", "doc"]
     )  # Updated to use cli
     assert result.exit_code == 0
     assert output_file.exists()
@@ -215,13 +221,22 @@ def test_unfold_complex_full_content(temp_project, tmp_path, runner):
     data = {
         "instructions": [],
         "files": [
-            {"path": "src/project/main.py", "content": 'print("Modified Hello")\nprint("Extra line")\n'},
-            {"path": "src/project/utils.py", "content": "# DELETE"},
-            {"path": "src/project/core/utils.py", "content": "def new_util():\n    return 42\n"},
-            {"path": "src/project/importer.py", "content": "from project.main import *\nprint('Imported')\n"},
-            {"path": "docs/index.md", "content": "# DELETE"},
-            {"path": "src/project/new_file.py", "content": "print('Brand new file')\n"}
-        ]
+            {
+                "path": "src/project/main.py",
+                "content": 'print("Modified Hello")\nprint("Extra line")\n',
+            },
+            {"path": "src/project/utils.py", "delete": True, "content": None},
+            {
+                "path": "src/project/core/utils.py",
+                "content": "def new_util():\n    return 42\n",
+            },
+            {
+                "path": "src/project/importer.py",
+                "content": "from project.main import *\nprint('Imported')\n",
+            },
+            {"path": "docs/index.md", "delete": True, "content": None},
+            {"path": "src/project/new_file.py", "content": "print('Brand new file')\n"},
+        ],
     }
     with open(fold_file, "w", encoding="utf-8") as f:
         json.dump(data, f)
@@ -254,8 +269,11 @@ def test_unfold_md_commands_not_interpreted(temp_project, tmp_path, runner):
     data = {
         "instructions": [],
         "files": [
-            {"path": "docs/example.md", "content": "# Example\n\nHere's how to delete a file:\n# DELETE\n# MOVE: src/project/main.py -> src/project/core/main.py\n"}
-        ]
+            {
+                "path": "docs/example.md",
+                "content": "# Example\n\nHere's how to delete a file:\n# DELETE\n# MOVE: src/project/main.py -> src/project/core/main.py\n",
+            }
+        ],
     }
     with open(fold_file, "w", encoding="utf-8") as f:
         json.dump(data, f)
@@ -269,9 +287,7 @@ def test_unfold_md_commands_not_interpreted(temp_project, tmp_path, runner):
     example_content = (output_dir / "docs" / "example.md").read_text()
     assert "# Example" in example_content
     assert "# DELETE" in example_content
-    assert (output_dir / "src" / "project" / "utils.py").exists()  # Assuming it's copied
-
-
-
-
+    assert (
+        output_dir / "src" / "project" / "utils.py"
+    ).exists()  # Assuming it's copied
 
