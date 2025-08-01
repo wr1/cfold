@@ -12,6 +12,7 @@ dependencies = [
     "rich>=13.7.1",
     "rich-click>=1.7.0",  # Added for Rich-styled Click help
     "pyperclip>=1.8.2",  # Added to handle clipboard operations
+    "pydantic>=2.0.0,<3",  # Added for data modeling
 ]
 
 [project.scripts]
@@ -36,3 +37,4 @@ include = ["src/cfold"]
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+

@@ -3,10 +3,11 @@
 import json
 import rich_click as click
 from cfold.utils.instructions import load_instructions
+from cfold.models import Codebase
 
 
 @click.command()
-@click.option("--output", "-o", default="start.txt", help="Output file")
+@click.option("--output", "-o", default="start.json", help="Output file")
 @click.option(
     "--custom",
     "-c",
@@ -22,19 +23,20 @@ from cfold.utils.instructions import load_instructions
 def init(output, custom, dialect):
     """Initialize a project template with LLM instructions."""
     common_system, instructions = load_instructions(dialect)
-    data = {
-        "system": common_system + "\n\n" + instructions.get("system", ""),
-        "user": instructions.get("user", ""),
-        "assistant": instructions.get("assistant", ""),
-        "files": [],
-    }
+    data = Codebase(
+        system=common_system + "\n\n" + instructions.get("system", ""),
+        user=instructions.get("user", ""),
+        assistant=instructions.get("assistant", ""),
+        files=[],
+    )
     if custom:
-        if data["user"]:
-            data["user"] += "\n\n" + custom
+        if data.user:
+            data.user += "\n\n" + custom
         else:
-            data["user"] = custom
+            data.user = custom
     with open(output, "w", encoding="utf-8") as outfile:
-        json.dump(data, outfile, indent=2)
+        json.dump(data.model_dump(), outfile, indent=2)
     click.echo(f"Initialized project template in {output}")
+
 
 

@@ -50,3 +50,4 @@ def test_load_foldignore(tmp_path):
     patterns = foldignore.load_foldignore(str(tmp_path))
     assert patterns == ["*.log", "temp/*", "secret.conf"]
 
+

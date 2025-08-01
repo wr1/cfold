@@ -8,6 +8,7 @@ from rich.console import Console
 from rich.tree import Tree
 from cfold.utils.instructions import load_instructions
 from cfold.utils.foldignore import load_foldignore, should_include_file
+from cfold.models import Codebase, FileEntry  # Added for Pydantic model
 
 
 @click.command()
@@ -25,9 +26,10 @@ def unfold(foldfile, original_dir, output_dir):
     included_dirs = instructions.get("included_dirs", [])
 
     with open(foldfile, "r", encoding="utf-8") as infile:
-        data = json.load(infile)
+        raw_data = json.load(infile)
+        data = Codebase.model_validate(raw_data)
 
-    modified_files = {f["path"]: f["content"] for f in data.get("files", [])}
+    modified_files = {f.path: f.content for f in data.files}
 
     if os.path.exists(output_dir) and os.listdir(output_dir):
         console.print(f"[dim]Merging into existing directory: {output_dir}[/dim]")
@@ -112,4 +114,5 @@ def unfold(foldfile, original_dir, output_dir):
             modified_node.add("[dim]" + file + "[/dim]")
     console.print(tree)
     console.print(f"[bold dim]Codebase unfolded into {output_dir}[/bold dim]")
+
 

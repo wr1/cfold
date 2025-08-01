@@ -8,7 +8,9 @@ import pyperclip  # Added for clipboard functionality
 from cfold.utils.instructions import load_instructions, get_available_dialects
 from cfold.utils.foldignore import load_foldignore, should_include_file
 from rich.console import Console
+from rich.tree import Tree
 from cfold.utils.treeviz import get_folded_tree
+from cfold.models import Codebase  # Added for Pydantic model
 
 
 @click.command()
@@ -59,18 +61,12 @@ def fold(files, output, prompt, dialect):
         click.echo("No valid files to fold.")
         return
 
-    data = {
-        "system": common_system + "\n\n" + instructions.get("system", ""),
-        "user": instructions.get("user", ""),
-        "assistant": instructions.get("assistant", ""),
-        "files": [],
-    }
-
-    for filepath in files:
-        relpath = filepath.relative_to(cwd)
-        with open(filepath, "r", encoding="utf-8") as infile:
-            content = infile.read()
-        data["files"].append({"path": str(relpath), "content": content})
+    data = Codebase(
+        system=common_system + "\n\n" + instructions.get("system", ""),
+        user=instructions.get("user", ""),
+        assistant=instructions.get("assistant", ""),
+        files=[{"path": str(filepath.relative_to(cwd)), "content": open(filepath, "r", encoding="utf-8").read()} for filepath in files]
+    )
 
     prompt_content = ""
     if prompt and os.path.isfile(prompt):
@@ -80,23 +76,36 @@ def fold(files, output, prompt, dialect):
         click.echo(f"Warning: Prompt file '{prompt}' does not exist. Skipping.")
 
     if prompt_content:
-        if data["user"]:
-            data["user"] += "\n\n" + prompt_content
+        if data.user:
+            data.user += "\n\n" + prompt_content
         else:
-            data["user"] = prompt_content
+            data.user = prompt_content
 
     try:
         with open(output, "w", encoding="utf-8") as outfile:
-            json.dump(data, outfile, indent=2)
+            json.dump(data.model_dump(), outfile, indent=2)
         # Copy content to clipboard after writing the file
-        pyperclip.copy(json.dumps(data))
+        pyperclip.copy(json.dumps(data.model_dump()))
         click.echo(f"Codebase folded into {output} and content copied to clipboard.")
     except IOError as e:
         click.echo(f"Error writing to {output}: {e}")
         raise
 
     console = Console()
-    tree = get_folded_tree(files, cwd)
-    if tree:
-        console.print(tree)
+    file_tree = get_folded_tree(files, cwd)
+    if file_tree:
+        console.print(file_tree)
+
+    # Visualize instructions by category
+    instr_tree = Tree("Instructions Added (Categories)", guide_style="dim")
+    if common_system:
+        instr_tree.add("[bold]Common System[/bold]")
+    if instructions.get("system"):
+        instr_tree.add("[bold]Dialect System[/bold]")
+    if data.user:
+        instr_tree.add("[bold]User[/bold]")
+    if data.assistant:
+        instr_tree.add("[bold]Assistant[/bold]")
+    console.print(instr_tree)
+
 

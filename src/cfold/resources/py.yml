@@ -53,3 +53,4 @@ latex:
 typst:
   system: "# for typst, follow typst syntax. Structure the document with sections and subsections as needed. "
   included_suffix: [".typ"]
+
