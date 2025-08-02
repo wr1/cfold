@@ -85,7 +85,11 @@ def fold(files, output, prompt, dialect):
 
     try:
         with open(output, "w", encoding="utf-8") as outfile:
-            json.dump(data.model_dump(), outfile, indent=2)
+            json.dump(
+                data.model_dump(exclude={"instructions": {"__all__": {"synopsis"}}}),
+                outfile,
+                indent=2,
+            )
         # Copy content to clipboard after writing the file
         pyperclip.copy(json.dumps(data.model_dump()))
         click.echo(f"Codebase folded into {output} and content copied to clipboard.")
@@ -104,6 +108,9 @@ def fold(files, output, prompt, dialect):
         label = f"[bold]{instr.type}[/bold]"
         if instr.name:
             label += f" ({instr.name})"
+        if instr.synopsis:
+            label += f" - {instr.synopsis}"
         instr_tree.add(label)
     console.print(instr_tree)
+
 

@@ -8,6 +8,7 @@ class Instruction(BaseModel):
     type: str  # 'system', 'user', or 'assistant'
     content: str
     name: Optional[str] = None
+    synopsis: Optional[str] = None
 
 
 class FileEntry(BaseModel):
@@ -32,6 +33,7 @@ class Codebase(BaseModel):
         if isinstance(v, dict):
             return [Instruction(**item) for item in v]
         return v
+
 
 
 

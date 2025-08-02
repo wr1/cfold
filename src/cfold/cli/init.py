@@ -30,8 +30,13 @@ def init(output, custom, dialect):
     if custom:
         data.instructions.append(Instruction(type="user", content=custom, name="custom"))
     with open(output, "w", encoding="utf-8") as outfile:
-        json.dump(data.model_dump(), outfile, indent=2)
+        json.dump(
+            data.model_dump(exclude={"instructions": {"__all__": {"synopsis"}}}),
+            outfile,
+            indent=2,
+        )
     click.echo(f"Initialized project template in {output}")
+
 
 
 
