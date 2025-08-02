@@ -5,7 +5,7 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-
+# sudo apt-get install xclip
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -17,6 +17,8 @@ jobs:
         python-version: '3.12'
     - name: Install uv
       run: curl -LsSf https://astral.sh/uv/install.sh | sh
+    - name: setup xclip
+      run: sudo apt-get install xclip
     - name: Create virtual environment
       run: uv venv
     - name: Activate virtual environment
