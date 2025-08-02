@@ -1,17 +1,21 @@
 """Handle folding command for cfold."""
 
 import os
+import json
 from pathlib import Path
 import rich_click as click  # Replaced for Rich-styled help
+import pyperclip  # Added for clipboard functionality
 from cfold.utils.instructions import load_instructions, get_available_dialects
 from cfold.utils.foldignore import load_foldignore, should_include_file
 from rich.console import Console
+from rich.tree import Tree
 from cfold.utils.treeviz import get_folded_tree
+from cfold.models import Codebase, FileEntry, Instruction  # Added for Pydantic model
 
 
 @click.command()
 @click.argument("files", nargs=-1)
-@click.option("--output", "-o", default="codefold.txt", help="Output file")
+@click.option("--output", "-o", default="codefold.json", help="Output file")
 @click.option("--prompt", "-p", default=None, help="Prompt file to append")
 @click.option(
     "--dialect",
@@ -22,16 +26,16 @@ from cfold.utils.treeviz import get_folded_tree
 def fold(files, output, prompt, dialect):
     """Fold files or directory into a single text file and visualize the structure."""
     cwd = Path.cwd()
-    common = load_instructions("common")
     try:
-        instructions = load_instructions(dialect)
+        instructions, patterns = load_instructions(dialect)
     except ValueError:
         available = get_available_dialects()
         click.echo(f"Available dialects: {', '.join(available)}")
         raise click.ClickException("Invalid dialect specified.")
 
-    included_patterns = instructions.get("included", [])
-    excluded_patterns = instructions.get("excluded", [])
+    included_patterns = patterns.get("included", [])  # Adjust if needed
+    excluded_patterns = patterns.get("excluded", [])
+    included_dirs = patterns.get("included_dirs", [])
 
     if not files:
         directory = cwd
@@ -46,6 +50,7 @@ def fold(files, output, prompt, dialect):
                     directory,
                     included_patterns,
                     excluded_patterns,
+                    included_dirs,
                 ):
                     files.append(filepath)
     else:
@@ -55,30 +60,57 @@ def fold(files, output, prompt, dialect):
         click.echo("No valid files to fold.")
         return
 
+    data = Codebase(
+        instructions=instructions,
+        files=[
+            FileEntry(
+                path=str(filepath.relative_to(cwd)),
+                content=open(filepath, "r", encoding="utf-8").read(),
+            )
+            for filepath in files
+        ],
+    )
+
+    prompt_content = ""
+    if prompt and os.path.isfile(prompt):
+        with open(prompt, "r", encoding="utf-8") as prompt_infile:
+            prompt_content = prompt_infile.read()
+    elif prompt:
+        click.echo(f"Warning: Prompt file '{prompt}' does not exist. Skipping.")
+
+    if prompt_content:
+        data.instructions.append(
+            Instruction(type="user", content=prompt_content, name="prompt")
+        )
+
     try:
         with open(output, "w", encoding="utf-8") as outfile:
-            outfile.write(common["prefix"] + "\n\n")
-            outfile.write(instructions["prefix"] + "\n\n")
-            for filepath in files:
-                relpath = filepath.relative_to(cwd)
-                outfile.write(f"# --- File: {relpath} ---\n")
-                with open(filepath, "r", encoding="utf-8") as infile:
-                    content = infile.read()
-                    if filepath.suffix == ".md":
-                        content = "\n".join(f"MD:{line}" for line in content.splitlines())
-                    outfile.write(content + "\n\n")
-            if prompt and os.path.isfile(prompt):
-                with open(prompt, "r", encoding="utf-8") as prompt_infile:
-                    outfile.write("\n# Prompt:\n")
-                    outfile.write(prompt_infile.read() + "\n")
-            elif prompt:
-                click.echo(f"Warning: Prompt file '{prompt}' does not exist. Skipping.")
+            json.dump(
+                data.model_dump(exclude={"instructions": {"__all__": {"synopsis"}}}),
+                outfile,
+                indent=2,
+            )
+        # Copy content to clipboard after writing the file
+        pyperclip.copy(json.dumps(data.model_dump()))
+        click.echo(f"Codebase folded into {output} and content copied to clipboard.")
     except IOError as e:
         click.echo(f"Error writing to {output}: {e}")
         raise
 
     console = Console()
-    tree = get_folded_tree(files, cwd)
-    if tree:
-        console.print(tree)
-    click.echo(f"Codebase folded into {output}")
+    file_tree = get_folded_tree(files, cwd)
+    if file_tree:
+        console.print(file_tree)
+
+    # Visualize instructions by type and name
+    instr_tree = Tree("Instructions Added", guide_style="dim")
+    for instr in data.instructions:
+        label = f"[bold]{instr.type}[/bold]"
+        if instr.name:
+            label += f" ({instr.name})"
+        if instr.synopsis:
+            label += f" - {instr.synopsis}"
+        instr_tree.add(label)
+    console.print(instr_tree)
+
+

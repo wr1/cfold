@@ -17,11 +17,17 @@ jobs:
         python-version: '3.12'
     - name: Install uv
       run: curl -LsSf https://astral.sh/uv/install.sh | sh
+    - name: Install clipboard dependencies
+      run: sudo apt-get update && sudo apt-get install -y xclip xsel
+    - name: Set up Xvfb
+      run: |
+        sudo apt-get install -y xvfb
+        /usr/bin/Xvfb :99 -ac -screen 0 1024x768x8 &
+        echo "DISPLAY=:99" >> $GITHUB_ENV
     - name: Create virtual environment
-      run: uv venv
-    - name: Activate virtual environment
-      run: source .venv/bin/activate
+      run: uv venv .venv
     - name: Install dependencies
-      run: uv pip install -e ".[dev]"
+      run: uv pip install --python .venv -e ".[dev]"
     - name: Run tests
-      run: uv run pytest . 
+      run: uv run --python .venv pytest .
+

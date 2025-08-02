@@ -22,6 +22,7 @@ def should_include_file(
     root_dir=None,
     included_patterns=None,
     excluded_patterns=None,
+    included_dirs=None,
 ):
     """Check if a file should be included based on patterns."""
     EXCLUDED_DIRS = {
@@ -43,6 +44,10 @@ def should_include_file(
         relpath = os.path.relpath(filepath, root_dir)
     else:
         relpath = str(path)
+
+    relpath_norm = relpath.replace(os.sep, '/')
+    if included_dirs and not any(relpath_norm.startswith(d.replace(os.sep, '/') + '/') for d in included_dirs):
+        return False
 
     EXCLUDED_PATTERNS = [
         "*.egg-info/*",
@@ -87,3 +92,7 @@ def should_include_file(
     ):
         return False
     return True
+
+
+
+

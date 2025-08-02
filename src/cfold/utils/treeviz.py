@@ -30,3 +30,6 @@ def get_folded_tree(files, cwd):
         else:
             current_node.add(f"{parts[-1]}")  # Add the file node with dim
     return main_tree  # Return the Rich Tree object
+
+
+

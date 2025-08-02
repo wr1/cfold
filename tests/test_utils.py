@@ -49,3 +49,6 @@ def test_load_foldignore(tmp_path):
     ignore_file.write_text("*.log\ntemp/*\n# comment\nsecret.conf\n")
     patterns = foldignore.load_foldignore(str(tmp_path))
     assert patterns == ["*.log", "temp/*", "secret.conf"]
+
+
+

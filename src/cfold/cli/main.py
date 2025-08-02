@@ -1,4 +1,4 @@
-"""Main CLI group for cfold. Available dialects: default, codeonly, test, doconly, latex."""
+"""Main CLI group for cfold. Available dialects: default, codeonly, test, doconly, latex, typst."""
 
 import rich_click as click  # Replaced for Rich-styled help
 from .fold import fold as fold_command
@@ -21,3 +21,7 @@ cli.add_command(init_command, name="init")
 
 if __name__ == "__main__":
    cli()
+
+
+
+

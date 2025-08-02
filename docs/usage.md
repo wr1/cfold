@@ -34,19 +34,19 @@ Initialize a project template with LLM instructions:
 cfold init [<output_file>] [--custom <instruction>] [--dialect <dialect>]
 ```
 
-- `<output_file>`: Output file (default: `start.txt`).
+- `<output_file>`: Output file (default: `start.json`).
 - `--custom <instruction>`: Custom instruction for the LLM (e.g., project purpose).
-- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `codeonly`, `test`, `doconly`, `latex`; default: `default`).
+- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `codeonly`, `test`, `doconly`, `latex`, `typst`; default: `default`).
 
 Example:
 
 ```bash
-cfold init start.txt --custom "Build a tool for code folding."
+cfold init start.json --custom "Build a tool for code folding."
 ```
 
 ### `cfold fold`
 
-Fold specific files or the current directory into a single text file:
+Fold specific files or the current directory into a single JSON file:
 
 ```bash
 cfold fold [files...] [--output <output_file>] [--prompt <prompt_file>] [--dialect <dialect>]
@@ -63,23 +63,25 @@ positional arguments:
 options:
   -h, --help            show this help message and exit
   --output OUTPUT, -o OUTPUT
-                        Output file (e.g., folded.txt; default: codefold.txt)
+                        Output file (e.g., folded.json; default: codefold.json)
   --prompt PROMPT, -p PROMPT
                         Optional file containing a prompt to append to the output
   --dialect DIALECT, -d DIALECT
-                        Dialect for instructions (e.g., default, codeonly, test, doconly, latex; default: default)
+                        Dialect for instructions (e.g., default, codeonly, test, doconly, latex, typst; default: default)
 ```
+
+After folding, copies content to clipboard, visualizes the file tree and instruction list (by type and name).
 
 Example:
 
 ```bash
-cfold fold src/main.py -o folded.txt --prompt prompt.txt
+cfold fold src/main.py -o folded.json --prompt prompt.txt
 ```
 
 Example (fold only code files):
 
 ```bash
-cfold fold -o folded.txt --dialect codeonly
+cfold fold -o folded.json --dialect codeonly
 ```
 
 ### `cfold unfold`
@@ -96,7 +98,7 @@ Options:
 usage: cfold unfold [-h] [--original-dir ORIGINAL_DIR] [--output-dir OUTPUT_DIR] foldfile
 
 positional arguments:
-  foldfile              File to unfold (e.g., folded.txt)
+  foldfile              File to unfold (e.g., folded.json)
 
 options:
   -h, --help            show this help message and exit
@@ -109,13 +111,19 @@ options:
 Example:
 
 ```bash
-cfold unfold folded.txt -i original_project -o output_dir
+cfold unfold folded.json -i original_project -o output_dir
 ```
 
 ## Refactoring
 
-- **Modify**: Provide the full content under `# --- File: <path> ---`.
-- **Delete**: Use `# DELETE` under the file's header.
-- **Add**: Create a new `# --- File: <path> ---` section with full content.
-- **Move/Rename**: Delete the old file with `# DELETE` and add a new file section with the updated path and content.
+- **Modify**: Update the `content` field in the `files` array with full content (set `delete: false` or omit).
+- **Delete**: Add an object to `files` with `path` and set `delete: true` (content optional).
+- **Add**: Add a new object to `files` with `path`, `content`, and `delete: false` (optional).
+- **Move/Rename**: Add a delete object for the old path (`delete: true`) and a new object with the new `path`, full `content`, and `delete: false`.
 - Paths are relative to the CWD.
+- JSON is validated using Pydantic models.
+- `instructions` is a list of objects; do not modify unless specified.
+
+
+
+

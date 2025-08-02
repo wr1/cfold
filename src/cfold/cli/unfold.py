@@ -2,12 +2,12 @@
 
 import os
 import shutil
-import re
+import json
 import rich_click as click  # Replaced for Rich-styled help
 from rich.console import Console
 from rich.tree import Tree
-from cfold.utils.instructions import load_instructions
 from cfold.utils.foldignore import load_foldignore, should_include_file
+from cfold.models import Codebase  # Added for Pydantic model
 
 
 @click.command()
@@ -19,33 +19,13 @@ def unfold(foldfile, original_dir, output_dir):
     console = Console()
     cwd = os.getcwd()
     output_dir = os.path.abspath(output_dir or cwd)
-    instructions = load_instructions("default")
-    included_patterns = instructions.get("included", [])
-    excluded_patterns = instructions.get("excluded", [])
+    # Note: included_patterns etc. seem unused in unfold; if needed, adjust
 
     with open(foldfile, "r", encoding="utf-8") as infile:
-        content = (
-            infile.read().replace("CF" + "OLD: ", "").replace("CF" + "OLD:", "")
-        ).strip()  # KEEP LINE INTACT, INCLUDING COMMENT
-        content = content.strip("```")
-        sections = re.split(r"(# --- File: .+? ---)\n", content)[1:]
-        if len(sections) % 2 != 0:
-            console.print(
-                "[yellow]Warning: Malformed fold file - odd number of sections[/yellow]"
-            )
-            return
+        raw_data = json.load(infile)
+        data = Codebase.model_validate(raw_data)
 
-        modified_files = {}
-        for i in range(0, len(sections), 2):
-            header = sections[i].strip()
-            file_content = sections[i + 1].rstrip()
-            filepath = header.replace("# --- File: ", "").replace(" ---", "").strip()
-            if filepath.endswith(".md"):
-                file_content = "\n".join(
-                    line[3:].lstrip() if line.startswith("MD:") else line
-                    for line in file_content.splitlines()
-                )
-            modified_files[filepath] = file_content
+    modified_files = {f.path: f for f in data.files}
 
     if os.path.exists(output_dir) and os.listdir(output_dir):
         console.print(f"[dim]Merging into existing directory: {output_dir}[/dim]")
@@ -66,47 +46,54 @@ def unfold(foldfile, original_dir, output_dir):
                     filepath,
                     ignore_patterns,
                     original_dir,
-                    included_patterns,
-                    excluded_patterns,
+                    [],  # included_patterns empty or adjust
+                    [],  # excluded_patterns
+                    [],  # included_dirs
                 ):
-                    relpath = os.path.relpath(filepath, cwd)
+                    relpath = os.path.relpath(
+                        filepath, original_dir
+                    )  # Changed to relpath from original_dir
                     dst = os.path.join(output_dir, relpath)
-                    if relpath not in modified_files:
+                    if relpath in modified_files:
+                        entry = modified_files[relpath]
+                        if entry.delete:
+                            if os.path.exists(dst):
+                                os.remove(dst)
+                            deleted_files.append(relpath)
+                        else:
+                            os.makedirs(os.path.dirname(dst), exist_ok=True)
+                            with open(dst, "w", encoding="utf-8") as outfile:
+                                outfile.write(entry.content + "\n")
+                            modified_files_list.append(relpath)
+                    else:
                         os.makedirs(os.path.dirname(dst), exist_ok=True)
                         if os.path.abspath(filepath) != os.path.abspath(dst):
                             shutil.copy2(filepath, dst)
                             added_files.append(relpath)
-                    elif modified_files[relpath] == "# DELETE":
-                        if os.path.exists(dst):
-                            os.remove(dst)
-                            deleted_files.append(relpath)
-                    else:
-                        os.makedirs(os.path.dirname(dst), exist_ok=True)
-                        with open(dst, "w", encoding="utf-8") as outfile:
-                            outfile.write(modified_files[relpath] + "\n")
-                        modified_files_list.append(relpath)
 
-        for filepath, file_content in modified_files.items():
-            if file_content == "# DELETE":
+        for path, entry in modified_files.items():
+            original_path = os.path.join(original_dir, path)
+            if os.path.exists(original_path):
                 continue  # Already handled
-            full_path = os.path.join(output_dir, filepath)
-            if not os.path.exists(os.path.join(original_dir, filepath)):
-                os.makedirs(os.path.dirname(full_path), exist_ok=True)
-                with open(full_path, "w", encoding="utf-8") as outfile:
-                    outfile.write(file_content + "\n")
-                added_files.append(filepath)
+            if entry.delete:
+                continue  # Skip deleting non-existing
+            full_path = os.path.join(output_dir, path)
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+            with open(full_path, "w", encoding="utf-8") as outfile:
+                outfile.write(entry.content + "\n")
+            added_files.append(path)
     else:
-        for filepath, file_content in modified_files.items():
-            full_path = os.path.join(output_dir, filepath)
-            if file_content == "# DELETE":
+        for path, entry in modified_files.items():
+            full_path = os.path.join(output_dir, path)
+            if entry.delete:
                 if os.path.exists(full_path):
                     os.remove(full_path)
-                    deleted_files.append(filepath)
+                    deleted_files.append(path)
                 continue
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
             with open(full_path, "w", encoding="utf-8") as outfile:
-                outfile.write(file_content + "\n")
-            added_files.append(filepath)
+                outfile.write(entry.content + "\n")
+            added_files.append(path)
 
     # Output summary tree
     tree = Tree(
@@ -127,3 +114,8 @@ def unfold(foldfile, original_dir, output_dir):
             modified_node.add("[dim]" + file + "[/dim]")
     console.print(tree)
     console.print(f"[bold dim]Codebase unfolded into {output_dir}[/bold dim]")
+
+
+
+
+
