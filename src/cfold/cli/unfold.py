@@ -7,7 +7,7 @@ import rich_click as click  # Replaced for Rich-styled help
 from rich.console import Console
 from rich.tree import Tree
 from cfold.utils.foldignore import load_foldignore, should_include_file
-from cfold.models import Codebase, FileEntry  # Added for Pydantic model
+from cfold.models import Codebase  # Added for Pydantic model
 
 
 @click.command()
