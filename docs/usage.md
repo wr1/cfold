@@ -36,7 +36,7 @@ cfold init [<output_file>] [--custom <instruction>] [--dialect <dialect>]
 
 - `<output_file>`: Output file (default: `start.json`).
 - `--custom <instruction>`: Custom instruction for the LLM (e.g., project purpose).
-- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `codeonly`, `test`, `doconly`, `latex`; default: `default`).
+- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `codeonly`, `test`, `doconly`, `latex`, `typst`; default: `default`).
 
 Example:
 
@@ -67,10 +67,10 @@ options:
   --prompt PROMPT, -p PROMPT
                         Optional file containing a prompt to append to the output
   --dialect DIALECT, -d DIALECT
-                        Dialect for instructions (e.g., default, codeonly, test, doconly, latex; default: default)
+                        Dialect for instructions (e.g., default, codeonly, test, doconly, latex, typst; default: default)
 ```
 
-After folding, visualizes the file tree and instruction list (by type and name).
+After folding, copies content to clipboard, visualizes the file tree and instruction list (by type and name).
 
 Example:
 
@@ -116,13 +116,14 @@ cfold unfold folded.json -i original_project -o output_dir
 
 ## Refactoring
 
-- **Modify**: Update the `content` field in the `files` array with full content.
-- **Delete**: Set `content: "# DELETE"` in the file object.
-- **Add**: Add a new object to `files` with `path` and `content`.
-- **Move/Rename**: Add `# DELETE` for old path and new object with updated path and content.
+- **Modify**: Update the `content` field in the `files` array with full content (set `delete: false` or omit).
+- **Delete**: Add an object to `files` with `path` and set `delete: true` (content optional).
+- **Add**: Add a new object to `files` with `path`, `content`, and `delete: false` (optional).
+- **Move/Rename**: Add a delete object for the old path (`delete: true`) and a new object with the new `path`, full `content`, and `delete: false`.
 - Paths are relative to the CWD.
 - JSON is validated using Pydantic models.
 - `instructions` is a list of objects; do not modify unless specified.
+
 
 
 

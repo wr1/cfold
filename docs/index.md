@@ -4,7 +4,7 @@
 
 ## Features
 
-- **Fold**: Combine specific files or the current directory into a `.json` file, with optional prompt inclusion. Visualizes file tree and instruction list (by type and name).
+- **Fold**: Combine specific files or the current directory into a `.json` file, with optional prompt inclusion. Copies output to clipboard, visualizes file tree and instruction list (by type and name).
 - **Unfold**: Apply changes (modifications, deletions, or new files) back to a directory.
 - **Init**: Generate a project template with custom instructions.
 - Supports UV, GitHub CI, MkDocs, and `.foldignore` for file exclusions.
@@ -36,6 +36,7 @@ Initialize a project:
 ```bash
 cfold init start.json --custom "Build a Python CLI tool."
 ```
+
 
 
 

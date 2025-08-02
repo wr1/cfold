@@ -45,7 +45,7 @@ cfold fold
 
 The output file can then be sent to an LLM either through the GUI or through a tool like [grk](https://github.com/wr1/grk). 
 
-After folding, a visualization of the file tree and added instructions (by type and name) is printed.
+After folding, copies content to clipboard, visualizes the file tree and added instructions (by type and name).
 
 ### Unfolding a codebase
 
@@ -75,7 +75,7 @@ cfold init [<output_file>] [--custom <instruction>] [--dialect <dialect>]
 
 - `<output_file>`: Output file (default: `start.json`).
 - `--custom <instruction>`: Custom instruction for the LLM.
-- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `codeonly`, `doconly`; default: `default`).
+- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `codeonly`, `doconly`, `latex`, `typst`; default: `default`).
 
 Example:
 
@@ -87,11 +87,12 @@ cfold init start.json --custom "Build a Python CLI tool." --dialect default
 
 - JSON structure with keys: `instructions` (list of objects), `files`.
 - Each instruction object: `{type: 'system'|'user'|'assistant', content: string, name: string (optional)}`.
-- `files`: Array of objects with `path` (relative to CWD) and `content` (full file content).
-- Modify files by updating `content`.
-- Delete files with `content: "# DELETE"`.
-- Add new files by adding new objects.
-- Move/rename: Delete old and add new with updated path and content.
+- `files`: Array of objects with `path` (relative to CWD), `content` (full file content, optional if deleting), and `delete` (bool, default false).
+- Modify files by updating `content` (with `delete: false`).
+- Delete files with `delete: true` (content optional).
+- Add new files by adding new objects with `path` and `content`.
+- Move/rename: Delete old (`delete: true`) and add new with updated path and content.
+
 
 
 
