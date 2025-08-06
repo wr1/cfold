@@ -46,22 +46,22 @@ def load_instructions(dialect: str = "default") -> tuple[List[Instruction], Dict
             "r", encoding="utf-8"
         ) as f:
             config = yaml.safe_load(f)  # Use safe_load for security
-        if dialect not in config:
-            raise ValueError(f"Dialect '{dialect}' not found in prompts.yaml")
-        instructions_list = collect_instructions(config, dialect)
-        instr = config[dialect]
-        patterns = {
-            "included": [
-                f"*{pat}" for pat in instr.get("included_suffix", [])
-            ],  # Convert suffixes to fnmatch patterns
-            "excluded": instr.get("excluded", []),
-            "included_dirs": instr.get("included_dirs", []),
-        }
-        return instructions_list, patterns
     except Exception as e:
         raise RuntimeError(
             f"Failed to load instructions for dialect '{dialect}' from prompts.yaml: {e}"
         )
+    if dialect not in config:
+        raise ValueError(f"Dialect '{dialect}' not found in prompts.yaml")
+    instructions_list = collect_instructions(config, dialect)
+    instr = config[dialect]
+    patterns = {
+        "included": [
+            f"*{pat}" for pat in instr.get("included_suffix", [])
+        ],  # Convert suffixes to fnmatch patterns
+        "excluded": instr.get("excluded", []),
+        "included_dirs": instr.get("included_dirs", []),
+    }
+    return instructions_list, patterns
 
 
 def get_available_dialects() -> List[str]:
@@ -74,5 +74,7 @@ def get_available_dialects() -> List[str]:
         return [k for k in config.keys() if k != "common"]
     except Exception as e:
         raise RuntimeError(f"Failed to load dialects: {e}")
+
+
 
 

@@ -38,6 +38,16 @@ default:
         - Use high level 1 line docstrings
         - Add one character alternatives to command line options i.e. --file and -f
         - Never delete files that are outside of cwd (i.e. starting with ../ or / or otherwise outside of the cwd)
+        - Make the CLI callable in pyproject.toml 
+    - type: user
+      synopsis: "instructions for authoring admin.sh"
+      content: |-
+        add an admin.sh file in the root dir, where each file has a separate line for each file added
+        cfold unfold __temp.json
+        git commit <filename> -m 'summary of edits for <filename>'
+        git commit <filename2> -m 'summary of edits for <filename2>'
+        ... for all files (but not the admin.sh file itself), if the files are new, add git add <filename> before git commit
+        uv run pytest -v > err.txt 
 
   included_suffix:
     - ".py"
@@ -86,9 +96,11 @@ doc:
 
 
 typst:
+  pre: [common]
   instructions:
     - type: system
       content: "# for typst, follow typst syntax. Structure the document with sections and subsections as needed. "
   included_suffix:
     - ".typ"
+
 
