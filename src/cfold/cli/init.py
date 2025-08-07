@@ -12,7 +12,7 @@ from cfold.models import Codebase, Instruction
 @click.option(
     "--custom",
     "-c",
-    default="Describe the purpose of your project here.",
+    default=None,
     help="Custom instruction",
 )
 @click.option(
@@ -44,6 +44,7 @@ def init(ctx, output, custom, dialect):
             indent=2,
         )
     click.echo(f"Initialized project template in {output}")
+
 
 
 
