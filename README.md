@@ -6,10 +6,10 @@
 ## Installation
 
 ```bash
-pip install .
+pip install cfold
 ```
 
-Or install locally with UV:
+Or install from source with UV:
 
 ```bash
 uv pip install .
@@ -28,13 +28,13 @@ cfold fold [files...] -o <output_file> [--prompt <prompt_file>] [--dialect <dial
 - `[files...]`: Specific files to fold (optional; if omitted, folds the entire current directory).
 - `-o <output_file>`: Output file (default: `codefold.json`).
 - `--prompt <prompt_file>`: Optional file to append as a prompt in the output.
-- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `codeonly`, `doconly`, `latex`, `typst`; default: `default`).
+- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `py`, `pytest`, `doc`, `typst`; default: `default`).
 - Supports `.foldignore` for excluding files when folding a directory.
 
 Example (fold only code files):
 
 ```bash
-cfold fold -o folded.json --dialect codeonly
+cfold fold -o folded.json --dialect py
 ```
 
 Or simply
@@ -75,7 +75,7 @@ cfold init [<output_file>] [--custom <instruction>] [--dialect <dialect>]
 
 - `<output_file>`: Output file (default: `start.json`).
 - `--custom <instruction>`: Custom instruction for the LLM.
-- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `codeonly`, `doconly`, `latex`, `typst`; default: `default`).
+- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `py`, `pytest`, `doc`, `typst`; default: `default`).
 
 Example:
 
@@ -92,6 +92,7 @@ cfold init start.json --custom "Build a Python CLI tool." --dialect default
 - Delete files with `delete: true` (content optional).
 - Add new files by adding new objects with `path` and `content`.
 - Move/rename: Delete old (`delete: true`) and add new with updated path and content.
+
 
 
 

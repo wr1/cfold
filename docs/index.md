@@ -10,6 +10,7 @@
 - Supports UV, GitHub CI, MkDocs, and `.foldignore` for file exclusions.
 - Uses Pydantic for data validation of input/output JSON.
 - `instructions` is a list of objects with `type`, `content`, and optional `name`.
+- Dialects: `default`, `py`, `pytest`, `doc`, `typst`.
 
 ## Quick Start
 
@@ -36,6 +37,7 @@ Initialize a project:
 ```bash
 cfold init start.json --custom "Build a Python CLI tool."
 ```
+
 
 
 

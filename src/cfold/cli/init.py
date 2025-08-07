@@ -2,27 +2,35 @@
 
 import json
 import rich_click as click
-from cfold.utils.instructions import load_instructions
+from cfold.utils.instructions import load_instructions, get_available_dialects
 from cfold.models import Codebase, Instruction
 
 
 @click.command()
+@click.pass_context
 @click.option("--output", "-o", default="start.json", help="Output file")
 @click.option(
     "--custom",
     "-c",
-    default="Describe the purpose of your project here.",
+    default=None,
     help="Custom instruction",
 )
 @click.option(
     "--dialect",
     "-d",
     default="default",
-    help="Instruction dialect (available: default, codeonly, test, doconly, latex, typst)",
+    help="Instruction dialect (available: default, py, pytest, doc, typst)",
 )
-def init(output, custom, dialect):
+def init(ctx, output, custom, dialect):
     """Initialize a project template with LLM instructions."""
-    instructions, _ = load_instructions(dialect)
+    try:
+        instructions, _ = load_instructions(dialect)
+    except ValueError:
+        available = get_available_dialects()
+        click.echo(f"Invalid dialect specified. Available dialects: {', '.join(available)}")
+        ctx.exit(1)
+    except Exception as e:
+        raise click.ClickException(f"Error loading instructions: {str(e)}")
     data = Codebase(
         instructions=instructions,
         files=[],
@@ -36,6 +44,10 @@ def init(output, custom, dialect):
             indent=2,
         )
     click.echo(f"Initialized project template in {output}")
+
+
+
+
 
 
 

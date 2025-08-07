@@ -1,9 +1,15 @@
-site_name: cfold Documentation
+site_name: cfold docs
 theme:
   name: material
+  palette:
+    scheme: slate
+  fonts:
+    text: "Ubuntu"
+    code: "Ubuntu Mono"
 nav:
   - Home: index.md
   - Usage: usage.md
   - API Reference: api.md
+
 
 

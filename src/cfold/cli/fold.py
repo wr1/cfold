@@ -14,6 +14,7 @@ from cfold.models import Codebase, FileEntry, Instruction  # Added for Pydantic 
 
 
 @click.command()
+@click.pass_context
 @click.argument("files", nargs=-1)
 @click.option("--output", "-o", default="codefold.json", help="Output file")
 @click.option("--prompt", "-p", default=None, help="Prompt file to append")
@@ -21,17 +22,19 @@ from cfold.models import Codebase, FileEntry, Instruction  # Added for Pydantic 
     "--dialect",
     "-d",
     default="default",
-    help="Instruction dialect (available: default, codeonly, test, doconly, latex)",
+    help="Instruction dialect (available: default, py, pytest, doc, typst)",
 )
-def fold(files, output, prompt, dialect):
+def fold(ctx, files, output, prompt, dialect):
     """Fold files or directory into a single text file and visualize the structure."""
     cwd = Path.cwd()
     try:
         instructions, patterns = load_instructions(dialect)
     except ValueError:
         available = get_available_dialects()
-        click.echo(f"Available dialects: {', '.join(available)}")
-        raise click.ClickException("Invalid dialect specified.")
+        click.echo(f"Invalid dialect specified. Available dialects: {', '.join(available)}")
+        ctx.exit(1)
+    except Exception as e:
+        raise click.ClickException(f"Error loading instructions: {str(e)}")
 
     included_patterns = patterns.get("included", [])  # Adjust if needed
     excluded_patterns = patterns.get("excluded", [])
@@ -112,5 +115,7 @@ def fold(files, output, prompt, dialect):
             label += f" - {instr.synopsis}"
         instr_tree.add(label)
     console.print(instr_tree)
+
+
 
 

@@ -6,6 +6,7 @@ import json
 import rich_click as click  # Replaced for Rich-styled help
 from rich.console import Console
 from rich.tree import Tree
+from pathlib import Path
 from cfold.utils.foldignore import load_foldignore, should_include_file
 from cfold.models import Codebase  # Added for Pydantic model
 
@@ -19,6 +20,7 @@ def unfold(foldfile, original_dir, output_dir):
     console = Console()
     cwd = os.getcwd()
     output_dir = os.path.abspath(output_dir or cwd)
+    output_path = Path(output_dir).resolve()
     # Note: included_patterns etc. seem unused in unfold; if needed, adjust
 
     with open(foldfile, "r", encoding="utf-8") as infile:
@@ -78,6 +80,10 @@ def unfold(foldfile, original_dir, output_dir):
             if entry.delete:
                 continue  # Skip deleting non-existing
             full_path = os.path.join(output_dir, path)
+            resolved_path = Path(full_path).resolve()
+            if not resolved_path.is_relative_to(output_path):
+                console.print(f"[yellow]Skipping addition outside output dir: {path}[/yellow]")
+                continue
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
             with open(full_path, "w", encoding="utf-8") as outfile:
                 outfile.write(entry.content + "\n")
@@ -85,6 +91,10 @@ def unfold(foldfile, original_dir, output_dir):
     else:
         for path, entry in modified_files.items():
             full_path = os.path.join(output_dir, path)
+            resolved_path = Path(full_path).resolve()
+            if not resolved_path.is_relative_to(output_path):
+                console.print(f"[yellow]Skipping operation outside output dir: {path}[/yellow]")
+                continue
             if entry.delete:
                 if os.path.exists(full_path):
                     os.remove(full_path)
@@ -114,6 +124,8 @@ def unfold(foldfile, original_dir, output_dir):
             modified_node.add("[dim]" + file + "[/dim]")
     console.print(tree)
     console.print(f"[bold dim]Codebase unfolded into {output_dir}[/bold dim]")
+
+
 
 
 

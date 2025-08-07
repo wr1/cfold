@@ -1,33 +1,43 @@
 # API Reference
 
-This page documents the Python API for the `cfold` module. All file paths are relative to the current working directory (CWD).
+This page documents the core models and utilities in the `cfold` module. Note: `cfold` is primarily a CLI tool; for CLI usage, see [Usage](/usage). The Python API focuses on data models for advanced usage.
 
-## `cfold.fold(files=None, output="codefold.json", prompt_file=None)`
+## Models (`cfold.models`)
 
-Fold specific files or the current directory into a single JSON file.
+### `Instruction`
 
-- `files`: List of file paths to fold (default: `None`, folds the current directory).
-- `output`: Output file path (default: `"codefold.json"`).
-- `prompt_file`: Path to an optional prompt file to append (default: `None`).
+Represents an instruction for the LLM.
 
-When `files` is `None`, the function folds all valid files in the current directory, respecting `.foldignore` patterns. Outputs JSON validated by Pydantic, copies content to clipboard, and visualizes file tree + instruction list.
+- `type`: str (e.g., `'system'`, `'user'`, `'assistant'`)
+- `content`: str (the instruction text)
+- `name`: Optional[str] (optional name for the instruction)
+- `synopsis`: Optional[str] (internal synopsis, not serialized)
 
-## `cfold.unfold(fold_file, original_dir=None, output_dir=None)`
+### `FileEntry`
 
-Unfold a modified fold file into a directory structure.
+Represents a file in the codebase.
 
-- `fold_file`: Path to the fold file to unfold.
-- `original_dir`: Path to the original directory to merge with (default: `None`).
-- `output_dir`: Output directory path (default: CWD).
+- `path`: str (relative path to the file)
+- `content`: Optional[str] (full file content; required unless deleting)
+- `delete`: bool (set to `true` to delete the file; default: `false`)
 
-Supports full content rewrites, deletions (`delete: true`), and new file creation. Validates input JSON with Pydantic.
+Validation: If `delete` is `false`, `content` must be provided.
 
-## `cfold.init(output="start.json", custom_instruction="")`
+### `Codebase`
 
-Initialize a project template with LLM instructions.
+Represents the full codebase structure.
 
-- `output`: Output file path (default: `"start.json"`).
-- `custom_instruction`: Custom instruction for the LLM (default: `""`).
+- `instructions`: List[Instruction] (list of instructions)
+- `files`: List[FileEntry] (list of file entries)
+
+Serialization: Use `model_dump()` to get a dict, excluding internal fields like `synopsis`.
+
+## Utilities
+
+- `cfold.utils.instructions.load_instructions(dialect: str)`: Load instructions and patterns for a dialect.
+- `cfold.utils.foldignore.should_include_file(...)`: Check if a file should be included based on patterns.
+
+For CLI commands, refer to the [Usage](/usage) page.
 
 
 

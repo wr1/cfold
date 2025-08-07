@@ -18,7 +18,7 @@ python -m pip install --force-reinstall pip
 pip install cfold
 ```
 
-Or install locally with UV:
+Or install from source with UV:
 
 ```bash
 uv pip install .
@@ -36,7 +36,7 @@ cfold init [<output_file>] [--custom <instruction>] [--dialect <dialect>]
 
 - `<output_file>`: Output file (default: `start.json`).
 - `--custom <instruction>`: Custom instruction for the LLM (e.g., project purpose).
-- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `codeonly`, `test`, `doconly`, `latex`, `typst`; default: `default`).
+- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `py`, `pytest`, `doc`, `typst`; default: `default`).
 
 Example:
 
@@ -67,7 +67,7 @@ options:
   --prompt PROMPT, -p PROMPT
                         Optional file containing a prompt to append to the output
   --dialect DIALECT, -d DIALECT
-                        Dialect for instructions (e.g., default, codeonly, test, doconly, latex, typst; default: default)
+                        Dialect for instructions (e.g., default, py, pytest, doc, typst; default: default)
 ```
 
 After folding, copies content to clipboard, visualizes the file tree and instruction list (by type and name).
@@ -81,7 +81,7 @@ cfold fold src/main.py -o folded.json --prompt prompt.txt
 Example (fold only code files):
 
 ```bash
-cfold fold -o folded.json --dialect codeonly
+cfold fold -o folded.json --dialect py
 ```
 
 ### `cfold unfold`
@@ -123,6 +123,7 @@ cfold unfold folded.json -i original_project -o output_dir
 - Paths are relative to the CWD.
 - JSON is validated using Pydantic models.
 - `instructions` is a list of objects; do not modify unless specified.
+
 
 
 
