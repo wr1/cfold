@@ -1,7 +1,7 @@
 ![Tests](https://github.com/wr1/cfold/actions/workflows/tests.yml/badge.svg)![Version](https://img.shields.io/github/v/release/wr1/cfold)
 # cfold
 
-`cfold` is a command-line tool that helps you prepare codebases for interaction with Large Language Models (LLMs). It can "fold" a directory of code into a single JSON file and "unfold" a modified version back into a directory structure.
+`cfold` is a command-line tool that helps you prepare codebases for interaction with Large Language Models (LLMs). It can `fold` a directory of code into a single JSON file and `unfold` a modified version back into a directory structure.
 
 ## Installation
 
