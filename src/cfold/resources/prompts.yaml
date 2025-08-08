@@ -43,6 +43,8 @@ default:
       synopsis: "instructions for authoring admin.sh"
       content: |-
         add an admin.sh file in the root dir, where each file has a separate line for each file added
+        ruff format 
+        ruff check --fix 
         git commit <filename> -m 'summary of edits for <filename>'
         git commit <filename2> -m 'summary of edits for <filename2>'
         ... for all files (but not the admin.sh file itself), if the files are new, add git add <filename> before git commit
