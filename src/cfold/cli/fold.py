@@ -31,7 +31,9 @@ def fold(ctx, files, output, prompt, dialect):
         instructions, patterns = load_instructions(dialect)
     except ValueError:
         available = get_available_dialects()
-        click.echo(f"Invalid dialect specified. Available dialects: {', '.join(available)}")
+        click.echo(
+            f"Invalid dialect specified. Available dialects: {', '.join(available)}"
+        )
         ctx.exit(1)
     except Exception as e:
         raise click.ClickException(f"Error loading instructions: {str(e)}")
@@ -115,9 +117,6 @@ def fold(ctx, files, output, prompt, dialect):
         instr_tree.add(label)
     console.print(instr_tree)
 
-    console.print(f"Codebase folded into [blue]{output}[/blue] and content [green]copied to clipboard[/green].")
-
-
-
-
-
+    console.print(
+        f"Codebase folded into [cyan]{output}[/cyan] and content [green]copied to clipboard[/green]."
+    )
