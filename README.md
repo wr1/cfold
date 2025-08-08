@@ -17,6 +17,8 @@ uv pip install .
 
 ## Usage
 
+![use gif](docs/assets/use.gif)
+
 ### Folding a codebase
 
 Fold specific files or the current directory into a single JSON file:
