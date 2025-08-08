@@ -2,6 +2,7 @@
 
 import json
 import rich_click as click
+from rich.console import Console  # Added for colored output
 from cfold.utils.instructions import load_instructions, get_available_dialects
 from cfold.models import Codebase, Instruction
 
@@ -43,7 +44,9 @@ def init(ctx, output, custom, dialect):
             outfile,
             indent=2,
         )
-    click.echo(f"Initialized project template in {output}")
+    console = Console()
+    console.print(f"Initialized project template in [blue]{output}[/blue]")
+
 
 
 

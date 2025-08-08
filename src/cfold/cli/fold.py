@@ -86,6 +86,7 @@ def fold(ctx, files, output, prompt, dialect):
             Instruction(type="user", content=prompt_content, name="prompt")
         )
 
+    console = Console()
     try:
         with open(output, "w", encoding="utf-8") as outfile:
             json.dump(
@@ -95,12 +96,10 @@ def fold(ctx, files, output, prompt, dialect):
             )
         # Copy content to clipboard after writing the file
         pyperclip.copy(json.dumps(data.model_dump()))
-        click.echo(f"Codebase folded into {output} and content copied to clipboard.")
     except IOError as e:
         click.echo(f"Error writing to {output}: {e}")
         raise
 
-    console = Console()
     file_tree = get_folded_tree(files, cwd)
     if file_tree:
         console.print(file_tree)
@@ -115,6 +114,9 @@ def fold(ctx, files, output, prompt, dialect):
             label += f" - {instr.synopsis}"
         instr_tree.add(label)
     console.print(instr_tree)
+
+    console.print(f"Codebase folded into [blue]{output}[/blue] and content [green]copied to clipboard[/green].")
+
 
 
 
