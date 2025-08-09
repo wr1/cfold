@@ -40,12 +40,13 @@ def init(ctx, output, custom, dialect):
         data.instructions.append(Instruction(type="user", content=custom, name="custom"))
     with open(output, "w", encoding="utf-8") as outfile:
         json.dump(
-            data.model_dump(exclude={"instructions": {"__all__": {"synopsis"}}}),
+            data.model_dump(),
             outfile,
             indent=2,
         )
     console = Console()
     console.print(f"Initialized project template in [blue]{output}[/blue]")
+
 
 
 

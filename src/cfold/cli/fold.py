@@ -92,7 +92,7 @@ def fold(ctx, files, output, prompt, dialect):
     try:
         with open(output, "w", encoding="utf-8") as outfile:
             json.dump(
-                data.model_dump(exclude={"instructions": {"__all__": {"synopsis"}}}),
+                data.model_dump(),
                 outfile,
                 indent=2,
             )
@@ -120,3 +120,4 @@ def fold(ctx, files, output, prompt, dialect):
     console.print(
         f"Codebase folded into [cyan]{output}[/cyan] and content [green]copied to clipboard[/green]."
     )
+

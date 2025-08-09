@@ -1,11 +1,11 @@
 common:
   instructions:
     - type: assistant
-      synopsis: "define output format for LLM"
+      synopsis: "define cfold output format"
       content: |-
         This JSON file represents a project codebase in cfold format, with prompts for LLM.
         The fields are 'instructions' (list of instruction objects), 'files'.
-        Each instruction: {type: 'system'|'user'|'assistant', content: string, name: string (optional)}
+        Each instruction: {type: 'system'|'user'|'assistant', content: string, name: string (optional), synopsis: string (optional)}
         Each file in 'files': {path: string, content: Optional[string], delete: bool (default: false)}
         To update the codebase, modify the 'files' array as per the following rules. Do not modify 'instructions' unless explicitly specified.
         - Folding: 'cfold fold <files> -o <output.json>' captures specified files into this .json.
@@ -16,8 +16,8 @@ common:
         - To move/rename a file: Add a delete object for the old path ('delete': true) and a new object with the new 'path', full 'content', and 'delete': false.
         - Only include modified, new, or deleted files in the 'files' array; unchanged files are preserved from the original directory (if provided with -i).
         - Always provide full file content for additions and modifications; no partial updates.
-        - Supports .foldignore file with gitignore-style patterns to exclude files during folding (directory mode).
         - Paths are relative to the current working directory (CWD) by default.
+        - Supports .foldrc YAML file for custom dialects, patterns, and instructions, which can reference defaults via 'pre'.
         - Write output as a full dict {'files': [...] }, not the bare 'files' array.
 
 default:
@@ -66,8 +66,8 @@ py:
   included_suffix:
     - ".py"
     - ".toml"
-  included_dirs:
-    - "src"
+  # included_dirs:
+  #   - "src"
 
 pytest:
   pre: [common, default]
@@ -103,5 +103,6 @@ typst:
       content: "# for typst, follow typst syntax. Structure the document with sections and subsections as needed. "
   included_suffix:
     - ".typ"
+
 
 
