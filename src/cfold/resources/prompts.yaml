@@ -16,8 +16,8 @@ common:
         - To move/rename a file: Add a delete object for the old path ('delete': true) and a new object with the new 'path', full 'content', and 'delete': false.
         - Only include modified, new, or deleted files in the 'files' array; unchanged files are preserved from the original directory (if provided with -i).
         - Always provide full file content for additions and modifications; no partial updates.
-        - Supports .foldignore file with gitignore-style patterns to exclude files during folding (directory mode).
         - Paths are relative to the current working directory (CWD) by default.
+        - Supports .foldrc YAML file for custom dialects, patterns, and instructions, which can reference defaults via 'pre'.
         - Write output as a full dict {'files': [...] }, not the bare 'files' array.
 
 default:
