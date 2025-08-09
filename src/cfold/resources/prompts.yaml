@@ -1,7 +1,7 @@
 common:
   instructions:
     - type: assistant
-      synopsis: "define output format for LLM"
+      synopsis: "define cfold output format"
       content: |-
         This JSON file represents a project codebase in cfold format, with prompts for LLM.
         The fields are 'instructions' (list of instruction objects), 'files'.
@@ -66,8 +66,8 @@ py:
   included_suffix:
     - ".py"
     - ".toml"
-  included_dirs:
-    - "src"
+  # included_dirs:
+  #   - "src"
 
 pytest:
   pre: [common, default]
