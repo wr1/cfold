@@ -184,37 +184,6 @@ def test_unfold_relocate_and_update_references(temp_project, tmp_path, runner):
     ).read_text().strip() == "from project.core.main import *"
 
 
-def test_init(tmp_path, runner):
-    """Test init creates template."""
-    output_file = tmp_path / "start.json"
-    custom = "Test custom instruction"
-    result = runner.invoke(
-        cli, ["init", "-o", str(output_file), "-c", custom, "-d", "default"]
-    )  # Updated to use cli
-    assert result.exit_code == 0
-    assert output_file.exists()
-    with open(output_file, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    assert "instructions" in data
-    assert any(
-        i["type"] == "user" and i["content"] == custom for i in data["instructions"]
-    )
-
-
-def test_init_dialect(tmp_path, runner):
-    """Test init with different dialects."""
-    output_file = tmp_path / "start.json"
-    custom = "Test custom instruction"
-    result = runner.invoke(
-        cli, ["init", "-o", str(output_file), "-c", custom, "-d", "doc"]
-    )  # Updated to use cli
-    assert result.exit_code == 0
-    assert output_file.exists()
-    with open(output_file, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    assert "instructions" in data
-
-
 def test_unfold_complex_full_content(temp_project, tmp_path, runner):
     """Test unfolding complex full-content file."""
     fold_file = tmp_path / "complex_full.json"
@@ -412,20 +381,6 @@ def test_unfold_delete_outside_cwd(temp_project, tmp_path, runner):
     assert outside_file.exists()  # Should not be deleted
 
 
-def test_init_without_custom(tmp_path, runner):
-    """Test init without custom instruction."""
-    output_file = tmp_path / "start.json"
-    result = runner.invoke(
-        cli, ["init", "-o", str(output_file), "-d", "default"]
-    )
-    assert result.exit_code == 0
-    assert output_file.exists()
-    with open(output_file, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    assert "instructions" in data
-    assert not any(i["name"] == "custom" for i in data["instructions"])
-
-
 def test_fold_with_foldignore(temp_project, tmp_path, runner):
     """Test fold respects .foldignore."""
     ignore_file = temp_project / ".foldignore"
@@ -440,5 +395,6 @@ def test_fold_with_foldignore(temp_project, tmp_path, runner):
         data = json.load(f)
     assert any(f["path"] == "src/project/main.py" for f in data["files"])
     assert not any(f["path"] == "docs/index.md" for f in data["files"])
+
 
 

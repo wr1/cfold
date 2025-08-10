@@ -3,7 +3,6 @@
 import rich_click as click  # Replaced for Rich-styled help
 from .fold import fold as fold_command
 from .unfold import unfold as unfold_command
-from .init import init as init_command
 
 
 @click.group(
@@ -17,10 +16,10 @@ def cli():
 
 cli.add_command(fold_command, name="fold")
 cli.add_command(unfold_command, name="unfold")
-cli.add_command(init_command, name="init")
 
 if __name__ == "__main__":
    cli()
+
 
 
 

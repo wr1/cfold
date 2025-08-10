@@ -6,7 +6,6 @@
 
 - **Fold**: Combine specific files or the current directory into a `.json` file, with optional prompt inclusion. Copies output to clipboard, visualizes file tree and instruction list (by type and name).
 - **Unfold**: Apply changes (modifications, deletions, or new files) back to a directory.
-- **Init**: Generate a project template with custom instructions.
 - Supports UV, GitHub CI, MkDocs, and `.foldignore` for file exclusions.
 - Uses Pydantic for data validation of input/output JSON.
 - `instructions` is a list of objects with `type`, `content`, and optional `name`.
@@ -32,11 +31,6 @@ Unfold changes:
 cfold unfold folded.json -o output_dir
 ```
 
-Initialize a project:
-
-```bash
-cfold init start.json --custom "Build a Python CLI tool."
-```
 
 
 

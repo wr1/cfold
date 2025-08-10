@@ -64,24 +64,6 @@ Example:
 cfold unfold folded.json -o output_dir
 ```
 
-### Initializing a project template
-
-Create a template file with LLM instructions for project setup:
-
-```bash
-cfold init [<output_file>] [--custom <instruction>] [--dialect <dialect>]
-```
-
-- `<output_file>`: Output file (default: `start.json`).
-- `--custom <instruction>`: Custom instruction for the LLM.
-- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `py`, `pytest`, `doc`, `typst`; default: `default`).
-
-Example:
-
-```bash
-cfold init start.json --custom "Build a Python CLI tool." --dialect default
-```
-
 ## Fold File Format
 
 - JSON structure with keys: `instructions` (list of objects), `files`.
@@ -91,6 +73,7 @@ cfold init start.json --custom "Build a Python CLI tool." --dialect default
 - Delete files with `delete: true` (content optional).
 - Add new files by adding new objects with `path` and `content`.
 - Move/rename: Delete old (`delete: true`) and add new with updated path and content.
+
 
 
 

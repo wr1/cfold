@@ -26,24 +26,6 @@ uv pip install .
 
 ## Commands
 
-### `cfold init`
-
-Initialize a project template with LLM instructions:
-
-```bash
-cfold init [<output_file>] [--custom <instruction>] [--dialect <dialect>]
-```
-
-- `<output_file>`: Output file (default: `start.json`).
-- `--custom <instruction>`: Custom instruction for the LLM (e.g., project purpose).
-- `--dialect <dialect>`: Dialect for instructions (e.g., `default`, `py`, `pytest`, `doc`, `typst`; default: `default`).
-
-Example:
-
-```bash
-cfold init start.json --custom "Build a tool for code folding."
-```
-
 ### `cfold fold`
 
 Fold specific files or the current directory into a single JSON file:
@@ -123,6 +105,7 @@ cfold unfold folded.json -i original_project -o output_dir
 - Paths are relative to the CWD.
 - JSON is validated using Pydantic models.
 - `instructions` is a list of objects; do not modify unless specified.
+
 
 
 
