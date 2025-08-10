@@ -82,7 +82,9 @@ def unfold(foldfile, original_dir, output_dir):
             full_path = os.path.join(output_dir, path)
             resolved_path = Path(full_path).resolve()
             if not resolved_path.is_relative_to(output_path):
-                console.print(f"[yellow]Skipping addition outside output dir: {path}[/yellow]")
+                console.print(
+                    f"[yellow]Skipping addition outside output dir: {path}[/yellow]"
+                )
                 continue
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
             with open(full_path, "w", encoding="utf-8") as outfile:
@@ -93,7 +95,9 @@ def unfold(foldfile, original_dir, output_dir):
             full_path = os.path.join(output_dir, path)
             resolved_path = Path(full_path).resolve()
             if not resolved_path.is_relative_to(output_path):
-                console.print(f"[yellow]Skipping operation outside output dir: {path}[/yellow]")
+                console.print(
+                    f"[yellow]Skipping operation outside output dir: {path}[/yellow]"
+                )
                 continue
             if entry.delete:
                 if os.path.exists(full_path):
@@ -124,11 +128,3 @@ def unfold(foldfile, original_dir, output_dir):
             modified_node.add("[dim]" + file + "[/dim]")
     console.print(tree)
     console.print(f"[bold dim]Codebase unfolded into {output_dir}[/bold dim]")
-
-
-
-
-
-
-
-
