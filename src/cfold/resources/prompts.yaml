@@ -66,6 +66,7 @@ py:
   included_suffix:
     - ".py"
     - ".toml"
+    - ".ini"
   # included_dirs:
   #   - "src"
 
