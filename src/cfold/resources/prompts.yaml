@@ -42,13 +42,13 @@ default:
     - type: user
       synopsis: "instructions for authoring admin.sh"
       content: |-
-        add an admin.sh file in the root dir, where each file has a separate line for each file added
+        add an admin.sh file in the root dir, where each file has a separate line for each file added, pipe output from ruff check and pytest to out.txt
         ruff format 
-        ruff check --fix 
+        ruff check --fix > out.txt 
         git commit <filename> -m 'summary of edits for <filename>'
         git commit <filename2> -m 'summary of edits for <filename2>'
         ... for all files (but not the admin.sh file itself), if the files are new, add git add <filename> before git commit
-        uv run pytest -v > err.txt 
+        uv run pytest -v >> out.txt 
 
   included_suffix:
     - ".py"
