@@ -6,6 +6,7 @@ from pathlib import Path
 import rich_click as click  # Replaced for Rich-styled help
 import pyperclip  # Added for clipboard functionality
 from cfold.utils.instructions import load_instructions, get_available_dialects
+import yaml  # Added for loading .foldrc
 from cfold.utils.foldignore import load_foldignore, should_include_file
 from rich.console import Console
 from rich.tree import Tree
@@ -27,6 +28,15 @@ from cfold.models import Codebase, FileEntry, Instruction  # Added for Pydantic 
 def fold(ctx, files, output, prompt, dialect):
     """Fold files or directory into a single text file and visualize the structure."""
     cwd = Path.cwd()
+    # Check for local default dialect if 'default' is specified
+    if dialect == "default":
+        local_path = cwd / ".foldrc"
+        if local_path.exists():
+            with local_path.open("r", encoding="utf-8") as f:
+                local_config = yaml.safe_load(f) or {}
+            if "default_dialect" in local_config:
+                dialect = local_config["default_dialect"]
+
     try:
         instructions, patterns = load_instructions(dialect)
     except ValueError:
@@ -120,4 +130,3 @@ def fold(ctx, files, output, prompt, dialect):
     console.print(
         f"Codebase folded into [cyan]{output}[/cyan] and content [green]copied to clipboard[/green]."
     )
-
