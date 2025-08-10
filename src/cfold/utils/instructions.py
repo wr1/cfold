@@ -26,6 +26,10 @@ def collect_instructions(
     if instr is None:
         path.remove(dialect)
         return []
+    if not isinstance(instr, dict):
+        raise ValueError(
+            f"Dialect '{dialect}' config must be a dictionary, got {type(instr).__name__}"
+        )
 
     instructions = []
     for pre_d in instr.get("pre", []):
@@ -40,7 +44,9 @@ def collect_instructions(
     return instructions
 
 
-def load_instructions(dialect: str = "default", directory: Optional[Path] = None) -> tuple[List[Instruction], Dict]:
+def load_instructions(
+    dialect: str = "default", directory: Optional[Path] = None
+) -> tuple[List[Instruction], Dict]:
     """Load the boilerplate instructions and patterns for the specified dialect from prompts.yaml as a list of Instruction."""
     if directory is None:
         directory = Path.cwd()
@@ -51,14 +57,14 @@ def load_instructions(dialect: str = "default", directory: Optional[Path] = None
             local_config = yaml.safe_load(f) or {}
 
     try:
-        with resources.files("cfold").joinpath("resources/prompts.yaml").open(
-            "r", encoding="utf-8"
-        ) as f:
+        with (
+            resources.files("cfold")
+            .joinpath("resources/prompts.yaml")
+            .open("r", encoding="utf-8") as f
+        ):
             default_config = yaml.safe_load(f)  # Use safe_load for security
     except Exception as e:
-        raise RuntimeError(
-            f"Failed to load default instructions: {e}"
-        )
+        raise RuntimeError(f"Failed to load default instructions: {e}")
 
     combined_config = {**default_config, **local_config}
 
@@ -87,17 +93,14 @@ def get_available_dialects(directory: Optional[Path] = None) -> List[str]:
             local_config = yaml.safe_load(f) or {}
 
     try:
-        with resources.files("cfold").joinpath("resources/prompts.yaml").open(
-            "r", encoding="utf-8"
-        ) as f:
+        with (
+            resources.files("cfold")
+            .joinpath("resources/prompts.yaml")
+            .open("r", encoding="utf-8") as f
+        ):
             default_config = yaml.safe_load(f)
     except Exception as e:
         raise RuntimeError(f"Failed to load dialects: {e}")
 
     combined_config = {**default_config, **local_config}
     return [k for k in combined_config.keys() if k != "common"]
-
-
-
-
-
