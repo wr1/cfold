@@ -52,6 +52,8 @@ options:
                         Dialect for instructions (e.g., default, py, pytest, doc, typst; default: default)
 ```
 
+If `--dialect` is not specified and a `.foldrc` file exists with a `default_dialect` key, it will use that as the dialect.
+
 After folding, copies content to clipboard, visualizes the file tree and instruction list (by type and name).
 
 Example:
@@ -95,6 +97,16 @@ Example:
 ```bash
 cfold unfold folded.json -i original_project -o output_dir
 ```
+
+### `cfold rc`
+
+Create or update a local `.foldrc` file with a 'local' profile and set it as the default dialect:
+
+```bash
+cfold rc
+```
+
+This adds a 'local' dialect (extending 'default') and sets `default_dialect: local` in `.foldrc`.
 
 ## Refactoring
 
