@@ -1,6 +1,5 @@
 """Handle rc command for cfold."""
 
-import os
 from pathlib import Path
 import yaml
 import rich_click as click
@@ -26,7 +25,7 @@ def rc():
                 {
                     "type": "user",
                     "synopsis": "local focus",
-                    "content": "Focus on brief and modular code."
+                    "content": "Focus on brief and modular code.",
                 }
             ],
             "included_suffix": [".py", ".toml"],
@@ -39,9 +38,6 @@ def rc():
         yaml.safe_dump(config, f, default_flow_style=False)
 
     console = Console()
-    console.print(f"[green].foldrc created/updated with 'local' as default dialect.[/green]")
-
-
-
-
-
+    console.print(
+        "[green].foldrc created/updated with 'local' as default dialect.[/green]"
+    )
