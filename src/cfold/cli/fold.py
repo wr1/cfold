@@ -25,7 +25,10 @@ from cfold.models import Codebase, FileEntry, Instruction  # Added for Pydantic 
     default="default",
     help="Instruction dialect (available: default, py, pytest, doc, typst)",
 )
-def fold(ctx, files, output, prompt, dialect):
+@click.option(
+    "--bare", "-b", is_flag=True, help="Bare mode without boilerplate instructions"
+)
+def fold(ctx, files, output, prompt, dialect, bare):
     """Fold files or directory into a single text file and visualize the structure."""
     cwd = Path.cwd()
     # Check for local default dialect if 'default' is specified
@@ -39,6 +42,8 @@ def fold(ctx, files, output, prompt, dialect):
 
     try:
         instructions, patterns = load_instructions(dialect)
+        if bare:
+            instructions = []
     except ValueError:
         available = get_available_dialects()
         click.echo(
