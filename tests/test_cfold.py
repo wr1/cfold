@@ -266,9 +266,7 @@ def test_fold_invalid_dialect(temp_project, tmp_path, runner):
     """Test fold with invalid dialect raises error."""
     output_file = tmp_path / "folded.json"
     os.chdir(temp_project)
-    result = runner.invoke(
-        cli, ["fold", "-o", str(output_file), "-d", "invalid"]
-    )
+    result = runner.invoke(cli, ["fold", "-o", str(output_file), "-d", "invalid"])
     assert result.exit_code == 1
     assert "Invalid dialect specified" in result.output
 
@@ -276,10 +274,10 @@ def test_fold_invalid_dialect(temp_project, tmp_path, runner):
 def test_fold_no_files(temp_project, tmp_path, runner):
     """Test fold with no valid files."""
     output_file = tmp_path / "folded.json"
-    os.chdir(temp_project / "docs")  # Change to a dir with no includable files for py dialect
-    result = runner.invoke(
-        cli, ["fold", "-o", str(output_file), "-d", "py"]
-    )
+    os.chdir(
+        temp_project / "docs"
+    )  # Change to a dir with no includable files for py dialect
+    result = runner.invoke(cli, ["fold", "-o", str(output_file), "-d", "py"])
     assert result.exit_code == 0
     assert "No valid files to fold." in result.output
     assert not output_file.exists()
@@ -297,7 +295,10 @@ def test_fold_with_prompt(temp_project, tmp_path, runner):
     assert result.exit_code == 0
     with open(output_file, "r", encoding="utf-8") as f:
         data = json.load(f)
-    assert any(i["content"] == "Custom prompt content" and i["type"] == "user" for i in data["instructions"])
+    assert any(
+        i["content"] == "Custom prompt content" and i["type"] == "user"
+        for i in data["instructions"]
+    )
 
 
 def test_fold_with_invalid_prompt(temp_project, tmp_path, runner):
@@ -308,7 +309,10 @@ def test_fold_with_invalid_prompt(temp_project, tmp_path, runner):
         cli, ["fold", "-o", str(output_file), "-p", "nonexistent.txt", "-d", "default"]
     )
     assert result.exit_code == 0
-    assert "Warning: Prompt file 'nonexistent.txt' does not exist. Skipping." in result.output
+    assert (
+        "Warning: Prompt file 'nonexistent.txt' does not exist. Skipping."
+        in result.output
+    )
 
 
 def test_unfold_without_original_dir(temp_project, tmp_path, runner):
@@ -327,9 +331,7 @@ def test_unfold_without_original_dir(temp_project, tmp_path, runner):
     output_dir.mkdir()
     (output_dir / "to_delete.py").write_text("delete me")
     os.chdir(tmp_path)
-    result = runner.invoke(
-        cli, ["unfold", str(fold_file), "-o", str(output_dir)]
-    )
+    result = runner.invoke(cli, ["unfold", str(fold_file), "-o", str(output_dir)])
     assert result.exit_code == 0
     assert (output_dir / "new_file.py").exists()
     assert not (output_dir / "to_delete.py").exists()
@@ -351,9 +353,7 @@ def test_unfold_merge_existing_dir(temp_project, tmp_path, runner):
     (output_dir / "existing.py").write_text("original")
     (output_dir / "unchanged.py").write_text("unchanged")
     os.chdir(tmp_path)
-    result = runner.invoke(
-        cli, ["unfold", str(fold_file), "-o", str(output_dir)]
-    )
+    result = runner.invoke(cli, ["unfold", str(fold_file), "-o", str(output_dir)])
     assert result.exit_code == 0
     assert (output_dir / "existing.py").read_text().strip() == "print('Modified')"
     assert (output_dir / "unchanged.py").read_text().strip() == "unchanged"
@@ -375,9 +375,7 @@ def test_unfold_delete_outside_cwd(temp_project, tmp_path, runner):
     outside_file = tmp_path / "outside.py"
     outside_file.write_text("should not delete")
     os.chdir(output_dir)
-    result = runner.invoke(
-        cli, ["unfold", str(fold_file), "-o", "."]
-    )
+    result = runner.invoke(cli, ["unfold", str(fold_file), "-o", "."])
     assert result.exit_code == 0
     assert outside_file.exists()  # Should not be deleted
 
@@ -388,14 +386,13 @@ def test_fold_with_foldignore(temp_project, tmp_path, runner):
     ignore_file.write_text("*.md\n")
     output_file = tmp_path / "folded.json"
     os.chdir(temp_project)
-    result = runner.invoke(
-        cli, ["fold", "-o", str(output_file), "-d", "default"]
-    )
+    result = runner.invoke(cli, ["fold", "-o", str(output_file), "-d", "default"])
     assert result.exit_code == 0
     with open(output_file, "r", encoding="utf-8") as f:
         data = json.load(f)
     assert any(f["path"] == "src/project/main.py" for f in data["files"])
     assert not any(f["path"] == "docs/index.md" for f in data["files"])
+
 
 def test_rc_command(temp_project, runner):
     """Test rc command creates .foldrc with local as default."""
@@ -409,8 +406,15 @@ def test_rc_command(temp_project, runner):
     assert "default_dialect" in config and config["default_dialect"] == "local"
     assert "local" in config
     assert config["local"]["pre"] == ["py"]
-    assert config["local"]["instructions"] == [{"type": "user", "synopsis": "local focus", "content": "Focus on brief and modular code."}]
+    assert config["local"]["instructions"] == [
+        {
+            "type": "user",
+            "synopsis": "local focus",
+            "content": "Focus on brief and modular code.",
+        }
+    ]
     assert config["local"]["included_suffix"] == [".py", ".toml"]
+
 
 def test_fold_uses_local_default(temp_project, tmp_path, runner):
     """Test fold uses local default dialect from .foldrc."""
@@ -430,4 +434,34 @@ def test_fold_uses_local_default(temp_project, tmp_path, runner):
     assert not any(f["path"] == "docs/index.md" for f in data["files"])
 
 
+def test_fold_bare(temp_project, tmp_path, runner):
+    """Test fold in bare mode has no instructions."""
+    output_file = tmp_path / "folded.json"
+    os.chdir(temp_project)
+    result = runner.invoke(cli, ["fold", "-o", str(output_file), "-b", "-d", "default"])
+    assert result.exit_code == 0
+    with open(output_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    assert data["instructions"] == []
+    assert any(f["path"] == "src/project/main.py" for f in data["files"])
+    assert any(f["path"] == "docs/index.md" for f in data["files"])
 
+
+def test_fold_bare_with_prompt(temp_project, tmp_path, runner):
+    """Test fold in bare mode with prompt includes only the prompt."""
+    output_file = tmp_path / "folded.json"
+    prompt_file = tmp_path / "prompt.txt"
+    prompt_file.write_text("Custom prompt")
+    os.chdir(temp_project)
+    result = runner.invoke(
+        cli,
+        ["fold", "-o", str(output_file), "-b", "-p", str(prompt_file), "-d", "default"],
+    )
+    assert result.exit_code == 0
+    with open(output_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    assert len(data["instructions"]) == 1
+    assert data["instructions"][0]["content"] == "Custom prompt"
+    assert data["instructions"][0]["type"] == "user"
+    assert any(f["path"] == "src/project/main.py" for f in data["files"])
+    assert any(f["path"] == "docs/index.md" for f in data["files"])
