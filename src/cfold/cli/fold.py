@@ -84,7 +84,7 @@ def fold(ctx, files, output, prompt, dialect, bare):
         instructions=instructions,
         files=[
             FileEntry(
-                path=str(filepath.relative_to(cwd)),
+                path=os.path.relpath(str(filepath), str(cwd)),
                 content=open(filepath, "r", encoding="utf-8").read(),
             )
             for filepath in files
