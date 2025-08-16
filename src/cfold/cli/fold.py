@@ -56,6 +56,7 @@ def fold(ctx, files, output, prompt, dialect, bare):
     included_patterns = patterns.get("included", [])  # Adjust if needed
     excluded_patterns = patterns.get("excluded", [])
     included_dirs = patterns.get("included_dirs", [])
+    exclude_files = patterns.get("exclude_files", [])
 
     if not files:
         directory = cwd
@@ -64,17 +65,24 @@ def fold(ctx, files, output, prompt, dialect, bare):
         for dirpath, _, filenames in os.walk(directory):
             for filename in filenames:
                 filepath = Path(dirpath) / filename
-                if should_include_file(
-                    filepath,
-                    ignore_patterns,
-                    directory,
-                    included_patterns,
-                    excluded_patterns,
-                    included_dirs,
+                rel_path = os.path.relpath(str(filepath), str(directory))
+                if (
+                    should_include_file(
+                        filepath,
+                        ignore_patterns,
+                        directory,
+                        included_patterns,
+                        excluded_patterns,
+                        included_dirs,
+                    )
+                    and rel_path not in exclude_files
                 ):
                     files.append(filepath)
     else:
         files = [Path(f).absolute() for f in files if Path(f).is_file()]
+        files = [
+            f for f in files if os.path.relpath(str(f), str(cwd)) not in exclude_files
+        ]
 
     if not files:
         click.echo("No valid files to fold.")
