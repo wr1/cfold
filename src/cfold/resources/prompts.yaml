@@ -56,6 +56,11 @@ default:
     - ".md"
     - ".yml"
     - ".yaml"
+  included_dirs:
+    - "src"
+    - "tests"
+    - "docs"
+    - "examples"
 
 py:
   pre: [common, default]

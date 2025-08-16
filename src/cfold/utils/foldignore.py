@@ -59,7 +59,7 @@ def should_include_file(
         "build/*",
         "dist/*",
         ".venv/*",
-        "example*",
+        # "example*",
         "htmlcov/*",
         "*png",
         "*vtu",
