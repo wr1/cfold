@@ -465,3 +465,26 @@ def test_fold_bare_with_prompt(temp_project, tmp_path, runner):
     assert data["instructions"][0]["type"] == "user"
     assert any(f["path"] == "src/project/main.py" for f in data["files"])
     assert any(f["path"] == "docs/index.md" for f in data["files"])
+
+
+def test_fold_with_exclude(temp_project, tmp_path, runner):
+    """Test fold excludes files specified in dialect's exclude list."""
+    foldrc_path = temp_project / ".foldrc"
+    config = {
+        "default_dialect": "local",
+        "local": {
+            "pre": ["default"],
+            "exclude": ["src/project/main.py"],
+        },
+    }
+    with open(foldrc_path, "w", encoding="utf-8") as f:
+        yaml.safe_dump(config, f)
+    output_file = tmp_path / "folded.json"
+    os.chdir(temp_project)
+    result = runner.invoke(cli, ["fold", "-o", str(output_file)])
+    assert result.exit_code == 0
+    with open(output_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    assert not any(f["path"] == "src/project/main.py" for f in data["files"])
+    assert any(f["path"] == "src/project/utils.py" for f in data["files"])
+    assert any(f["path"] == "docs/index.md" for f in data["files"])
