@@ -44,6 +44,43 @@ def collect_instructions(
     return instructions
 
 
+def collect_patterns(
+    config: Dict, dialect: str, processed: set = None, path: set = None
+) -> Dict[str, List[str]]:
+    """Recursively collect patterns for the dialect, handling 'pre' dependencies."""
+    if processed is None:
+        processed = set()
+    if path is None:
+        path = set()
+
+    if dialect in processed:
+        return {}
+    if dialect in path:
+        raise ValueError(f"Cycle detected in 'pre' for patterns in '{dialect}'")
+
+    path.add(dialect)
+    instr = config.get(dialect, {})
+
+    patterns = {
+        "included_suffix": [],
+        "excluded": [],
+        "included_dirs": [],
+        "exclude": [],
+    }
+
+    for pre_d in instr.get("pre", []):
+        pre_patterns = collect_patterns(config, pre_d, processed, path)
+        for key in patterns:
+            patterns[key].extend(pre_patterns.get(key, []))
+
+    for key in patterns:
+        patterns[key].extend(instr.get(key, []))
+
+    path.remove(dialect)
+    processed.add(dialect)
+    return patterns
+
+
 def load_instructions(
     dialect: str = "default", directory: Optional[Path] = None
 ) -> tuple[List[Instruction], Dict]:
@@ -71,13 +108,14 @@ def load_instructions(
     if dialect not in combined_config:
         raise ValueError(f"Dialect '{dialect}' not found in combined configurations")
     instructions_list = collect_instructions(combined_config, dialect)
-    instr = combined_config[dialect]
+    all_patterns = collect_patterns(combined_config, dialect)
     patterns = {
         "included": [
-            f"*{pat}" for pat in instr.get("included_suffix", [])
+            f"*{pat}" for pat in all_patterns.get("included_suffix", [])
         ],  # Convert suffixes to fnmatch patterns
-        "excluded": instr.get("excluded", []),
-        "included_dirs": instr.get("included_dirs", []),
+        "excluded": all_patterns.get("excluded", []),
+        "included_dirs": all_patterns.get("included_dirs", []),
+        "exclude_files": all_patterns.get("exclude", []),
     }
     return instructions_list, patterns
 
