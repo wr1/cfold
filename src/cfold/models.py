@@ -16,7 +16,7 @@ class FileEntry(BaseModel):
     content: Optional[str] = None
     delete: bool = False
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def check_content(self):
         if not self.delete and self.content is None:
             raise ValueError("Content must be provided if not deleting")
@@ -33,10 +33,3 @@ class Codebase(BaseModel):
         if isinstance(v, dict):
             return [Instruction(**item) for item in v]
         return v
-
-
-
-
-
-
-

@@ -45,8 +45,10 @@ def should_include_file(
     else:
         relpath = str(path)
 
-    relpath_norm = relpath.replace(os.sep, '/')
-    if included_dirs and not any(relpath_norm.startswith(d.replace(os.sep, '/') + '/') for d in included_dirs):
+    relpath_norm = relpath.replace(os.sep, "/")
+    if included_dirs and not any(
+        relpath_norm.startswith(d.replace(os.sep, "/") + "/") for d in included_dirs
+    ):
         return False
 
     EXCLUDED_PATTERNS = [
@@ -57,7 +59,7 @@ def should_include_file(
         "build/*",
         "dist/*",
         ".venv/*",
-        "example*",
+        # "example*",
         "htmlcov/*",
         "*png",
         "*vtu",
@@ -92,9 +94,3 @@ def should_include_file(
     ):
         return False
     return True
-
-
-
-
-
-

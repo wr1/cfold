@@ -35,7 +35,7 @@ def test_codebase():
     """Test Codebase model."""
     codebase = Codebase(
         instructions=[Instruction(type="user", content="prompt")],
-        files=[FileEntry(path="file.py", content="code")]
+        files=[FileEntry(path="file.py", content="code")],
     )
     dumped = codebase.model_dump(exclude={"instructions": {"__all__": {"synopsis"}}})
     assert "synopsis" not in dumped["instructions"][0]
@@ -43,5 +43,3 @@ def test_codebase():
     # Test validator for instructions as dict (though not typically used)
     codebase = Codebase.model_validate({"instructions": [], "files": []})
     assert isinstance(codebase.instructions, list)
-
-

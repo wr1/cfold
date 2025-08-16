@@ -2,21 +2,26 @@ from cfold.utils import foldignore, instructions, treeviz
 from cfold.models import Codebase, FileEntry, Instruction
 from pydantic import ValidationError
 import pytest
-import os
 
 
 def test_should_include_file():
     """Test file inclusion/exclusion rules."""
     assert (
-        foldignore.should_include_file("src/main.py", included_patterns=["*.py", "*.md", "*.yml"])
+        foldignore.should_include_file(
+            "src/main.py", included_patterns=["*.py", "*.md", "*.yml"]
+        )
         is True
     )
     assert (
-        foldignore.should_include_file("docs/index.md", included_patterns=["*.py", "*.md", "*.yml"])
+        foldignore.should_include_file(
+            "docs/index.md", included_patterns=["*.py", "*.md", "*.yml"]
+        )
         is True
     )
     assert (
-        foldignore.should_include_file("config.yml", included_patterns=["*.py", "*.md", "*.yml"])
+        foldignore.should_include_file(
+            "config.yml", included_patterns=["*.py", "*.md", "*.yml"]
+        )
         is True
     )
     assert (
@@ -32,7 +37,9 @@ def test_should_include_file():
         is False
     )
     assert (
-        foldignore.should_include_file("test.txt", included_patterns=["*.py", "*.md", "*.yml"])
+        foldignore.should_include_file(
+            "test.txt", included_patterns=["*.py", "*.md", "*.yml"]
+        )
         is False
     )
 
@@ -101,5 +108,3 @@ def test_model_validation():
     FileEntry(path="test.py", delete=True)
     # Valid Codebase
     Codebase(instructions=[Instruction(type="system", content="test")], files=[])
-
-
