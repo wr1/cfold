@@ -109,6 +109,15 @@ def load_instructions(
         raise ValueError(f"Dialect '{dialect}' not found in combined configurations")
     instructions_list = collect_instructions(combined_config, dialect)
     all_patterns = collect_patterns(combined_config, dialect)
+
+    # Override with defaults for specific dialects
+    if dialect in ("py", "pytest"):
+        all_patterns["included_suffix"] = [".py", ".toml"]
+    elif dialect == "doc":
+        all_patterns["included_suffix"] = [".md", ".rst"]
+    elif dialect == "typst":
+        all_patterns["included_suffix"] = [".typ"]
+
     patterns = {
         "included": [
             f"*{pat}" for pat in all_patterns.get("included_suffix", [])
