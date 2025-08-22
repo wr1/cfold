@@ -7,7 +7,7 @@ import rich_click as click  # Replaced for Rich-styled help
 from rich.console import Console
 from rich.tree import Tree
 from pathlib import Path
-from cfold.utils.foldignore import load_foldignore, should_include_file
+from cfold.utils.foldignore import should_include_file
 from cfold.models import Codebase  # Added for Pydantic model
 
 
@@ -40,13 +40,11 @@ def unfold(foldfile, original_dir, output_dir):
 
     if original_dir and os.path.isdir(original_dir):
         original_dir = os.path.abspath(original_dir)
-        ignore_patterns = load_foldignore(original_dir)
         for dirpath, _, filenames in os.walk(original_dir):
             for filename in filenames:
                 filepath = os.path.join(dirpath, filename)
                 if should_include_file(
                     filepath,
-                    ignore_patterns,
                     original_dir,
                     [],  # included_patterns empty or adjust
                     [],  # excluded_patterns
