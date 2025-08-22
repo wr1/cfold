@@ -6,7 +6,7 @@
 
 - **Fold**: Combine specific files or the current directory into a `.json` file, with optional prompt inclusion. Copies output to clipboard, visualizes file tree and instruction list (by type and name).
 - **Unfold**: Apply changes (modifications, deletions, or new files) back to a directory.
-- Supports UV, GitHub CI, MkDocs, and `.foldignore` for file exclusions.
+- Supports UV, GitHub CI, MkDocs.
 - Uses Pydantic for data validation of input/output JSON.
 - `instructions` is a list of objects with `type`, `content`, and optional `name`.
 - Dialects: `default`, `py`, `pytest`, `doc`, `typst`.
@@ -30,6 +30,7 @@ Unfold changes:
 ```bash
 cfold unfold folded.json -o output_dir
 ```
+
 
 
 
