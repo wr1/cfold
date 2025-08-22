@@ -3,22 +3,8 @@ import fnmatch
 import os
 
 
-def load_foldignore(directory):
-    """Load and parse .foldignore file if it exists."""
-    ignore_file = Path(directory) / ".foldignore"
-    ignore_patterns = []
-    if ignore_file.exists():
-        with open(ignore_file, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith("#"):
-                    ignore_patterns.append(line)
-    return ignore_patterns
-
-
 def should_include_file(
     filepath,
-    ignore_patterns=None,
     root_dir=None,
     included_patterns=None,
     excluded_patterns=None,
@@ -46,10 +32,13 @@ def should_include_file(
         relpath = str(path)
 
     relpath_norm = relpath.replace(os.sep, "/")
-    if included_dirs and not any(
-        relpath_norm.startswith(d.replace(os.sep, "/") + "/") for d in included_dirs
-    ):
-        return False
+    if included_dirs:
+        is_in_included_dir = any(
+            relpath_norm.startswith(d.replace(os.sep, "/") + "/") for d in included_dirs
+        )
+        is_root_file = "." in included_dirs and "/" not in relpath_norm
+        if not (is_in_included_dir or is_root_file):
+            return False
 
     EXCLUDED_PATTERNS = [
         "*.egg-info/*",
@@ -87,10 +76,6 @@ def should_include_file(
         return False
     if excluded_patterns and any(
         fnmatch.fnmatch(relpath, pattern) for pattern in excluded_patterns
-    ):
-        return False
-    if ignore_patterns and any(
-        fnmatch.fnmatch(relpath, pattern) for pattern in ignore_patterns
     ):
         return False
     return True
