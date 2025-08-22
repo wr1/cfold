@@ -7,7 +7,7 @@ import rich_click as click  # Replaced for Rich-styled help
 import pyperclip  # Added for clipboard functionality
 from cfold.utils.instructions import load_instructions, get_available_dialects
 import yaml  # Added for loading .foldrc
-from cfold.utils.foldignore import load_foldignore, should_include_file
+from cfold.utils.foldignore import should_include_file
 from rich.console import Console
 from rich.tree import Tree
 from cfold.utils.treeviz import get_folded_tree
@@ -60,7 +60,6 @@ def fold(ctx, files, output, prompt, dialect, bare):
 
     if not files:
         directory = cwd
-        ignore_patterns = load_foldignore(directory)
         files = []
         for dirpath, _, filenames in os.walk(directory):
             for filename in filenames:
@@ -69,7 +68,6 @@ def fold(ctx, files, output, prompt, dialect, bare):
                 if (
                     should_include_file(
                         filepath,
-                        ignore_patterns,
                         directory,
                         included_patterns,
                         excluded_patterns,
