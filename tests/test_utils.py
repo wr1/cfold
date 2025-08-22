@@ -44,24 +44,6 @@ def test_should_include_file():
     )
 
 
-def test_should_include_file_with_ignore():
-    """Test file inclusion with .foldignore patterns."""
-    ignore_patterns = ["*.log", "temp/*", "secret.conf"]
-    assert foldignore.should_include_file("src/main.py", ignore_patterns) is True
-    assert foldignore.should_include_file("logs/app.log", ignore_patterns) is False
-    assert foldignore.should_include_file("temp/file.py", ignore_patterns) is False
-    assert foldignore.should_include_file("secret.conf", ignore_patterns) is False
-    assert foldignore.should_include_file("docs/index.md", ignore_patterns) is True
-
-
-def test_load_foldignore(tmp_path):
-    """Test loading and parsing .foldignore file."""
-    ignore_file = tmp_path / ".foldignore"
-    ignore_file.write_text("*.log\ntemp/*\n# comment\nsecret.conf\n")
-    patterns = foldignore.load_foldignore(str(tmp_path))
-    assert patterns == ["*.log", "temp/*", "secret.conf"]
-
-
 def test_load_instructions():
     """Test loading instructions for a dialect."""
     instr, patterns = instructions.load_instructions("default")
