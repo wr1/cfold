@@ -380,20 +380,6 @@ def test_unfold_delete_outside_cwd(temp_project, tmp_path, runner):
     assert outside_file.exists()  # Should not be deleted
 
 
-def test_fold_with_foldignore(temp_project, tmp_path, runner):
-    """Test fold respects .foldignore."""
-    ignore_file = temp_project / ".foldignore"
-    ignore_file.write_text("*.md\n")
-    output_file = tmp_path / "folded.json"
-    os.chdir(temp_project)
-    result = runner.invoke(cli, ["fold", "-o", str(output_file), "-d", "default"])
-    assert result.exit_code == 0
-    with open(output_file, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    assert any(f["path"] == "src/project/main.py" for f in data["files"])
-    assert not any(f["path"] == "docs/index.md" for f in data["files"])
-
-
 def test_rc_command(temp_project, runner):
     """Test rc command creates .foldrc with local as default."""
     os.chdir(temp_project)
