@@ -97,8 +97,8 @@ def load_instructions(
         with (
             resources.files("cfold")
             .joinpath("resources/prompts.yaml")
-            .open("r", encoding="utf-8") as f
-        ):
+            .open("r", encoding="utf-8")
+        ) as f:
             default_config = yaml.safe_load(f)  # Use safe_load for security
     except Exception as e:
         raise RuntimeError(f"Failed to load default instructions: {e}")
@@ -143,8 +143,8 @@ def get_available_dialects(directory: Optional[Path] = None) -> List[str]:
         with (
             resources.files("cfold")
             .joinpath("resources/prompts.yaml")
-            .open("r", encoding="utf-8") as f
-        ):
+            .open("r", encoding="utf-8")
+        ) as f:
             default_config = yaml.safe_load(f)
     except Exception as e:
         raise RuntimeError(f"Failed to load dialects: {e}")
