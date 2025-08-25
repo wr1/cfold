@@ -1,9 +1,13 @@
 import pytest
-import os
 import json
-from click.testing import CliRunner
-from cfold.cli.main import cli  # Updated import to fix the error
+import sys
 import yaml
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).parent.parent / "src"))
+sys.path.append(str(Path(__file__).parent.parent.parent / "treeparse" / "src"))
+
+from cfold.cli.main import main  # Updated import
 
 
 @pytest.fixture
@@ -20,24 +24,22 @@ def temp_project(tmp_path):
     return proj_dir
 
 
-@pytest.fixture
-def runner():
-    """Provide a CliRunner for testing CLI commands."""
-    return CliRunner()
-
-
-def test_fold(temp_project, tmp_path, runner):
+def test_fold(temp_project, tmp_path, monkeypatch, capsys):
     """Test fold command creates correct output."""
-    output_file = tmp_path / "folded.json"
-    os.chdir(tmp_path)
     files = [
         str(temp_project / "src" / "project" / "main.py"),
         str(temp_project / "docs" / "index.md"),
     ]
-    result = runner.invoke(
-        cli, ["fold", *files, "-o", str(output_file), "-d", "default"]
-    )  # Updated to use cli
-    assert result.exit_code == 0
+    output_file = tmp_path / "folded.json"
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["cfold", "fold"] + files + ["-o", str(output_file), "-d", "default"],
+    )
+    main()
+    captured = capsys.readouterr()
+    assert "Codebase folded into" in captured.out
     assert output_file.exists()
     with open(output_file, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -49,14 +51,16 @@ def test_fold(temp_project, tmp_path, runner):
     assert data["files"][1]["content"] == "# Docs\n"
 
 
-def test_fold_directory_default(temp_project, tmp_path, runner):
+def test_fold_directory_default(temp_project, tmp_path, monkeypatch, capsys):
     """Test folding directory when no files specified."""
     output_file = tmp_path / "folded.json"
-    os.chdir(temp_project)
-    result = runner.invoke(
-        cli, ["fold", "-o", str(output_file), "-d", "default"]
-    )  # Updated to use cli
-    assert result.exit_code == 0
+    monkeypatch.chdir(temp_project)
+    monkeypatch.setattr(
+        sys, "argv", ["cfold", "fold", "-o", str(output_file), "-d", "default"]
+    )
+    main()
+    captured = capsys.readouterr()
+    assert "Codebase folded into" in captured.out
     assert output_file.exists()
     with open(output_file, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -65,14 +69,16 @@ def test_fold_directory_default(temp_project, tmp_path, runner):
     assert any(f["path"] == "src/project/utils.py" for f in data["files"])
 
 
-def test_fold_dialect_codeonly(temp_project, tmp_path, runner):
+def test_fold_dialect_codeonly(temp_project, tmp_path, monkeypatch, capsys):
     """Test codeonly dialect excludes non-code files."""
     output_file = tmp_path / "folded.json"
-    os.chdir(temp_project)
-    result = runner.invoke(
-        cli, ["fold", "-o", str(output_file), "-d", "py"]
-    )  # Updated to use cli
-    assert result.exit_code == 0
+    monkeypatch.chdir(temp_project)
+    monkeypatch.setattr(
+        sys, "argv", ["cfold", "fold", "-o", str(output_file), "-d", "py"]
+    )
+    main()
+    captured = capsys.readouterr()
+    assert "Codebase folded into" in captured.out
     assert output_file.exists()
     with open(output_file, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -82,14 +88,16 @@ def test_fold_dialect_codeonly(temp_project, tmp_path, runner):
     assert not any(f["path"] == "docs/index.md" for f in data["files"])
 
 
-def test_fold_dialect_doconly(temp_project, tmp_path, runner):
+def test_fold_dialect_doconly(temp_project, tmp_path, monkeypatch, capsys):
     """Test doconly dialect includes only doc files."""
     output_file = tmp_path / "folded.json"
-    os.chdir(temp_project)
-    result = runner.invoke(
-        cli, ["fold", "-o", str(output_file), "-d", "doc"]
-    )  # Updated to use cli
-    assert result.exit_code == 0
+    monkeypatch.chdir(temp_project)
+    monkeypatch.setattr(
+        sys, "argv", ["cfold", "fold", "-o", str(output_file), "-d", "doc"]
+    )
+    main()
+    captured = capsys.readouterr()
+    assert "Codebase folded into" in captured.out
     assert output_file.exists()
     with open(output_file, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -98,7 +106,7 @@ def test_fold_dialect_doconly(temp_project, tmp_path, runner):
     assert not any(f["path"] == "src/project/importer.py" for f in data["files"])
 
 
-def test_unfold_new_files(temp_project, tmp_path, runner):
+def test_unfold_new_files(temp_project, tmp_path, monkeypatch, capsys):
     """Test unfolding new files."""
     fold_file = tmp_path / "folded.json"
     data = {
@@ -110,22 +118,24 @@ def test_unfold_new_files(temp_project, tmp_path, runner):
     }
     with open(fold_file, "w", encoding="utf-8") as f:
         json.dump(data, f)
-    os.chdir(tmp_path)
     output_dir = tmp_path / "unfolded"
     output_dir.mkdir()
-    result = runner.invoke(
-        cli, ["unfold", str(fold_file), "-o", str(output_dir)]
-    )  # Updated to use cli, removed -f
-    assert result.exit_code == 0
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys, "argv", ["cfold", "unfold", str(fold_file), "-o", str(output_dir)]
+    )
+    main()
+    captured = capsys.readouterr()
+    assert "Codebase unfolded into" in captured.out
     assert (output_dir / "src" / "project" / "new.py").exists()
     assert (
         output_dir / "src" / "project" / "new.py"
-    ).read_text().strip() == "print('New file')"
+    ).read_text() == "print('New file')\n"
     assert (output_dir / "docs" / "new.md").exists()
-    assert (output_dir / "docs" / "new.md").read_text().strip() == "# New Doc"
+    assert (output_dir / "docs" / "new.md").read_text() == "# New Doc\n"
 
 
-def test_unfold_modify_and_delete(temp_project, tmp_path, runner):
+def test_unfold_modify_and_delete(temp_project, tmp_path, monkeypatch, capsys):
     """Test unfolding with modifications and deletions."""
     fold_file = tmp_path / "folded.json"
     data = {
@@ -137,22 +147,36 @@ def test_unfold_modify_and_delete(temp_project, tmp_path, runner):
     }
     with open(fold_file, "w", encoding="utf-8") as f:
         json.dump(data, f)
-    os.chdir(tmp_path)
     output_dir = tmp_path / "unfolded"
     output_dir.mkdir()
-    result = runner.invoke(
-        cli, ["unfold", str(fold_file), "-i", str(temp_project), "-o", str(output_dir)]
-    )  # Updated to use cli, removed -f
-    assert result.exit_code == 0
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "cfold",
+            "unfold",
+            str(fold_file),
+            "-i",
+            str(temp_project),
+            "-o",
+            str(output_dir),
+        ],
+    )
+    main()
+    captured = capsys.readouterr()
+    assert "Codebase unfolded into" in captured.out
     assert (output_dir / "src" / "project" / "main.py").exists()
     assert (
         output_dir / "src" / "project" / "main.py"
-    ).read_text().strip() == "print('Modified')"
+    ).read_text() == "print('Modified')\n"
     assert not (output_dir / "src" / "project" / "utils.py").exists()
     assert (output_dir / "docs" / "index.md").exists()
 
 
-def test_unfold_relocate_and_update_references(temp_project, tmp_path, runner):
+def test_unfold_relocate_and_update_references(
+    temp_project, tmp_path, monkeypatch, capsys
+):
     """Test unfolding with file relocation."""
     fold_file = tmp_path / "folded.json"
     data = {
@@ -168,24 +192,36 @@ def test_unfold_relocate_and_update_references(temp_project, tmp_path, runner):
     }
     with open(fold_file, "w", encoding="utf-8") as f:
         json.dump(data, f)
-    os.chdir(tmp_path)
     output_dir = tmp_path / "unfolded"
     output_dir.mkdir()
-    result = runner.invoke(
-        cli, ["unfold", str(fold_file), "-i", str(temp_project), "-o", str(output_dir)]
-    )  # Updated to use cli, removed -f
-    assert result.exit_code == 0
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "cfold",
+            "unfold",
+            str(fold_file),
+            "-i",
+            str(temp_project),
+            "-o",
+            str(output_dir),
+        ],
+    )
+    main()
+    captured = capsys.readouterr()
+    assert "Codebase unfolded into" in captured.out
     assert (output_dir / "src" / "project" / "core" / "main.py").exists()
     assert (
         output_dir / "src" / "project" / "core" / "main.py"
-    ).read_text().strip() == 'print("Hello")'
+    ).read_text() == 'print("Hello")\n'
     assert not (output_dir / "src" / "project" / "main.py").exists()
     assert (
         output_dir / "src" / "project" / "importer.py"
-    ).read_text().strip() == "from project.core.main import *"
+    ).read_text() == "from project.core.main import *\n"
 
 
-def test_unfold_complex_full_content(temp_project, tmp_path, runner):
+def test_unfold_complex_full_content(temp_project, tmp_path, monkeypatch, capsys):
     """Test unfolding complex full-content file."""
     fold_file = tmp_path / "complex_full.json"
     data = {
@@ -210,30 +246,44 @@ def test_unfold_complex_full_content(temp_project, tmp_path, runner):
     }
     with open(fold_file, "w", encoding="utf-8") as f:
         json.dump(data, f)
-    os.chdir(tmp_path)
     output_dir = tmp_path / "unfolded"
     output_dir.mkdir()
-    result = runner.invoke(
-        cli, ["unfold", str(fold_file), "-i", str(temp_project), "-o", str(output_dir)]
-    )  # Updated to use cli, removed -f
-    assert result.exit_code == 0
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "cfold",
+            "unfold",
+            str(fold_file),
+            "-i",
+            str(temp_project),
+            "-o",
+            str(output_dir),
+        ],
+    )
+    main()
+    captured = capsys.readouterr()
+    assert "Codebase unfolded into" in captured.out
     assert (
         output_dir / "src" / "project" / "main.py"
-    ).read_text().strip() == 'print("Modified Hello")\nprint("Extra line")'
+    ).read_text() == 'print("Modified Hello")\nprint("Extra line")\n'
     assert (
         output_dir / "src" / "project" / "core" / "utils.py"
-    ).read_text().strip() == "def new_util():\n    return 42"
+    ).read_text() == "def new_util():\n    return 42\n"
     assert not (output_dir / "src" / "project" / "utils.py").exists()
     assert (
         output_dir / "src" / "project" / "importer.py"
-    ).read_text().strip() == "from project.main import *\nprint('Imported')"
+    ).read_text() == "from project.main import *\nprint('Imported')\n"
     assert not (output_dir / "docs" / "index.md").exists()
     assert (
         output_dir / "src" / "project" / "new_file.py"
-    ).read_text().strip() == "print('Brand new file')"
+    ).read_text() == "print('Brand new file')\n"
 
 
-def test_unfold_md_commands_not_interpreted(temp_project, tmp_path, runner):
+def test_unfold_md_commands_not_interpreted(
+    temp_project, tmp_path, monkeypatch, capsys
+):
     """Test MOVE/DELETE in .md files not interpreted."""
     fold_file = tmp_path / "folded.json"
     data = {
@@ -247,13 +297,25 @@ def test_unfold_md_commands_not_interpreted(temp_project, tmp_path, runner):
     }
     with open(fold_file, "w", encoding="utf-8") as f:
         json.dump(data, f)
-    os.chdir(tmp_path)
     output_dir = tmp_path / "unfolded"
     output_dir.mkdir()
-    result = runner.invoke(
-        cli, ["unfold", str(fold_file), "-i", str(temp_project), "-o", str(output_dir)]
-    )  # Updated to use cli, removed -f
-    assert result.exit_code == 0
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "cfold",
+            "unfold",
+            str(fold_file),
+            "-i",
+            str(temp_project),
+            "-o",
+            str(output_dir),
+        ],
+    )
+    main()
+    captured = capsys.readouterr()
+    assert "Codebase unfolded into" in captured.out
     example_content = (output_dir / "docs" / "example.md").read_text()
     assert "# Example" in example_content
     assert "# DELETE" in example_content
@@ -262,37 +324,58 @@ def test_unfold_md_commands_not_interpreted(temp_project, tmp_path, runner):
     ).exists()  # Assuming it's copied
 
 
-def test_fold_invalid_dialect(temp_project, tmp_path, runner):
+def test_fold_invalid_dialect(temp_project, tmp_path, monkeypatch, capsys):
     """Test fold with invalid dialect raises error."""
     output_file = tmp_path / "folded.json"
-    os.chdir(temp_project)
-    result = runner.invoke(cli, ["fold", "-o", str(output_file), "-d", "invalid"])
-    assert result.exit_code == 1
-    assert "Invalid dialect specified" in result.output
+    monkeypatch.chdir(temp_project)
+    monkeypatch.setattr(
+        sys, "argv", ["cfold", "fold", "-o", str(output_file), "-d", "invalid"]
+    )
+    with pytest.raises(SystemExit) as exc:
+        main()
+    assert exc.value.code == 1
+    captured = capsys.readouterr()
+    assert "Invalid dialect specified" in captured.out
 
 
-def test_fold_no_files(temp_project, tmp_path, runner):
+def test_fold_no_files(temp_project, tmp_path, monkeypatch, capsys):
     """Test fold with no valid files."""
     output_file = tmp_path / "folded.json"
-    os.chdir(
+    monkeypatch.chdir(
         temp_project / "docs"
     )  # Change to a dir with no includable files for py dialect
-    result = runner.invoke(cli, ["fold", "-o", str(output_file), "-d", "py"])
-    assert result.exit_code == 0
-    assert "No valid files to fold." in result.output
+    monkeypatch.setattr(
+        sys, "argv", ["cfold", "fold", "-o", str(output_file), "-d", "py"]
+    )
+    main()
+    captured = capsys.readouterr()
+    assert "No valid files to fold." in captured.out
     assert not output_file.exists()
 
 
-def test_fold_with_prompt(temp_project, tmp_path, runner):
+def test_fold_with_prompt(temp_project, tmp_path, monkeypatch, capsys):
     """Test fold with prompt file."""
     output_file = tmp_path / "folded.json"
     prompt_file = tmp_path / "prompt.txt"
     prompt_file.write_text("Custom prompt content")
-    os.chdir(temp_project)
-    result = runner.invoke(
-        cli, ["fold", "-o", str(output_file), "-p", str(prompt_file), "-d", "default"]
+    monkeypatch.chdir(temp_project)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "cfold",
+            "fold",
+            "-o",
+            str(output_file),
+            "-p",
+            str(prompt_file),
+            "-d",
+            "default",
+        ],
     )
-    assert result.exit_code == 0
+    main()
+    captured = capsys.readouterr()
+    assert "Codebase folded into" in captured.out
     with open(output_file, "r", encoding="utf-8") as f:
         data = json.load(f)
     assert any(
@@ -301,21 +384,34 @@ def test_fold_with_prompt(temp_project, tmp_path, runner):
     )
 
 
-def test_fold_with_invalid_prompt(temp_project, tmp_path, runner):
+def test_fold_with_invalid_prompt(temp_project, tmp_path, monkeypatch, capsys):
     """Test fold with non-existing prompt file."""
     output_file = tmp_path / "folded.json"
-    os.chdir(temp_project)
-    result = runner.invoke(
-        cli, ["fold", "-o", str(output_file), "-p", "nonexistent.txt", "-d", "default"]
+    monkeypatch.chdir(temp_project)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "cfold",
+            "fold",
+            "-o",
+            str(output_file),
+            "-p",
+            "nonexistent.txt",
+            "-d",
+            "default",
+        ],
     )
-    assert result.exit_code == 0
+    main()
+    captured = capsys.readouterr()
     assert (
         "Warning: Prompt file 'nonexistent.txt' does not exist. Skipping."
-        in result.output
+        in captured.out
     )
+    assert "Codebase folded into" in captured.out
 
 
-def test_unfold_without_original_dir(temp_project, tmp_path, runner):
+def test_unfold_without_original_dir(temp_project, tmp_path, monkeypatch, capsys):
     """Test unfold without original directory."""
     fold_file = tmp_path / "folded.json"
     data = {
@@ -330,14 +426,18 @@ def test_unfold_without_original_dir(temp_project, tmp_path, runner):
     output_dir = tmp_path / "unfolded"
     output_dir.mkdir()
     (output_dir / "to_delete.py").write_text("delete me")
-    os.chdir(tmp_path)
-    result = runner.invoke(cli, ["unfold", str(fold_file), "-o", str(output_dir)])
-    assert result.exit_code == 0
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys, "argv", ["cfold", "unfold", str(fold_file), "-o", str(output_dir)]
+    )
+    main()
+    captured = capsys.readouterr()
+    assert "Codebase unfolded into" in captured.out
     assert (output_dir / "new_file.py").exists()
     assert not (output_dir / "to_delete.py").exists()
 
 
-def test_unfold_merge_existing_dir(temp_project, tmp_path, runner):
+def test_unfold_merge_existing_dir(temp_project, tmp_path, monkeypatch, capsys):
     """Test unfold merging into existing directory."""
     fold_file = tmp_path / "folded.json"
     data = {
@@ -352,14 +452,18 @@ def test_unfold_merge_existing_dir(temp_project, tmp_path, runner):
     output_dir.mkdir()
     (output_dir / "existing.py").write_text("original")
     (output_dir / "unchanged.py").write_text("unchanged")
-    os.chdir(tmp_path)
-    result = runner.invoke(cli, ["unfold", str(fold_file), "-o", str(output_dir)])
-    assert result.exit_code == 0
-    assert (output_dir / "existing.py").read_text().strip() == "print('Modified')"
-    assert (output_dir / "unchanged.py").read_text().strip() == "unchanged"
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys, "argv", ["cfold", "unfold", str(fold_file), "-o", str(output_dir)]
+    )
+    main()
+    captured = capsys.readouterr()
+    assert "Codebase unfolded into" in captured.out
+    assert (output_dir / "existing.py").read_text() == "print('Modified')\n"
+    assert (output_dir / "unchanged.py").read_text() == "unchanged"
 
 
-def test_unfold_delete_outside_cwd(temp_project, tmp_path, runner):
+def test_unfold_delete_outside_cwd(temp_project, tmp_path, monkeypatch, capsys):
     """Test unfold does not delete files outside CWD."""
     fold_file = tmp_path / "folded.json"
     data = {
@@ -374,17 +478,21 @@ def test_unfold_delete_outside_cwd(temp_project, tmp_path, runner):
     output_dir.mkdir()
     outside_file = tmp_path / "outside.py"
     outside_file.write_text("should not delete")
-    os.chdir(output_dir)
-    result = runner.invoke(cli, ["unfold", str(fold_file), "-o", "."])
-    assert result.exit_code == 0
+    monkeypatch.chdir(output_dir)
+    monkeypatch.setattr(sys, "argv", ["cfold", "unfold", str(fold_file), "-o", "."])
+    main()
+    captured = capsys.readouterr()
+    assert "Codebase unfolded into" in captured.out
     assert outside_file.exists()  # Should not be deleted
 
 
-def test_rc_command(temp_project, runner):
+def test_rc_command(temp_project, monkeypatch, capsys):
     """Test rc command creates .foldrc with local as default."""
-    os.chdir(temp_project)
-    result = runner.invoke(cli, ["rc"])
-    assert result.exit_code == 0
+    monkeypatch.chdir(temp_project)
+    monkeypatch.setattr(sys, "argv", ["cfold", "rc"])
+    main()
+    captured = capsys.readouterr()
+    assert ".foldrc created/updated" in captured.out
     foldrc_path = temp_project / ".foldrc"
     assert foldrc_path.exists()
     with open(foldrc_path, "r", encoding="utf-8") as f:
@@ -402,17 +510,18 @@ def test_rc_command(temp_project, runner):
     assert config["local"]["included_suffix"] == [".py", ".toml"]
 
 
-def test_fold_uses_local_default(temp_project, tmp_path, runner):
+def test_fold_uses_local_default(temp_project, tmp_path, monkeypatch, capsys):
     """Test fold uses local default dialect from .foldrc."""
-    os.chdir(temp_project)
-    # Create .foldrc with default_dialect: py
     foldrc_path = temp_project / ".foldrc"
     config = {"default_dialect": "py"}
     with open(foldrc_path, "w", encoding="utf-8") as f:
         yaml.safe_dump(config, f)
     output_file = tmp_path / "folded.json"
-    result = runner.invoke(cli, ["fold", "-o", str(output_file)])
-    assert result.exit_code == 0
+    monkeypatch.chdir(temp_project)
+    monkeypatch.setattr(sys, "argv", ["cfold", "fold", "-o", str(output_file)])
+    main()
+    captured = capsys.readouterr()
+    assert "Codebase folded into" in captured.out
     with open(output_file, "r", encoding="utf-8") as f:
         data = json.load(f)
     # Check if it used 'py' dialect (excludes .md)
@@ -420,12 +529,16 @@ def test_fold_uses_local_default(temp_project, tmp_path, runner):
     assert not any(f["path"] == "docs/index.md" for f in data["files"])
 
 
-def test_fold_bare(temp_project, tmp_path, runner):
+def test_fold_bare(temp_project, tmp_path, monkeypatch, capsys):
     """Test fold in bare mode has no instructions."""
     output_file = tmp_path / "folded.json"
-    os.chdir(temp_project)
-    result = runner.invoke(cli, ["fold", "-o", str(output_file), "-b", "-d", "default"])
-    assert result.exit_code == 0
+    monkeypatch.chdir(temp_project)
+    monkeypatch.setattr(
+        sys, "argv", ["cfold", "fold", "-o", str(output_file), "-b", "-d", "default"]
+    )
+    main()
+    captured = capsys.readouterr()
+    assert "Codebase folded into" in captured.out
     with open(output_file, "r", encoding="utf-8") as f:
         data = json.load(f)
     assert data["instructions"] == []
@@ -433,17 +546,30 @@ def test_fold_bare(temp_project, tmp_path, runner):
     assert any(f["path"] == "docs/index.md" for f in data["files"])
 
 
-def test_fold_bare_with_prompt(temp_project, tmp_path, runner):
+def test_fold_bare_with_prompt(temp_project, tmp_path, monkeypatch, capsys):
     """Test fold in bare mode with prompt includes only the prompt."""
     output_file = tmp_path / "folded.json"
     prompt_file = tmp_path / "prompt.txt"
     prompt_file.write_text("Custom prompt")
-    os.chdir(temp_project)
-    result = runner.invoke(
-        cli,
-        ["fold", "-o", str(output_file), "-b", "-p", str(prompt_file), "-d", "default"],
+    monkeypatch.chdir(temp_project)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "cfold",
+            "fold",
+            "-o",
+            str(output_file),
+            "-b",
+            "-p",
+            str(prompt_file),
+            "-d",
+            "default",
+        ],
     )
-    assert result.exit_code == 0
+    main()
+    captured = capsys.readouterr()
+    assert "Codebase folded into" in captured.out
     with open(output_file, "r", encoding="utf-8") as f:
         data = json.load(f)
     assert len(data["instructions"]) == 1
@@ -453,7 +579,7 @@ def test_fold_bare_with_prompt(temp_project, tmp_path, runner):
     assert any(f["path"] == "docs/index.md" for f in data["files"])
 
 
-def test_fold_with_exclude(temp_project, tmp_path, runner):
+def test_fold_with_exclude(temp_project, tmp_path, monkeypatch, capsys):
     """Test fold excludes files specified in dialect's exclude list."""
     foldrc_path = temp_project / ".foldrc"
     config = {
@@ -466,9 +592,11 @@ def test_fold_with_exclude(temp_project, tmp_path, runner):
     with open(foldrc_path, "w", encoding="utf-8") as f:
         yaml.safe_dump(config, f)
     output_file = tmp_path / "folded.json"
-    os.chdir(temp_project)
-    result = runner.invoke(cli, ["fold", "-o", str(output_file)])
-    assert result.exit_code == 0
+    monkeypatch.chdir(temp_project)
+    monkeypatch.setattr(sys, "argv", ["cfold", "fold", "-o", str(output_file)])
+    main()
+    captured = capsys.readouterr()
+    assert "Codebase folded into" in captured.out
     with open(output_file, "r", encoding="utf-8") as f:
         data = json.load(f)
     assert not any(f["path"] == "src/project/main.py" for f in data["files"])
