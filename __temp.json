@@ -1,0 +1,10 @@
+{
+  "instructions": [],
+  "files": [
+    {
+      "path": "admin.sh",
+      "content": "#!/bin/bash\n\n# Run ruff format (outputs to stdout by default)\nruff format\n\n# Run ruff check with fix, print to stdout and save to out.txt\nruff check --fix | tee out.txt\n\n# Get modified files (staged or unstaged)\nmodified=$(git status --porcelain | grep '^ M' | cut -c4-)\n\n# Get untracked (new) files\nuntracked=$(git status --porcelain | grep '^??' | cut -c4-)\n\n# Commit new files individually\nfor file in $untracked; do\n  if [ \"$file\" != \"admin.sh\" ] && [ \"$file\" != \"out.txt\" ]; then\n    git add \"$file\"\n    git commit \"$file\" -m \"Add new file $file\"\n  fi\ndone\n\n# Commit modified files individually\nfor file in $modified; do\n  if [ \"$file\" != \"admin.sh\" ] && [ \"$file\" != \"out.txt\" ]; then\n    git commit \"$file\" -m \"Update $file\"\n  fi\ndone\n\n# Run pytest, print to stdout and append to out.txt\nuv run pytest -v | tee -a out.txt\n",
+      "delete": false
+    }
+  ]
+}
