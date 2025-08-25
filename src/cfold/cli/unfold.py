@@ -58,7 +58,7 @@ def unfold(foldfile, original_dir=None, output_dir=None):
                         else:
                             os.makedirs(os.path.dirname(dst), exist_ok=True)
                             with open(dst, "w", encoding="utf-8") as outfile:
-                                outfile.write(entry.content + "\n")
+                                outfile.write(entry.content)
                             modified_files_list.append(relpath)
                     else:
                         os.makedirs(os.path.dirname(dst), exist_ok=True)
@@ -81,7 +81,7 @@ def unfold(foldfile, original_dir=None, output_dir=None):
                 continue
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
             with open(full_path, "w", encoding="utf-8") as outfile:
-                outfile.write(entry.content + "\n")
+                outfile.write(entry.content)
             added_files.append(path)
     else:
         for path, entry in modified_files.items():
@@ -99,7 +99,7 @@ def unfold(foldfile, original_dir=None, output_dir=None):
                 continue
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
             with open(full_path, "w", encoding="utf-8") as outfile:
-                outfile.write(entry.content + "\n")
+                outfile.write(entry.content)
             added_files.append(path)
 
     # Output summary tree
