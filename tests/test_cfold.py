@@ -425,7 +425,6 @@ def test_unfold_without_original_dir(temp_project, tmp_path, monkeypatch, capsys
         json.dump(data, f)
     output_dir = tmp_path / "unfolded"
     output_dir.mkdir()
-    (output_dir / "to_delete.py").write_text("delete me")
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(
         sys, "argv", ["cfold", "unfold", str(fold_file), "-o", str(output_dir)]
@@ -534,7 +533,7 @@ def test_fold_bare(temp_project, tmp_path, monkeypatch, capsys):
     output_file = tmp_path / "folded.json"
     monkeypatch.chdir(temp_project)
     monkeypatch.setattr(
-        sys, "argv", ["cfold", "fold", "-o", str(output_file), "-b", "-d", "default"]
+        sys, "argv", ["cfold", "fold", "-o", str(output_file), "-b", "True", "-d", "default"]
     )
     main()
     captured = capsys.readouterr()
@@ -561,6 +560,7 @@ def test_fold_bare_with_prompt(temp_project, tmp_path, monkeypatch, capsys):
             "-o",
             str(output_file),
             "-b",
+            "True",
             "-p",
             str(prompt_file),
             "-d",
@@ -602,3 +602,48 @@ def test_fold_with_exclude(temp_project, tmp_path, monkeypatch, capsys):
     assert not any(f["path"] == "src/project/main.py" for f in data["files"])
     assert any(f["path"] == "src/project/utils.py" for f in data["files"])
     assert any(f["path"] == "docs/index.md" for f in data["files"])
+
+
+def test_view_command(tmp_path, monkeypatch, capsys):
+    """Test view command displays instructions and files."""
+    fold_file = tmp_path / "view_test.json"
+    data = {
+        "instructions": [
+            {
+                "type": "system",
+                "content": "System prompt",
+                "name": "sys",
+                "synopsis": "Overview",
+            },
+            {"type": "user", "content": "User prompt"},
+        ],
+        "files": [
+            {"path": "file1.py", "content": "code"},
+            {"path": "file2.md", "delete": True},
+        ],
+    }
+    with open(fold_file, "w", encoding="utf-8") as f:
+        json.dump(data, f)
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", ["cfold", "view", str(fold_file)])
+    main()
+    captured = capsys.readouterr()
+    assert "Instructions" in captured.out
+    assert "system (sys) - Overview" in captured.out
+    assert "user" in captured.out
+    assert "Files" in captured.out
+    assert "file1.py" in captured.out
+    assert "file2.md (delete)" in captured.out
+
+
+def test_view_invalid_file(tmp_path, monkeypatch, capsys):
+    """Test view with invalid file shows error."""
+    fold_file = tmp_path / "invalid.json"
+    fold_file.write_text("invalid json")
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", ["cfold", "view", str(fold_file)])
+    main()
+    captured = capsys.readouterr()
+    assert "Error loading" in captured.out

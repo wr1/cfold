@@ -12,10 +12,18 @@ from rich.tree import Tree
 from cfold.utils.treeviz import get_folded_tree
 from cfold.models import Codebase, FileEntry, Instruction  # Added for Pydantic model
 import sys
+from typing import List, Optional
 
 
-def fold(files, output="codefold.json", prompt=None, dialect="default", bare=False):
+def fold(
+    files: List[str],
+    output: str = "codefold.json",
+    prompt: str = None,
+    dialect: str = "default",
+    bare: bool = False,
+):
     """Fold files or directory into a single text file and visualize the structure."""
+    bare = bool(bare)
     console = Console()
     cwd = Path.cwd()
     # Check for local default dialect if 'default' is specified

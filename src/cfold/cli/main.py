@@ -8,10 +8,12 @@
 # from treeparse import cli, command, argument, option
 
 import treeparse
+from typing import List, Optional
 
 from .fold import fold
 from .unfold import unfold
 from .rc import rc
+from .view import view
 
 app = treeparse.cli(
     name="cfold",
@@ -55,9 +57,12 @@ fold_cmd = treeparse.command(
         ),
         treeparse.option(
             flags=["--bare", "-b"],
-            is_flag=True,
             help="Bare mode without boilerplate instructions",
+            default=False,
+            arg_type=bool,
             sort_key=3,
+            # action="store_const",
+            # const="True",
         ),
     ],
 )
@@ -95,6 +100,16 @@ rc_cmd = treeparse.command(
     callback=rc,
 )
 app.commands.append(rc_cmd)
+
+view_cmd = treeparse.command(
+    name="view",
+    help="View the prompts and files in a fold file.",
+    callback=view,
+    arguments=[
+        treeparse.argument(name="foldfile", arg_type=str, sort_key=0),
+    ],
+)
+app.commands.append(view_cmd)
 
 
 def main():
