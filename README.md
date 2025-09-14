@@ -17,7 +17,6 @@ uv pip install https://github.com/wr1/cfold.git
 
 ![Help](docs/assets/demo.svg)
 
-
 ## Fold File Format
 
 - JSON structure with keys: `instructions` (list of objects), `files`.
@@ -27,9 +26,4 @@ uv pip install https://github.com/wr1/cfold.git
 - Delete files with `delete: true` (content optional).
 - Add new files by adding new objects with `path` and `content`.
 - Move/rename: Delete old (`delete: true`) and add new with updated path and content.
-
-
-
-
-
 
