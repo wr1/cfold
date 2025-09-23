@@ -1,6 +1,6 @@
 [project]
 name = "cfold"
-version = "0.2.3"
+version = "0.2.2"
 description = "A command line tool to fold and unfold Python projects for LLM interaction"
 authors = [{ name = "wr1", email = "8971152+wr1@users.noreply.github.com" }]
 requires-python = "~=3.10"
