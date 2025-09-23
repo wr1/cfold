@@ -1,19 +1,12 @@
 """Main CLI for cfold using treeparse."""
 
-# import sys
-# from pathlib import Path
-
-# sys.path.append(str(Path(__file__).parent.parent.parent / "treeparse" / "src"))
-
-# from treeparse import cli, command, argument, option
-
 import treeparse
-from typing import List, Optional
 
 from .fold import fold
 from .unfold import unfold
 from .rc import rc
 from .view import view
+from .add import add
 
 app = treeparse.cli(
     name="cfold",
@@ -61,8 +54,6 @@ fold_cmd = treeparse.command(
             default=False,
             arg_type=bool,
             sort_key=3,
-            # action="store_const",
-            # const="True",
         ),
     ],
 )
@@ -110,6 +101,27 @@ view_cmd = treeparse.command(
     ],
 )
 app.commands.append(view_cmd)
+
+add_cmd = treeparse.command(
+    name="add",
+    help="Add files to an existing cfold file.",
+    callback=add,
+    arguments=[
+        treeparse.argument(
+            name="files", arg_type=str, nargs="*", default=[], sort_key=0
+        ),
+    ],
+    options=[
+        treeparse.option(
+            flags=["--foldfile", "-f"],
+            help="Cfold file to add to",
+            arg_type=str,
+            default="codefold.json",
+            sort_key=0,
+        ),
+    ],
+)
+app.commands.append(add_cmd)
 
 
 def main():
