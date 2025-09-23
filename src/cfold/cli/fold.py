@@ -12,7 +12,7 @@ from rich.tree import Tree
 from cfold.utils.treeviz import get_folded_tree
 from cfold.models import Codebase, FileEntry, Instruction  # Added for Pydantic model
 import sys
-from typing import List, Optional
+from typing import List
 
 
 def fold(

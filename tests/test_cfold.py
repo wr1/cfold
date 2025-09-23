@@ -647,3 +647,86 @@ def test_view_invalid_file(tmp_path, monkeypatch, capsys):
     main()
     captured = capsys.readouterr()
     assert "Error loading" in captured.out
+
+
+def test_add_files(temp_project, tmp_path, monkeypatch, capsys):
+    """Test add command adds new files to existing cfold file."""
+    fold_file = tmp_path / "codefold.json"
+    initial_data = {
+        "instructions": [],
+        "files": [
+            {"path": "existing.py", "content": "original"},
+        ],
+    }
+    with open(fold_file, "w", encoding="utf-8") as f:
+        json.dump(initial_data, f)
+    new_file = temp_project / "src" / "project" / "new.py"
+    new_file.write_text("new content")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys, "argv", ["cfold", "add", str(new_file)]
+    )
+    main()
+    captured = capsys.readouterr()
+    assert "Added files to" in captured.out
+    with open(fold_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    assert len(data["files"]) == 2
+    assert any(f["path"] == "existing.py" and f["content"] == "original" for f in data["files"])
+    assert any(f["path"] == "src/project/new.py" and f["content"] == "new content" for f in data["files"])
+
+
+def test_add_update_existing(temp_project, tmp_path, monkeypatch, capsys):
+    """Test add command updates existing files."""
+    fold_file = tmp_path / "codefold.json"
+    initial_data = {
+        "instructions": [],
+        "files": [
+            {"path": "src/project/main.py", "content": "old"},
+        ],
+    }
+    with open(fold_file, "w", encoding="utf-8") as f:
+        json.dump(initial_data, f)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys, "argv", ["cfold", "add", str(temp_project / "src" / "project" / "main.py")]
+    )
+    main()
+    captured = capsys.readouterr()
+    assert "No new files added" in captured.out
+    with open(fold_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    assert len(data["files"]) == 1
+    assert data["files"][0]["content"] == 'print("Hello")\n'
+
+
+def test_add_nonexistent_foldfile(temp_project, tmp_path, monkeypatch, capsys):
+    """Test add command with nonexistent foldfile."""
+    fold_file = tmp_path / "nonexistent.json"
+    new_file = temp_project / "src" / "project" / "new.py"
+    new_file.write_text("content")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys, "argv", ["cfold", "add", str(new_file), "-f", str(fold_file)]
+    )
+    main()
+    captured = capsys.readouterr()
+    assert "does not exist" in captured.out
+
+
+def test_add_non_file(temp_project, tmp_path, monkeypatch, capsys):
+    """Test add command with non-file input."""
+    fold_file = tmp_path / "codefold.json"
+    initial_data = {"instructions": [], "files": []}
+    with open(fold_file, "w", encoding="utf-8") as f:
+        json.dump(initial_data, f)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys, "argv", ["cfold", "add", str(temp_project / "src")]  # directory
+    )
+    main()
+    captured = capsys.readouterr()
+    assert "Warning: " in captured.out and "is not a file" in captured.out
+    with open(fold_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    assert len(data["files"]) == 0
