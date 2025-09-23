@@ -10,10 +10,10 @@ dependencies = [
     "pyyaml>=6.0.2,<7",
     "click>=8.1.7,<9",
     "rich>=13.7.1",
-    "rich-click>=1.7.0",  # Added for Rich-styled Click help
+    # "rich-click>=1.7.0",  # Added for Rich-styled Click help
     "pyperclip>=1.8.2",  # Added to handle clipboard operations
     "pydantic>=2.0.0,<3",  # Added for data modeling  
-    "treeparse @ git+https://github.com/wr1/treeparse.git@master",  # Added for CLI parsing
+    "treeparse",  # Added for CLI parsing
 
 ]
 

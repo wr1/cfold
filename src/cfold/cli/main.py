@@ -1,6 +1,7 @@
 """Main CLI for cfold using treeparse."""
 
 import treeparse
+from typing import List, Optional
 
 from .fold import fold
 from .unfold import unfold
@@ -19,7 +20,7 @@ app = treeparse.cli(
 
 fold_cmd = treeparse.command(
     name="fold",
-    help="Fold files or directory into a single text file and visualize the structure.",
+    help="Fold files or directory into a single file and visualize the structure.",
     callback=fold,
     arguments=[
         treeparse.argument(
@@ -97,7 +98,7 @@ view_cmd = treeparse.command(
     help="View the prompts and files in a fold file.",
     callback=view,
     arguments=[
-        treeparse.argument(name="foldfile", arg_type=str, sort_key=0),
+        treeparse.argument(name="foldfile", arg_type=str, default="codefold.json", sort_key=0),
     ],
 )
 app.commands.append(view_cmd)
