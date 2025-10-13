@@ -5,6 +5,7 @@
 
 - Fold files and instructions into json
 - Unfold LLM return jsons in same format
+- Intended to let LLM's produce codebase changes in a controlled manner
 
 
 ## Installation
@@ -15,7 +16,10 @@ uv pip install https://github.com/wr1/cfold.git
 
 ## Usage
 
-<!-- ![Help](docs/assets/demo.svg) -->
+<!-- ![Help](docs/assets/help1.svg) -->
+
+
+
 ![Help](docs/assets/help.svg)
 
 
