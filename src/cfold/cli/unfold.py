@@ -3,19 +3,14 @@
 import os
 import shutil
 import json
-import rich_click as click  # Replaced for Rich-styled help
 from rich.console import Console
 from rich.tree import Tree
 from pathlib import Path
-from cfold.utils.foldignore import load_foldignore, should_include_file
-from cfold.models import Codebase  # Added for Pydantic model
+from cfold.utils.foldignore import should_include_file
+from cfold.core.models import Codebase  # Added for Pydantic model
 
 
-@click.command()
-@click.argument("foldfile")
-@click.option("--original-dir", "-i", help="Original project directory")
-@click.option("--output-dir", "-o", help="Output directory")
-def unfold(foldfile, original_dir, output_dir):
+def unfold(foldfile, original_dir=None, output_dir=None):
     """Unfold a modified fold file into a directory."""
     console = Console()
     cwd = os.getcwd()
@@ -40,13 +35,11 @@ def unfold(foldfile, original_dir, output_dir):
 
     if original_dir and os.path.isdir(original_dir):
         original_dir = os.path.abspath(original_dir)
-        ignore_patterns = load_foldignore(original_dir)
         for dirpath, _, filenames in os.walk(original_dir):
             for filename in filenames:
                 filepath = os.path.join(dirpath, filename)
                 if should_include_file(
                     filepath,
-                    ignore_patterns,
                     original_dir,
                     [],  # included_patterns empty or adjust
                     [],  # excluded_patterns
@@ -65,7 +58,7 @@ def unfold(foldfile, original_dir, output_dir):
                         else:
                             os.makedirs(os.path.dirname(dst), exist_ok=True)
                             with open(dst, "w", encoding="utf-8") as outfile:
-                                outfile.write(entry.content + "\n")
+                                outfile.write(entry.content)
                             modified_files_list.append(relpath)
                     else:
                         os.makedirs(os.path.dirname(dst), exist_ok=True)
@@ -88,7 +81,7 @@ def unfold(foldfile, original_dir, output_dir):
                 continue
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
             with open(full_path, "w", encoding="utf-8") as outfile:
-                outfile.write(entry.content + "\n")
+                outfile.write(entry.content)
             added_files.append(path)
     else:
         for path, entry in modified_files.items():
@@ -106,7 +99,7 @@ def unfold(foldfile, original_dir, output_dir):
                 continue
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
             with open(full_path, "w", encoding="utf-8") as outfile:
-                outfile.write(entry.content + "\n")
+                outfile.write(entry.content)
             added_files.append(path)
 
     # Output summary tree

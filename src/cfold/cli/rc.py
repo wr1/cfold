@@ -2,11 +2,9 @@
 
 from pathlib import Path
 import yaml
-import rich_click as click
 from rich.console import Console
 
 
-@click.command()
 def rc():
     """Create or update .foldrc with a 'local' profile and set it as the default dialect."""
     cwd = Path.cwd()

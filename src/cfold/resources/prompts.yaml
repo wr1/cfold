@@ -61,6 +61,7 @@ default:
     - "tests"
     - "docs"
     - "examples"
+    - "."
 
 py:
   pre: [common, default]
@@ -72,8 +73,10 @@ py:
     - ".py"
     - ".toml"
     - ".ini"
-  # included_dirs:
-  #   - "src"
+
+  included_dirs:
+    - "src"
+    - "."
 
 pytest:
   pre: [common, default]
@@ -110,5 +113,18 @@ typst:
   included_suffix:
     - ".typ"
 
+
+hugo:
+  pre: [common]
+  instructions:
+    - type: user
+      synopsis: "hugo instructions"
+      content: "# For Hugo projects, focus on content/ directory for MD files, include hugo.yaml config. Use Hugo's front matter for metadata, organize content hierarchically."
+  included_suffix:
+    - ".md"
+    - ".yaml"
+  included_dirs:
+    - "content"
+    - "."
 
 
