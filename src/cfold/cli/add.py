@@ -4,7 +4,7 @@ import json
 import os
 from pathlib import Path
 from rich.console import Console
-from cfold.models import Codebase, FileEntry
+from cfold.core.models import Codebase, FileEntry
 from typing import List
 
 

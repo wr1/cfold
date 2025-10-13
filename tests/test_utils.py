@@ -1,5 +1,5 @@
 from cfold.utils import foldignore, instructions, treeviz
-from cfold.models import Codebase, FileEntry, Instruction
+from cfold.core.models import Codebase, FileEntry, Instruction
 from pydantic import ValidationError
 import pytest
 

@@ -3,7 +3,7 @@
 import json
 from rich.console import Console
 from rich.tree import Tree
-from cfold.models import Codebase
+from cfold.core.models import Codebase
 
 
 def view(foldfile: str):

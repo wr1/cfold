@@ -10,7 +10,7 @@ from cfold.utils.foldignore import should_include_file
 from rich.console import Console
 from rich.tree import Tree
 from cfold.utils.treeviz import get_folded_tree
-from cfold.models import Codebase, FileEntry, Instruction  # Added for Pydantic model
+from cfold.core.models import Codebase, FileEntry, Instruction  # Added for Pydantic model
 import sys
 from typing import List
 

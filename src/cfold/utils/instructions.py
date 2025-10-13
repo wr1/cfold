@@ -4,7 +4,7 @@ from importlib import resources
 from pathlib import Path
 import yaml
 from typing import List, Dict, Optional
-from cfold.models import Instruction
+from cfold.core.models import Instruction
 
 
 def collect_instructions(
