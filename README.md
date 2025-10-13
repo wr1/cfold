@@ -19,8 +19,12 @@ uv pip install https://github.com/wr1/cfold.git
 <!-- ![Help](docs/assets/help1.svg) -->
 
 
-
+### CLI help
 ![Help](docs/assets/help.svg)
+
+### Example output
+![Output](docs/assets/output.svg)
+
 
 
 ## Fold File Format
