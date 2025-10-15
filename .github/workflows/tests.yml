@@ -28,6 +28,14 @@ jobs:
       run: uv venv .venv
     - name: Install dependencies
       run: uv pip install --python .venv -e ".[dev]"
-    - name: Run tests
-      run: uv run --python .venv pytest .
-
+    - name: Run tests with coverage
+      run: uv run --python .venv pytest --cov=cfold --cov-report=xml
+    - name: Generate coverage badge
+      run: uv run --python .venv coverage-badge -f -o coverage.svg
+    - name: Commit coverage badge
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add coverage.svg
+        git commit -m "Update coverage badge" || echo "No changes to commit"
+        git push
