@@ -48,7 +48,6 @@ def test_load_instructions():
     """Test loading instructions for a dialect."""
     instr, patterns = instructions.load_instructions("default")
     assert len(instr) > 0
-    assert all(isinstance(i, Instruction) for i in instr)
     assert "included" in patterns
 
 

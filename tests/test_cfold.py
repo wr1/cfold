@@ -711,7 +711,7 @@ def test_add_nonexistent_foldfile(temp_project, tmp_path, monkeypatch, capsys):
     )
     main()
     captured = capsys.readouterr()
-    assert "does not exist" in captured.out
+    assert "does not exist" in captured.out.replace('\n', ' ')
 
 
 def test_add_non_file(temp_project, tmp_path, monkeypatch, capsys):
