@@ -36,6 +36,7 @@ default:
         - Aim for modularity: Each file should have a single responsibility, making it easier to modify or replace individually.
         - Don't include LLM instructions in the output.
         - Use high level 1 line docstrings
+        - Use clear variable and function names that convey purpose and meaning, prioritizing human/machine readability.
         - Add one character alternatives to command line options i.e. --file and -f
         - Never delete files that are outside of cwd (i.e. starting with ../ or / or otherwise outside of the cwd)
         - Make the CLI callable in pyproject.toml 
