@@ -44,7 +44,7 @@ fold_cmd = treeparse.command(
         ),
         treeparse.option(
             flags=["--dialect", "-d"],
-            help="Instruction dialect (available: default, py, pytest, doc, typst)",
+            help="Instruction dialect (available: default, py, pytest, doc, typst, hugo, pyscript)",
             arg_type=str,
             default="default",
             sort_key=2,
@@ -98,7 +98,9 @@ view_cmd = treeparse.command(
     help="View the prompts and files in a fold file.",
     callback=view,
     arguments=[
-        treeparse.argument(name="foldfile", arg_type=str, default="codefold.json", sort_key=0),
+        treeparse.argument(
+            name="foldfile", arg_type=str, default="codefold.json", sort_key=0
+        ),
     ],
 )
 app.commands.append(view_cmd)

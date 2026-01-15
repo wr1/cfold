@@ -37,3 +37,5 @@ uv pip install https://github.com/wr1/cfold.git
 - Add new files by adding new objects with `path` and `content`.
 - Move/rename: Delete old (`delete: true`) and add new with updated path and content.
 
+# license
+MIT
