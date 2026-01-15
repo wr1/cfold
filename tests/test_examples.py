@@ -1,6 +1,4 @@
-import pytest
 from pathlib import Path
-import os
 import sys
 
 # Add the project root to sys.path to import examples

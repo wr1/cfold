@@ -533,7 +533,9 @@ def test_fold_bare(temp_project, tmp_path, monkeypatch, capsys):
     output_file = tmp_path / "folded.json"
     monkeypatch.chdir(temp_project)
     monkeypatch.setattr(
-        sys, "argv", ["cfold", "fold", "-o", str(output_file), "-b", "True", "-d", "default"]
+        sys,
+        "argv",
+        ["cfold", "fold", "-o", str(output_file), "-b", "True", "-d", "default"],
     )
     main()
     captured = capsys.readouterr()
@@ -663,17 +665,20 @@ def test_add_files(temp_project, tmp_path, monkeypatch, capsys):
     new_file = temp_project / "src" / "project" / "new.py"
     new_file.write_text("new content")
     monkeypatch.chdir(tmp_path)
-    monkeypatch.setattr(
-        sys, "argv", ["cfold", "add", str(new_file)]
-    )
+    monkeypatch.setattr(sys, "argv", ["cfold", "add", str(new_file)])
     main()
     captured = capsys.readouterr()
     assert "Added files to" in captured.out
     with open(fold_file, "r", encoding="utf-8") as f:
         data = json.load(f)
     assert len(data["files"]) == 2
-    assert any(f["path"] == "existing.py" and f["content"] == "original" for f in data["files"])
-    assert any(f["path"] == "src/project/new.py" and f["content"] == "new content" for f in data["files"])
+    assert any(
+        f["path"] == "existing.py" and f["content"] == "original" for f in data["files"]
+    )
+    assert any(
+        f["path"] == "src/project/new.py" and f["content"] == "new content"
+        for f in data["files"]
+    )
 
 
 def test_add_update_existing(temp_project, tmp_path, monkeypatch, capsys):
@@ -711,7 +716,7 @@ def test_add_nonexistent_foldfile(temp_project, tmp_path, monkeypatch, capsys):
     )
     main()
     captured = capsys.readouterr()
-    assert "does not exist" in captured.out.replace('\n', ' ')
+    assert "does not exist" in captured.out.replace("\n", " ")
 
 
 def test_add_non_file(temp_project, tmp_path, monkeypatch, capsys):
@@ -722,7 +727,9 @@ def test_add_non_file(temp_project, tmp_path, monkeypatch, capsys):
         json.dump(initial_data, f)
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(
-        sys, "argv", ["cfold", "add", str(temp_project / "src")]  # directory
+        sys,
+        "argv",
+        ["cfold", "add", str(temp_project / "src")],  # directory
     )
     main()
     captured = capsys.readouterr()
