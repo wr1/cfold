@@ -1,13 +1,13 @@
 """Main CLI for cfold using treeparse."""
 
 import treeparse
-from typing import List, Optional
 
 from .fold import fold
 from .unfold import unfold
 from .rc import rc
 from .view import view
 from .add import add
+from .sum import sum_codebases
 
 app = treeparse.cli(
     name="cfold",
@@ -125,6 +125,32 @@ add_cmd = treeparse.command(
     ],
 )
 app.commands.append(add_cmd)
+
+sum_cmd = treeparse.command(
+    name="sum",
+    help="Summarize codebases using AST to generate LLM-readable structure.",
+    callback=sum_codebases,
+    arguments=[
+        treeparse.argument(name="codebases", arg_type=str, nargs="+", sort_key=0),
+    ],
+    options=[
+        treeparse.option(
+            flags=["--output", "-o"],
+            help="Output summary file",
+            arg_type=str,
+            default="summary.txt",
+            sort_key=0,
+        ),
+        treeparse.option(
+            flags=["--include-tests", "-t"],
+            help="Include test directories",
+            default=False,
+            arg_type=bool,
+            sort_key=1,
+        ),
+    ],
+)
+app.commands.append(sum_cmd)
 
 
 def main():
