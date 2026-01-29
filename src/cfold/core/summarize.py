@@ -62,7 +62,7 @@ class CodeVisitor(ast.NodeVisitor):
 def summarize_codebases(codebase_paths: List[Path], include_tests: bool = False) -> str:
     """Walk through codebases, parse Python files with AST, and generate a summary of code structure."""
     summary_lines = []
-    excluded_dirs = {".venv", "venv", "__pycache__", "node_modules", ".git"}
+    excluded_dirs = {".venv", "build", "venv", "__pycache__", "node_modules", ".git"}
     if not include_tests:
         excluded_dirs.add("tests")
         excluded_dirs.add("test")
@@ -82,18 +82,29 @@ def summarize_codebases(codebase_paths: List[Path], include_tests: bool = False)
                         with open(file_path, "r", encoding="utf-8") as f:
                             source = f.read()
                         tree = ast.parse(source, filename=str(file_path))
-                        rel_path = file_path.relative_to(codebase_path)
+                        if file_path.is_absolute():
+                            rel_path = file_path.relative_to(codebase_path)
+                        else:
+                            rel_path = file_path
                         summary_lines.append(f"  File: {rel_path}")
                         visitor = CodeVisitor()
                         visitor.visit(tree)
                         summary_lines.extend(visitor.summary_lines)
                     except SyntaxError:
                         logger.warning(f"Syntax error in {file_path}, skipped")
+                        if file_path.is_absolute():
+                            rel_path = file_path.relative_to(codebase_path)
+                        else:
+                            rel_path = file_path
                         summary_lines.append(
                             f"  File: {rel_path} - Syntax error, skipped"
                         )
                     except Exception as e:
                         logger.error(f"Error processing {file_path}: {e}")
+                        if file_path.is_absolute():
+                            rel_path = file_path.relative_to(codebase_path)
+                        else:
+                            rel_path = file_path
                         summary_lines.append(f"  File: {rel_path} - Error: {e}")
         summary_lines.append("")
     return "\n".join(summary_lines)
