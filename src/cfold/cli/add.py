@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 from rich.console import Console
 from cfold.core.models import Codebase, FileEntry
+import pyperclip  # Added for clipboard functionality
 from typing import List
 
 
@@ -55,6 +56,8 @@ def add(files: List[str], foldfile: str = "codefold.json"):
     try:
         with open(foldfile, "w", encoding="utf-8") as outfile:
             json.dump(data.model_dump(), outfile, indent=2)
+        # Copy updated content to clipboard
+        pyperclip.copy(json.dumps(data.model_dump()))
     except IOError as e:
         console.print(f"Error writing to {foldfile}: {e}", style="red")
         return
@@ -65,3 +68,4 @@ def add(files: List[str], foldfile: str = "codefold.json"):
         )
     else:
         console.print(f"No new files added to [cyan]{foldfile}[/cyan].")
+    console.print(f"Updated content [green]copied to clipboard[/green].")

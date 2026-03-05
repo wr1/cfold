@@ -16,6 +16,7 @@ app = treeparse.cli(
     show_types=True,
     show_defaults=True,
     line_connect=True,
+    theme="red_white_blue",
 )
 
 fold_cmd = treeparse.command(
