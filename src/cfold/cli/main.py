@@ -57,6 +57,13 @@ fold_cmd = treeparse.command(
             arg_type=bool,
             sort_key=3,
         ),
+        treeparse.option(
+            flags=["--copy-to-clipboard", "-c"],
+            help="Copy the folded content to clipboard",
+            default=True,
+            arg_type=bool,
+            sort_key=4,
+        ),
     ],
 )
 app.commands.append(fold_cmd)
