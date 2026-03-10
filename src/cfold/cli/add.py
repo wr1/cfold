@@ -68,4 +68,4 @@ def add(files: List[str], foldfile: str = "codefold.json"):
         )
     else:
         console.print(f"No new files added to [cyan]{foldfile}[/cyan].")
-    console.print(f"Updated content [green]copied to clipboard[/green].")
+    console.print("Updated content [green]copied to clipboard[/green].")

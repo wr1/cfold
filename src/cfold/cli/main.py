@@ -16,7 +16,7 @@ app = treeparse.cli(
     show_types=True,
     show_defaults=True,
     line_connect=True,
-    theme="red_white_blue",
+    theme="default",
 )
 
 fold_cmd = treeparse.command(
@@ -58,7 +58,7 @@ fold_cmd = treeparse.command(
             sort_key=3,
         ),
         treeparse.option(
-            flags=["--copy-to-clipboard", "-c"],
+            flags=["--clip", "-c"],
             help="Copy the folded content to clipboard",
             default=True,
             arg_type=bool,

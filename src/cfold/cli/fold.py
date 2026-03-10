@@ -25,7 +25,7 @@ def fold(
     prompt: str = None,
     dialect: str = "default",
     bare: bool = False,
-    copy_to_clipboard: bool = False,
+    clip: bool = False,
 ):
     """Fold files or directory into a single text file and visualize the structure."""
     bare = bool(bare)
@@ -120,7 +120,7 @@ def fold(
                 outfile,
                 indent=2,
             )
-        if copy_to_clipboard:
+        if clip:
             pyperclip.copy(json.dumps(data.model_dump()))
     except IOError as e:
         console.print(f"Error writing to {output}: {e}", style="red")
@@ -141,6 +141,9 @@ def fold(
         instr_tree.add(label)
     console.print(instr_tree)
 
-    console.print(
-        f"Codebase folded into [cyan]{output}[/cyan] and content [green]copied to clipboard[/green]."
-    )
+    msg = f"Codebase folded into [cyan]{output}[/cyan]"
+    if clip:
+        msg += " and content [green]copied to clipboard[/green]."
+    else:
+        msg += "."
+    console.print(msg)

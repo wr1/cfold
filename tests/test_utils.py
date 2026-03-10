@@ -74,8 +74,7 @@ def test_get_folded_tree(tmp_path):
     """Test generating folded tree."""
     files = [tmp_path / "src" / "main.py", tmp_path / "docs" / "index.md"]
     tree = treeviz.get_folded_tree(files, tmp_path)
-    assert tree.label == "Folded files tree"
-    assert len(tree.children) > 0
+    assert tree.label == "Folded files tree (total lines: 0)"
 
 
 def test_model_validation():

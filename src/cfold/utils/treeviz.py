@@ -31,7 +31,9 @@ def get_folded_tree(files: List[Path], cwd: Path) -> Tree:
     line_counts = {os.path.relpath(str(f), str(cwd)): count_lines(f) for f in files}
     total_lines = sum(line_counts.values())
 
-    main_tree = Tree(f"Folded files tree (total lines: {total_lines})", guide_style="dim")  # Create the main Tree
+    main_tree = Tree(
+        f"Folded files tree (total lines: {total_lines})", guide_style="dim"
+    )  # Create the main Tree
 
     # Build tree
     for file_path_rel in sorted(line_counts.keys()):
@@ -57,35 +59,37 @@ def get_folded_tree(files: List[Path], cwd: Path) -> Tree:
 
     # Calculate directory lines
     dir_lines = {}
+
     def calc_dir_lines(node, rel_path):
         if not node.children:
             return 0
         lines = 0
         for child in node.children:
             if child.children:  # dir
-                dir_name = child.label.rstrip('/')
-                child_rel = rel_path + dir_name + '/'
+                dir_name = child.label.rstrip("/")
+                child_rel = rel_path + dir_name + "/"
                 child_lines = calc_dir_lines(child, child_rel)
-                dir_lines[child_rel.rstrip('/')] = child_lines
+                dir_lines[child_rel.rstrip("/")] = child_lines
                 lines += child_lines
             else:  # file
                 file_label = child.label
                 file_name = file_label
-                if file_name.startswith('[green]'):
+                if file_name.startswith("[green]"):
                     file_name = file_name[7:-8]
-                elif file_name.startswith('[cyan]'):
+                elif file_name.startswith("[cyan]"):
                     file_name = file_name[7:-8]
-                elif file_name.startswith('[yellow]'):
+                elif file_name.startswith("[yellow]"):
                     file_name = file_name[7:-8]
                 full_path = rel_path + file_name
                 lines += line_counts.get(full_path, 0)
         return lines
-    calc_dir_lines(main_tree, '')
+
+    calc_dir_lines(main_tree, "")
 
     # Update directory labels with percentages
     def update_dir_labels(node, rel_path):
-        if node.children and node.label.endswith('/'):
-            dir_rel = rel_path.rstrip('/')
+        if node.children and node.label.endswith("/"):
+            dir_rel = rel_path.rstrip("/")
             lines = dir_lines.get(dir_rel, 0)
             percent = (lines / total_lines * 100) if total_lines > 0 else 0
             color = get_heat_color(percent)
@@ -93,9 +97,10 @@ def get_folded_tree(files: List[Path], cwd: Path) -> Tree:
             node.label = node.label + percent_str
         for child in node.children:
             if child.children:
-                child_dir_name = child.label.rstrip('/')
-                child_rel_path = rel_path + child_dir_name + '/'
+                child_dir_name = child.label.rstrip("/")
+                child_rel_path = rel_path + child_dir_name + "/"
                 update_dir_labels(child, child_rel_path)
-    update_dir_labels(main_tree, '')
+
+    update_dir_labels(main_tree, "")
 
     return main_tree  # Return the Rich Tree object
