@@ -10,7 +10,11 @@ from cfold.utils.foldignore import should_include_file
 from rich.console import Console
 from rich.tree import Tree
 from cfold.utils.treeviz import get_folded_tree
-from cfold.core.models import Codebase, FileEntry, Instruction  # Added for Pydantic model
+from cfold.core.models import (
+    Codebase,
+    FileEntry,
+    Instruction,
+)  # Added for Pydantic model
 import sys
 from typing import List
 
@@ -21,6 +25,7 @@ def fold(
     prompt: str = None,
     dialect: str = "default",
     bare: bool = False,
+    clip: bool = False,
 ):
     """Fold files or directory into a single text file and visualize the structure."""
     bare = bool(bare)
@@ -115,8 +120,8 @@ def fold(
                 outfile,
                 indent=2,
             )
-        # Copy content to clipboard after writing the file
-        pyperclip.copy(json.dumps(data.model_dump()))
+        if clip:
+            pyperclip.copy(json.dumps(data.model_dump()))
     except IOError as e:
         console.print(f"Error writing to {output}: {e}", style="red")
         sys.exit(1)
@@ -136,6 +141,9 @@ def fold(
         instr_tree.add(label)
     console.print(instr_tree)
 
-    console.print(
-        f"Codebase folded into [cyan]{output}[/cyan] and content [green]copied to clipboard[/green]."
-    )
+    msg = f"Codebase folded into [cyan]{output}[/cyan]"
+    if clip:
+        msg += " and content [green]copied to clipboard[/green]."
+    else:
+        msg += "."
+    console.print(msg)

@@ -1,4 +1,4 @@
-![Coverage](https://codecov.io/gh/wr1/cfold/branch/master/graph/badge.svg)![Tests](https://github.com/wr1/cfold/actions/workflows/tests.yml/badge.svg)![Version](https://img.shields.io/github/v/release/wr1/cfold)
+![Tests](https://github.com/wr1/cfold/actions/workflows/tests.yml/badge.svg)![Version](https://img.shields.io/github/v/release/wr1/cfold)
 # cfold
 
 <!-- `cfold` is a command-line tool that helps you prepare codebases for interaction with Large Language Models (LLMs). It can `fold` a directory of code into a single JSON file and `unfold` a modified version back into a directory structure. -->
@@ -26,7 +26,6 @@ uv pip install https://github.com/wr1/cfold.git
 ![Output](docs/assets/output.svg)
 
 
-
 ## Fold File Format
 
 - JSON structure with keys: `instructions` (list of objects), `files`.
@@ -37,3 +36,13 @@ uv pip install https://github.com/wr1/cfold.git
 - Add new files by adding new objects with `path` and `content`.
 - Move/rename: Delete old (`delete: true`) and add new with updated path and content.
 
+## Sum Command
+
+The `sum` command summarizes the structure of Python codebases using AST parsing. It generates an LLM-readable summary of classes, functions, and other code elements.
+
+```bash
+cfold sum codebase/ codebase2/ -o summary.txt
+```
+
+# license
+MIT

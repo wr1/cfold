@@ -1,13 +1,13 @@
 """Main CLI for cfold using treeparse."""
 
 import treeparse
-from typing import List, Optional
 
 from .fold import fold
 from .unfold import unfold
 from .rc import rc
 from .view import view
 from .add import add
+from .sum import sum_codebases
 
 app = treeparse.cli(
     name="cfold",
@@ -16,6 +16,7 @@ app = treeparse.cli(
     show_types=True,
     show_defaults=True,
     line_connect=True,
+    theme="default",
 )
 
 fold_cmd = treeparse.command(
@@ -44,7 +45,7 @@ fold_cmd = treeparse.command(
         ),
         treeparse.option(
             flags=["--dialect", "-d"],
-            help="Instruction dialect (available: default, py, pytest, doc, typst)",
+            help="Instruction dialect (available: default, py, pytest, doc, typst, hugo, pyscript)",
             arg_type=str,
             default="default",
             sort_key=2,
@@ -55,6 +56,13 @@ fold_cmd = treeparse.command(
             default=False,
             arg_type=bool,
             sort_key=3,
+        ),
+        treeparse.option(
+            flags=["--clip", "-c"],
+            help="Copy the folded content to clipboard",
+            default=True,
+            arg_type=bool,
+            sort_key=4,
         ),
     ],
 )
@@ -98,7 +106,9 @@ view_cmd = treeparse.command(
     help="View the prompts and files in a fold file.",
     callback=view,
     arguments=[
-        treeparse.argument(name="foldfile", arg_type=str, default="codefold.json", sort_key=0),
+        treeparse.argument(
+            name="foldfile", arg_type=str, default="codefold.json", sort_key=0
+        ),
     ],
 )
 app.commands.append(view_cmd)
@@ -123,6 +133,32 @@ add_cmd = treeparse.command(
     ],
 )
 app.commands.append(add_cmd)
+
+sum_cmd = treeparse.command(
+    name="sum",
+    help="Summarize codebases using AST to generate LLM-readable structure.",
+    callback=sum_codebases,
+    arguments=[
+        treeparse.argument(name="codebases", arg_type=str, nargs="+", sort_key=0),
+    ],
+    options=[
+        treeparse.option(
+            flags=["--output", "-o"],
+            help="Output summary file",
+            arg_type=str,
+            default="summary.txt",
+            sort_key=0,
+        ),
+        treeparse.option(
+            flags=["--include-tests", "-t"],
+            help="Include test directories",
+            default=False,
+            arg_type=bool,
+            sort_key=1,
+        ),
+    ],
+)
+app.commands.append(sum_cmd)
 
 
 def main():

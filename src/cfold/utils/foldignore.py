@@ -55,8 +55,8 @@ def should_include_file(
         "*xdmf",
         "*data/*",
         "*log",
-        ".*",
         "*sh",
+        ".*",
     ]
 
     if excluded_patterns is None:
