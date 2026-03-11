@@ -1,6 +1,6 @@
 [project]
 name = "cfold"
-version = "0.2.4"
+version = "0.2.5"
 description = "A command line tool to fold and unfold Python projects for LLM interaction"
 authors = [{ name = "wr1", email = "8971152+wr1@users.noreply.github.com" }]
 requires-python = "~=3.10"
@@ -9,16 +9,15 @@ license = "MIT"
 dependencies = [
     "pyyaml>=6.0.2,<7",
     "click>=8.1.7,<9",
-    "pyperclip>=1.8.2",  # Added to handle clipboard operations
-    "pydantic>=2.0.0,<3",  # Added for data modeling  
-    "treeparse",  # Added for CLI parsing
-    "loguru>=0.7.0,<1",  # Added for logging
-    "rich>=13.0.0,<14",  # Added for console output
-    # "numpy>=1.21.0,<2",  # Added for vectorization
+    "pyperclip>=1.8.2",
+    "pydantic>=2.0.0,<3",
+    "treeparse",
+    "loguru>=0.7.0,<1",
+    "rich>=13.0.0,<14",
 ]
 
 [project.scripts]
-cfold = "cfold.cli.main:main"
+cfold = "cfold.cli.entrypoint:main"
 
 [dependency-groups]
 dev = [
@@ -42,5 +41,3 @@ build-backend = "hatchling.build"
 
 [tool.hatch.metadata]
 allow-direct-references = true
-
-

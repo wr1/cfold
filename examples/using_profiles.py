@@ -33,8 +33,8 @@ def main():
                     "content": "Focus on custom project structure.",
                 }
             ],
-            "included_suffix": [".py", ".toml"],
-            "included_dirs": ["src", "tests"],
+            "included_suffix": [".py", ".toml", ".md"],
+            "included_dirs": [".", "src", "tests", "docs"],
         },
     }
     with open(project_dir / ".foldrc", "w", encoding="utf-8") as f:

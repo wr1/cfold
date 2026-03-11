@@ -1,72 +1,45 @@
 """Handle adding files to an existing cfold file."""
 
 import json
-import os
 from pathlib import Path
 from rich.console import Console
-from cfold.core.codebase import Codebase
-from cfold.core.file_entry import FileEntry
-import pyperclip  # Added for clipboard functionality
+import pyperclip
+from ..models.codebase import Codebase
+from ..models.file_entry import FileEntry
 from typing import List
 
 
 def add(files: List[str], foldfile: str = "codefold.json"):
-    """Add files to an existing cfold file."""
+    """Add or update files in an existing cfold file."""
     console = Console()
     cwd = Path.cwd()
-
-    if not Path(foldfile).exists():
+    path = Path(foldfile)
+    if not path.exists():
         console.print(f"Error: {foldfile} does not exist.", style="red")
         return
-
-    try:
-        with open(foldfile, "r", encoding="utf-8") as infile:
-            raw_data = json.load(infile)
-            data = Codebase.model_validate(raw_data)
-    except Exception as e:
-        console.print(f"Error loading {foldfile}: {e}", style="red")
-        return
-
-    existing_paths = {f.path for f in data.files}
-
-    added_files = []
-    for file_path in files:
-        abs_path = Path(file_path).absolute()
+    with open(path, "r", encoding="utf-8") as f:
+        data = Codebase.model_validate(json.load(f))
+    existing = {f.path for f in data.files}
+    new_added = False
+    for f in files:
+        abs_path = Path(f).absolute()
         if not abs_path.is_file():
-            console.print(
-                f"Warning: {file_path} is not a file, skipping.", style="yellow"
-            )
+            console.print(f"Warning: {f} is not a file, skipping.")
             continue
-        rel_path = os.path.relpath(str(abs_path), str(cwd))
-        if rel_path in existing_paths:
-            # Update existing
-            for f in data.files:
-                if f.path == rel_path:
-                    f.content = open(abs_path, "r", encoding="utf-8").read()
+        rel = str(abs_path.relative_to(cwd))
+        content = abs_path.read_text(encoding="utf-8")
+        if rel in existing:
+            for entry in data.files:
+                if entry.path == rel:
+                    entry.content = content
                     break
         else:
-            # Add new
-            data.files.append(
-                FileEntry(
-                    path=rel_path,
-                    content=open(abs_path, "r", encoding="utf-8").read(),
-                )
-            )
-            added_files.append(rel_path)
-
-    try:
-        with open(foldfile, "w", encoding="utf-8") as outfile:
-            json.dump(data.model_dump(), outfile, indent=2)
-        # Copy updated content to clipboard
-        pyperclip.copy(json.dumps(data.model_dump()))
-    except IOError as e:
-        console.print(f"Error writing to {foldfile}: {e}", style="red")
-        return
-
-    if added_files:
-        console.print(
-            f"Added files to [cyan]{foldfile}[/cyan]: {', '.join(added_files)}"
-        )
+            data.files.append(FileEntry(path=rel, content=content))
+            new_added = True
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data.model_dump(), f, indent=2)
+    pyperclip.copy(json.dumps(data.model_dump()))
+    if new_added:
+        console.print(f"Added files to [cyan]{foldfile}[/cyan] and copied to clipboard.")
     else:
-        console.print(f"No new files added to [cyan]{foldfile}[/cyan].")
-    console.print("Updated content [green]copied to clipboard[/green].")
+        console.print("No new files added, but updated existing.")

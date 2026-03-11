@@ -1,3 +1,1 @@
-# Empty file as placeholder
-
-
+"""CLI commands for cfold."""

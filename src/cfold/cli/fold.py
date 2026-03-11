@@ -1,21 +1,14 @@
-"""Handle folding command for cfold."""
-
-import os
-import json
 from pathlib import Path
-import pyperclip  # Added for clipboard functionality
-from cfold.utils.load_instructions import load_instructions
-from cfold.utils.get_available_dialects import get_available_dialects
-import yaml  # Added for loading .foldrc
-from cfold.utils.should_include_file import should_include_file
+from typing import List
+import yaml
 from rich.console import Console
 from rich.tree import Tree
-from cfold.utils.get_folded_tree import get_folded_tree
-from cfold.core.codebase import Codebase
-from cfold.core.file_entry import FileEntry
-from cfold.core.instruction import Instruction  # Added for Pydantic model
-import sys
-from typing import List
+from ..fold.build_codebase import build_codebase
+from ..fold.filter_files import filter_files
+from ..fold.write_json import write_json
+from ..tree.build_folded import build_folded_tree
+from ..dialect.list_available import list_available_dialects
+from ..dialect.load_instructions import load_instructions
 
 
 def fold(
@@ -26,123 +19,36 @@ def fold(
     bare: bool = False,
     clip: bool = False,
 ):
-    """Fold files or directory into a single text file and visualize the structure."""
-    bare = bool(bare)
+    """Fold files or directory into a single file."""
     console = Console()
     cwd = Path.cwd()
-    # Check for local default dialect if 'default' is specified
+    output_path = Path(output)
     if dialect == "default":
         local_path = cwd / ".foldrc"
         if local_path.exists():
             with local_path.open("r", encoding="utf-8") as f:
-                local_config = yaml.safe_load(f) or {}
-            if "default_dialect" in local_config:
-                dialect = local_config["default_dialect"]
-
+                local = yaml.safe_load(f) or {}
+                if "default_dialect" in local:
+                    dialect = local["default_dialect"]
     try:
-        instructions, patterns = load_instructions(dialect)
-        if bare:
-            instructions = []
+        instructions, patterns = load_instructions(dialect, cwd) if not bare else ([], {})
     except ValueError:
-        available = get_available_dialects()
-        console.print(
-            f"Invalid dialect specified. Available dialects: {', '.join(available)}",
-            style="red",
-        )
-        sys.exit(1)
-    except Exception as e:
-        console.print(f"Error loading instructions: {str(e)}", style="red")
-        sys.exit(1)
-
-    included_patterns = patterns.get("included", [])  # Adjust if needed
-    excluded_patterns = patterns.get("excluded", [])
-    included_dirs = patterns.get("included_dirs", [])
-    exclude_files = patterns.get("exclude_files", [])
-
+        available = list_available_dialects()
+        console.print(f"Invalid dialect. Available: {', '.join(available)}", style="red")
+        raise SystemExit(1)
     if not files:
-        directory = cwd
-        files = []
-        for dirpath, _, filenames in os.walk(directory):
-            for filename in filenames:
-                filepath = Path(dirpath) / filename
-                rel_path = os.path.relpath(str(filepath), str(directory))
-                if (
-                    should_include_file(
-                        filepath,
-                        directory,
-                        included_patterns,
-                        excluded_patterns,
-                        included_dirs,
-                    )
-                    and rel_path not in exclude_files
-                ):
-                    files.append(filepath)
+        files = list(cwd.rglob("*"))
+        files = [f for f in files if f.name != output]
     else:
-        files = [Path(f).absolute() for f in files if Path(f).is_file()]
-        files = [
-            f for f in files if os.path.relpath(str(f), str(cwd)) not in exclude_files
-        ]
-
-    if not files:
+        files = [Path(f) for f in files]
+    filtered = filter_files(files, patterns.get("included", []), patterns.get("excluded", []), patterns.get("included_dirs", []), patterns.get("exclude_files", []), cwd)
+    if not filtered:
         console.print("No valid files to fold.")
         return
-
-    data = Codebase(
-        instructions=instructions,
-        files=[
-            FileEntry(
-                path=os.path.relpath(str(filepath), str(cwd)),
-                content=open(filepath, "r", encoding="utf-8").read(),
-            )
-            for filepath in files
-        ],
-    )
-
-    prompt_content = ""
-    if prompt and os.path.isfile(prompt):
-        with open(prompt, "r", encoding="utf-8") as prompt_infile:
-            prompt_content = prompt_infile.read()
-    elif prompt:
-        console.print(
-            f"Warning: Prompt file '{prompt}' does not exist. Skipping.", style="yellow"
-        )
-
-    if prompt_content:
-        data.instructions.append(
-            Instruction(type="user", content=prompt_content, name="prompt")
-        )
-
-    try:
-        with open(output, "w", encoding="utf-8") as outfile:
-            json.dump(
-                data.model_dump(),
-                outfile,
-                indent=2,
-            )
-        if clip:
-            pyperclip.copy(json.dumps(data.model_dump()))
-    except IOError as e:
-        console.print(f"Error writing to {output}: {e}", style="red")
-        sys.exit(1)
-
-    file_tree = get_folded_tree(files, cwd)
-    if file_tree:
-        console.print(file_tree)
-
-    # Visualize instructions by type and name
-    instr_tree = Tree("Instructions Added", guide_style="dim")
-    for instr in data.instructions:
-        label = f"[bold]{instr.type}[/bold]"
-        if instr.name:
-            label += f" ({instr.name})"
-        if instr.synopsis:
-            label += f" - {instr.synopsis}"
-        instr_tree.add(label)
-    console.print(instr_tree)
-
-    msg = f"Codebase folded into [cyan]{output}[/cyan]"
-    if clip:
-        msg += " and content [green]copied to clipboard[/green]."
-    else:
-        msg += "."
-    console.print(msg)
+    prompt_content = Path(prompt).read_text(encoding="utf-8") if prompt and Path(prompt).exists() else ""
+    if prompt and not Path(prompt).exists():
+        console.print(f"Warning: Prompt file '{prompt}' does not exist. Skipping.")
+    codebase = build_codebase(filtered, instructions, prompt_content, cwd)
+    tree = build_folded_tree(filtered, cwd)
+    console.print(tree)
+    write_json(codebase, output_path, clip)

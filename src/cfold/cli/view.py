@@ -3,22 +3,19 @@
 import json
 from rich.console import Console
 from rich.tree import Tree
-from cfold.core.codebase import Codebase
+from ..models.codebase import Codebase
 
 
 def view(foldfile: str):
     """View the prompts and files in a fold file."""
     console = Console()
-
     try:
-        with open(foldfile, "r", encoding="utf-8") as infile:
-            raw_data = json.load(infile)
-            data = Codebase.model_validate(raw_data)
+        with open(foldfile, "r", encoding="utf-8") as f:
+            raw = json.load(f)
+        data = Codebase.model_validate(raw)
     except Exception as e:
-        console.print(f"Error loading {foldfile}: {e}", style="red")
+        console.print(f"Error loading file: {e}")
         return
-
-    # Visualize instructions
     instr_tree = Tree("Instructions", guide_style="dim")
     for instr in data.instructions:
         label = f"[bold]{instr.type}[/bold]"
@@ -28,12 +25,7 @@ def view(foldfile: str):
             label += f" - {instr.synopsis}"
         instr_tree.add(label)
     console.print(instr_tree)
-
-    # Visualize files
     files_tree = Tree("Files", guide_style="dim")
     for file in data.files:
-        if file.delete:
-            files_tree.add(f"[red]{file.path} (delete)[/red]")
-        else:
-            files_tree.add(f"[green]{file.path}[/green]")
+        files_tree.add(f"[green]{file.path}[/green]" if not file.delete else f"[red]{file.path} (delete)[/red]")
     console.print(files_tree)

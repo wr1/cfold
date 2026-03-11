@@ -1,6 +1,6 @@
-from cfold.core.codebase import Codebase
-from cfold.core.file_entry import FileEntry
-from cfold.core.instruction import Instruction
+from cfold.models.codebase import Codebase
+from cfold.models.file_entry import FileEntry
+from cfold.models.instruction import Instruction
 from pydantic import ValidationError
 import pytest
 
