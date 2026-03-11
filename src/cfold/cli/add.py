@@ -4,7 +4,8 @@ import json
 import os
 from pathlib import Path
 from rich.console import Console
-from cfold.core.models import Codebase, FileEntry
+from cfold.core.codebase import Codebase
+from cfold.core.file_entry import FileEntry
 import pyperclip  # Added for clipboard functionality
 from typing import List
 
