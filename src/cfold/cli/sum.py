@@ -3,7 +3,8 @@
 from pathlib import Path
 from typing import List
 from rich.console import Console
-from cfold.core.summarize import summarize_codebases
+from cfold.core.summarize_codebases import summarize_codebases
+import pyperclip  # Added for clipboard functionality
 
 
 def sum_codebases(
@@ -18,6 +19,9 @@ def sum_codebases(
         summary = summarize_codebases(codebase_paths, include_tests=include_tests)
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(summary)
-        console.print(f"Summary written to [cyan]{output_path}[/cyan].")
+        pyperclip.copy(summary)
+        console.print(
+            f"Summary written to [cyan]{output_path}[/cyan] and copied to clipboard."
+        )
     except Exception as e:
         console.print(f"Error summarizing codebases: {e}", style="red")
