@@ -1,7 +1,7 @@
 import pytest
 from pathlib import Path
 import tempfile
-from cfold.core.summarize import summarize_codebases
+from cfold.core.summarize_codebases import summarize_codebases
 
 
 def test_summarize_codebases_basic():

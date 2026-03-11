@@ -34,6 +34,20 @@ default:
         - Prefer organizing code into subdirectories based on functionality (e.g. 'src/<project>/<functionality>/' where functionality can be cli or api etc.).
         - Split functionality into small, focused files (e.g., one function or class per file where practical, typically 50-200 lines).
         - Aim for modularity: Each file should have a single responsibility, making it easier to modify or replace individually.
+
+        # === NEW BOILERPLATE (added per user request) ===
+        # Granular one-function-per-file style (machine-first):
+        # For Python code, use one public function/class per .py file.
+        # Filename = function_name.py (or clear verb_noun purpose).
+        # This enables precise, minimal LLM edits.
+        - **Granular one-function-per-file style (machine-first)**: For Python code, use one public function/class per .py file. Filename = function_name.py (or clear verb_noun purpose). This enables precise, minimal LLM edits.
+        # Tree maintenance freedom:
+        # LLM is explicitly allowed (and encouraged) to rename, delete,
+        # or reorganize files whenever a function's purpose changes or
+        # a better name emerges. The directory tree must always accurately
+        # represent current code responsibilities — never leave outdated filenames.
+        - **Tree maintenance freedom**: LLM is explicitly allowed (and encouraged) to rename, delete, or reorganize files whenever a function's purpose changes or a better name emerges. The directory tree must always accurately represent current code responsibilities — never leave outdated filenames.
+
         - Don't include LLM instructions in the output.
         - Use high level 1 line docstrings
         - Use clear variable and function names that convey purpose and meaning, prioritizing human/machine readability.
@@ -105,7 +119,6 @@ doc:
     - "src"
     - "docs"
 
-
 typst:
   pre: [common]
   instructions:
@@ -113,7 +126,6 @@ typst:
       content: "# for typst, follow typst syntax. Structure the document with sections and subsections as needed. "
   included_suffix:
     - ".typ"
-
 
 hugo:
   pre: [common]
@@ -127,7 +139,6 @@ hugo:
   included_dirs:
     - "content"
     - "."
-
 
 pyscript:
   pre: [common]
@@ -145,7 +156,7 @@ pyscript:
         - Use only stdlib or packages that can be installed with `uv add` (prefer stdlib when possible).
         - If external dependencies are truly needed, add a short comment at the top:
           # Run: uv add requests rich typer etc.
-        - Use Typer or argparse for CLI (prefer Typer for new scripts because it's shorter and clearer).
+        - Use treeparse for CLI (this is now the project default)
         - Provide short single-character aliases for all CLI options (e.g. -f / --file).
         - Include a brief high-level docstring at the top (1–3 lines).
         - Use clear, readable function and variable names.
@@ -168,76 +179,67 @@ pyscript:
   included_dirs:
     - "."
 
-
+# === OPTIMAL STRUCTURE (domain-driven, no vague folders like core/) ===
 scipy:
   pre: [common, default]
   instructions:
     - type: system
-      synopsis: "Scientific/3D Python package – treeparse + PyVista + strict naming & submodule layout"
+      synopsis: "Scientific/3D Python package – treeparse + PyVista + domain-driven granular layout"
       content: |
         You are an expert Python engineer building production-grade 3D, geometry, mesh, or scientific tools.
-        Always create a proper installable package with src/ layout. Never a flat or single script (use -d pyscript for that).
+        Always create a proper installable package with src/ layout.
 
-        === MANDATORY PROJECT STRUCTURE ===
+        === MANDATORY PROJECT STRUCTURE (domain/verb_noun.py) ===
         src/<project_name>/
-        ├── __init__.py          # only __version__ and minimal public exports
-        ├── cli.py               # treeparse @command entrypoints only
-        ├── core.py              # high-level pipeline functions (public API)
-        ├── io.py                # all file loading/saving (PyVista-based)
-        ├── processing.py        # mesh algorithms, filtering, voxelization, boolean ops
-        ├── utils.py             # small pure functions, helpers, constants
-        ├── types.py             # pydantic models, TypedDicts, Protocols
-        └── viz/                 # optional – only if visualisation is non-trivial
-            ├── __init__.py
-            ├── plot.py          # rich + PyVista offscreen → PNG or interactive helpers
-            └── colors.py
+        ├── airfoil/
+        │   ├── load_xfoil.py
+        │   ├── build_spline.py
+        │   ├── remesh_uniform.py
+        │   ├── add_hard_point.py
+        │   ├── add_shear_web.py
+        │   └── export_pyvista.py
+        ├── blade/
+        │   ├── process_yaml_config.py
+        │   ├── collect_sections.py
+        │   └── merge_to_vtm.py
+        ├── surface/
+        │   ├── build_quad_faces.py
+        │   ├── propagate_point_data.py
+        │   └── save_vtp.py
+        ├── web/
+        │   ├── shear_web.py
+        │   └── compute_intersection.py
+        ├── io/
+        │   ├── load_vtp.py
+        │   ├── save_vtp.py
+        │   └── save_vtm.py
+        ├── cli/
+        │   └── entrypoint.py
+        └── __init__.py
 
         === DEPENDENCIES (add all relevant to pyproject.toml) ===
-        numpy, pyvista, scipy, trimesh, rich, loguru, pydantic>=2, treeparse, typer
+        numpy, pyvista, scipy, trimesh, rich, loguru, pydantic>=2, treeparse
 
         === CLI ===
-        - Use treeparse exclusively 
+        - Use treeparse exclusively (this is now the project default)
         - Every option MUST have a single-letter alias
-        - Prefer noun_verb naming for commands: mesh_voxelize, pointcloud_denoise
 
-        === NAMING CONVENTIONS – NEVER VIOLATE ===
-        - Modules      : lowercase with underscore only when needed (io.py, processing.py)
-        - Functions    : verb_noun, very explicit (load_mesh, voxelize_surface, simplify_mesh)
-        - Variables    : full words, extremely clear
-            Good: input_path, output_mesh, voxel_size, target_resolution, smoothing_iterations
-            Bad : f, m, sz, res, iters
-        - Constants    : UPPER_CASE (DEFAULT_VOXEL_SIZE = 0.1)
-        - Type aliases : CamelCase ending in "Config" or "Result" (VoxelizeConfig, MeshResult)
+        === NAMING CONVENTIONS ===
+        - Directories = noun domain (airfoil, blade, surface, web, io, cli)
+        - Files      = verb_noun action (remesh_uniform.py, build_quad_faces.py)
+        - No "core", "utils", "processing", or other vague folders
 
         === STYLE & BEST PRACTICES ===
-        - Full type hints everywhere (no Any)
-        - One public function/class per file when >80 lines
-        - One-line module docstring only
-        - Use loguru logger, never print()
-        - Use rich for progress bars/tables
-        - All I/O through io.py (never inline in cli.py)
-        - All heavy algorithms in processing.py or deeper submodules
-
-        === REQUIRED FILES FOR EVERY NEW PROJECT ===
-        - pyproject.toml (console_scripts + ruff + all deps)
-        - src/<project_name>/__init__.py → __version__ = "0.1.0"
-        - src/<project_name>/cli.py
-        - src/<project_name>/core.py + io.py + processing.py + utils.py + types.py
-        - examples/basic_usage.py (complete working script)
-        - tests/test_pipeline.py (smoke test + one real assertion)
-        - admin.sh
-        - .gitignore
-
-        After `uv sync`, it must work with exactly one command.
+        - Follow the granular one-function-per-file rule from default
+        - LLM may rename/delete/reorganize files freely to keep the tree accurate
+        - Depth 2 is preferred (domain/action.py)
 
     - type: user
-      synopsis: "Enforce exact layout and naming"
+      synopsis: "Enforce domain-driven granular layout"
       content: |
-        When creating a new project, you MUST create the exact submodule structure shown above.
-        Never put processing code in cli.py or core.py if it exceeds ~50 lines.
-        Never use short/vague variable names — readability is paramount.
-        Always group related functionality into its own file inside src/<project>/.
-        If visualisation is needed and non-trivial, create src/<project>/viz/ with its own __init__.py.
+        Always follow domain/verb_noun.py structure.
+        Never use monolithic or vague folders like core/, utils/, or processing/.
+        LLM is allowed to rename/delete/reorganize files freely to keep the tree accurate.
 
   included_suffix:
     - ".py"
@@ -296,13 +298,15 @@ plan:
         - namespace package or regular package?
         - subpackages / modules names (suggested names)
         For existing projects: Suggest preserving current layout with minor additions.
+        - Use domain/verb_noun.py at depth 2 (airfoil/load_xfoil.py, surface/build_quad_faces.py)
+        - Never use vague folders like core/ or processing/
 
         # Core Dependencies
         - runtime
         - dev / test / lint / doc (reference tools from query if relevant)
 
         # CLI / Entry Points Strategy
-        (typer / treeparse / argparse / click / no cli / ... – detail based on tool help in query)
+        (treeparse (default) / typer / click / no cli – detail based on tool help in query)
 
         # Data Model & Types Strategy
         (pydantic v2 / dataclasses / TypedDict / NamedTuple / custom classes / ...)
@@ -326,7 +330,7 @@ plan:
         Example step phrasing:
         1. Create pyproject.toml with basic metadata + uv-compatible [tool.uv] section
         2. Initialize src/<pkgname>/__init__.py with __version__ = "0.1.0"
-        3. Add minimal working CLI entry point using typer / treeparse
+        3. Add minimal working CLI entry point using treeparse
         4. Create first pydantic model in src/<pkgname>/types.py or models.py
         ...
 
