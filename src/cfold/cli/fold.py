@@ -4,17 +4,16 @@ import os
 import json
 from pathlib import Path
 import pyperclip  # Added for clipboard functionality
-from cfold.utils.instructions import load_instructions, get_available_dialects
+from cfold.utils.load_instructions import load_instructions
+from cfold.utils.get_available_dialects import get_available_dialects
 import yaml  # Added for loading .foldrc
-from cfold.utils.foldignore import should_include_file
+from cfold.utils.should_include_file import should_include_file
 from rich.console import Console
 from rich.tree import Tree
-from cfold.utils.treeviz import get_folded_tree
-from cfold.core.models import (
-    Codebase,
-    FileEntry,
-    Instruction,
-)  # Added for Pydantic model
+from cfold.utils.get_folded_tree import get_folded_tree
+from cfold.core.codebase import Codebase
+from cfold.core.file_entry import FileEntry
+from cfold.core.instruction import Instruction  # Added for Pydantic model
 import sys
 from typing import List
 
