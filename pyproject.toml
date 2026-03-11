@@ -13,6 +13,8 @@ dependencies = [
     "pydantic>=2.0.0,<3",  # Added for data modeling  
     "treeparse",  # Added for CLI parsing
     "loguru>=0.7.0,<1",  # Added for logging
+    "rich>=13.0.0,<14",  # Added for console output
+    # "numpy>=1.21.0,<2",  # Added for vectorization
 ]
 
 [project.scripts]
