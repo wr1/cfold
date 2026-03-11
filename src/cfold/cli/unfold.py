@@ -6,8 +6,8 @@ import json
 from rich.console import Console
 from rich.tree import Tree
 from pathlib import Path
-from cfold.utils.foldignore import should_include_file
-from cfold.core.models import Codebase  # Added for Pydantic model
+from cfold.utils.should_include_file import should_include_file
+from cfold.core.codebase import Codebase  # Added for Pydantic model
 
 
 def unfold(foldfile, original_dir=None, output_dir=None):
