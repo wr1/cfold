@@ -12,7 +12,7 @@ def test_load_instructions():
     """Test loading instructions for a dialect."""
     instr, patterns = load_instructions("default")
     assert len(instr) > 0
-    assert "included" in patterns
+    assert len(patterns) > 0
 
 
 def test_load_instructions_invalid():

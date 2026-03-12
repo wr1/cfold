@@ -1,6 +1,9 @@
 import json
 import yaml
+import subprocess
+from pathlib import Path
 from cfold.cli.fold import fold
+from cfold.cli.add import add
 
 
 def test_basic_fold(tmp_path, monkeypatch, capsys):
@@ -8,8 +11,9 @@ def test_basic_fold(tmp_path, monkeypatch, capsys):
     # Create a temporary simple project
     project_dir = tmp_path / "temp_example_project"
     project_dir.mkdir()
-    (project_dir / "main.py").write_text('print("Hello, World!")\n')
-    (project_dir / "utils.py").write_text("def helper():\n    return 'help'\n")
+    (project_dir / "src").mkdir()
+    (project_dir / "src" / "main.py").write_text('print("Hello, World!")\n')
+    (project_dir / "src" / "utils.py").write_text("def helper():\n    return 'help'\n")
     (project_dir / "README.md").write_text("# Example Project\n")
 
     # Change to project directory
@@ -34,8 +38,8 @@ def test_basic_fold(tmp_path, monkeypatch, capsys):
     with open(folded_file, "r", encoding="utf-8") as f:
         data = json.load(f)
     assert len(data["files"]) == 3
-    assert any(f["path"] == "main.py" for f in data["files"])
-    assert any(f["path"] == "utils.py" for f in data["files"])
+    assert any(f["path"] == "src/main.py" for f in data["files"])
+    assert any(f["path"] == "src/utils.py" for f in data["files"])
     assert any(f["path"] == "README.md" for f in data["files"])
 
 
@@ -111,3 +115,83 @@ def test_using_profiles(tmp_path, monkeypatch, capsys):
         else:
             assert len(data["files"]) == 4
             assert not any(f["path"] == "docs/index.md" for f in data["files"])
+
+
+def test_fold_specified_files(tmp_path, monkeypatch):
+    """Test that specified files override dialect include patterns."""
+    project_dir = tmp_path / "project"
+    project_dir.mkdir()
+    (project_dir / "root_file.py").write_text("print('root')")
+    (project_dir / "src").mkdir()
+    (project_dir / "src" / "src_file.py").write_text("print('src')")
+
+    monkeypatch.chdir(project_dir)
+
+    fold(
+        files=["root_file.py"],
+        output="folded.json",
+        prompt=None,
+        dialect="py",
+        bare=False,
+    )
+
+    with open("folded.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+    assert len(data["files"]) == 1
+    assert data["files"][0]["path"] == "root_file.py"
+
+
+def test_add_files(tmp_path, monkeypatch, capsys):
+    """Test adding files to an existing fold file and check tree output."""
+    project_dir = tmp_path / "project"
+    project_dir.mkdir()
+    (project_dir / "file1.py").write_text("code1")
+    (project_dir / "file2.py").write_text("code2")
+
+    monkeypatch.chdir(project_dir)
+
+    # First fold file1
+    fold(
+        files=["file1.py"],
+        output="fold.json",
+        prompt=None,
+        dialect="default",
+        bare=True,
+    )
+
+    # Then add file2
+    add(files=["file2.py"], foldfile="fold.json")
+
+    captured = capsys.readouterr()
+    assert "Added files to fold.json and copied to clipboard." in captured.out
+    assert "file2.py" in captured.out  # Tree includes the file
+
+    # Check the file has both
+    with open("fold.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+    assert len(data["files"]) == 2
+    paths = {f["path"] for f in data["files"]}
+    assert "file1.py" in paths
+    assert "file2.py" in paths
+
+
+def test_run_basic_fold_example():
+    """Test running the basic_fold example script."""
+    result = subprocess.run(
+        ["python", "examples/basic_fold.py"],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert "Folded" in result.stdout
+
+
+def test_run_using_profiles_example():
+    """Test running the using_profiles example script."""
+    result = subprocess.run(
+        ["python", "examples/using_profiles.py"],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert "Codebase folded" in result.stdout

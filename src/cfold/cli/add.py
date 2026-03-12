@@ -6,6 +6,7 @@ from rich.console import Console
 import pyperclip
 from ..models.codebase import Codebase
 from ..models.file_entry import FileEntry
+from ..tree.build_folded import build_folded_tree
 from typing import List
 
 
@@ -36,6 +37,10 @@ def add(files: List[str], foldfile: str = "codefold.json"):
         else:
             data.files.append(FileEntry(path=rel, content=content))
             new_added = True
+    added_files = [Path(entry.path) for entry in data.files if entry.path not in existing]
+    if added_files:
+        tree = build_folded_tree(added_files, cwd)
+        console.print(tree)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data.model_dump(), f, indent=2)
     pyperclip.copy(json.dumps(data.model_dump()))

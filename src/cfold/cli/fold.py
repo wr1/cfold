@@ -32,11 +32,11 @@ def fold(
                 if "default_dialect" in local:
                     dialect = local["default_dialect"]
     try:
-        instructions, include_patterns = load_instructions(dialect, cwd) if not bare else ([], [])
+        instructions, include_patterns = load_instructions(dialect, cwd) if not bare else ([], load_instructions("default", cwd)[1])
     except ValueError:
         if dialect == "default":
             console.print("Default dialect not found, falling back to bare mode.")
-            instructions, include_patterns = [], []
+            instructions, include_patterns = [], load_instructions("default", cwd)[1]
             bare = True
         else:
             available = list_available_dialects()
@@ -61,13 +61,15 @@ def fold(
     else:
         file_paths = []
         for f in files:
-            if '*' in f or '?' in f:
-                file_paths.extend(cwd / p for p in glob.glob(f, root_dir=str(cwd), recursive=True) if (cwd / p).is_file())
-            else:
-                path = cwd / f
-                if path.is_file():
+            pattern = f
+            if '**' in f and '/' not in f and f.startswith('**'):
+                suffix = f[2:]
+                pattern = f'**/*{suffix}'
+            for path_str in glob.glob(pattern, root_dir=str(cwd), recursive=True):
+                path = cwd / path_str
+                if path.is_file() and path.name != output:
                     file_paths.append(path)
-        filtered = filter_files(include_patterns, cwd, file_paths)
+        filtered = file_paths
     if not filtered:
         console.print("No valid files to fold.")
         return

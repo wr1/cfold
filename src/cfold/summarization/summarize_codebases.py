@@ -23,10 +23,10 @@ def summarize_codebases(codebase_paths: List[Path], include_tests: bool = False)
     if not include_tests:
         excluded_dirs.add("tests")
         excluded_dirs.add("test")
-    for codebase_path in codebase_paths:
-        if not codebase_path.is_dir():
-            logger.warning(f"Skipping {codebase_path}: not a directory")
-            continue
+    valid_paths = [p for p in codebase_paths if p.is_dir()]
+    if not valid_paths:
+        raise ValueError("No valid directories provided")
+    for codebase_path in valid_paths:
         logger.info(f"Navigating codebase: {codebase_path}")
         summary_lines.append(f"Codebase: {codebase_path}")
         for root, dirs, files in os.walk(codebase_path):

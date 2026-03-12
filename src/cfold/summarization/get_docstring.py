@@ -1,6 +1,6 @@
 """Extract docstring from a node if present."""
 
-from ast import Expr, Constant, Str
+from ast import Expr, Constant
 
 
 def get_docstring(node):
@@ -9,6 +9,4 @@ def get_docstring(node):
         expr = node.body[0]
         if isinstance(expr.value, Constant) and isinstance(expr.value.value, str):
             return expr.value.value
-        elif isinstance(expr.value, Str):  # For older Python
-            return expr.value.s
     return None
