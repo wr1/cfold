@@ -16,7 +16,11 @@ def list_available_dialects(directory: Optional[Path] = None) -> List[str]:
         with local_path.open("r", encoding="utf-8") as f:
             local_config = yaml.safe_load(f) or {}
     try:
-        with resources.files("cfold").joinpath("resources/prompts.yaml").open("r", encoding="utf-8") as f:
+        with (
+            resources.files("cfold")
+            .joinpath("resources/prompts.yaml")
+            .open("r", encoding="utf-8") as f
+        ):
             default_config = yaml.safe_load(f)
     except Exception as e:
         raise RuntimeError(f"Failed to load dialects: {e}")

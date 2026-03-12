@@ -1,5 +1,4 @@
 from cfold.models.codebase import codebase
-from cfold.models.file_entry import file_entry
 
 
 def test_codebase_with_role_instructions():

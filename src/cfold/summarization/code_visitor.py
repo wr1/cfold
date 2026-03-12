@@ -1,6 +1,5 @@
 """Visitor to collect code structure."""
 
-import sys
 from ast import NodeVisitor
 from .get_docstring import get_docstring
 from .get_annotation_str import get_annotation_str
@@ -16,12 +15,12 @@ class code_visitor(NodeVisitor):
 
     def visit_Import(self, node):
         for alias in node.names:
-            self.imports.add(alias.name.split('.')[0])
+            self.imports.add(alias.name.split(".")[0])
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node):
         if node.module:
-            self.imports.add(node.module.split('.')[0])
+            self.imports.add(node.module.split(".")[0])
         self.generic_visit(node)
 
     def visit_ClassDef(self, node):

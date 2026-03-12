@@ -14,4 +14,7 @@ def write_json(codebase: codebase, output: Path, clip: bool = False) -> None:
         json.dump(codebase.model_dump(), f, indent=2)
     if clip:
         pyperclip.copy(json.dumps(codebase.model_dump()))
-    console.print(f"Codebase folded into [cyan]{output}[/cyan]" + (" and copied to clipboard" if clip else "."))
+    console.print(
+        f"Codebase folded into [cyan]{output}[/cyan]"
+        + (" and copied to clipboard" if clip else ".")
+    )

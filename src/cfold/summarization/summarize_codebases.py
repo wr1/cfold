@@ -48,14 +48,14 @@ def summarize_codebases(codebase_paths: List[Path], include_tests: bool = False)
                         visitor.visit(tree)
                         non_stdlib_imports = sorted(visitor.imports - stdlib)
                         if non_stdlib_imports:
-                            summary_lines.append(f"    imports: {', '.join(non_stdlib_imports)}")
+                            summary_lines.append(
+                                f"    imports: {', '.join(non_stdlib_imports)}"
+                            )
                         summary_lines.extend(visitor.summary_lines)
                     except SyntaxError:
                         logger.warning(f"Syntax error in {file_path}, skipped")
                         rel_path = file_path.relative_to(codebase_path)
-                        summary_lines.append(
-                            f"  - {rel_path} - Syntax error, skipped"
-                        )
+                        summary_lines.append(f"  - {rel_path} - Syntax error, skipped")
                     except Exception as e:
                         logger.error(f"Error processing {file_path}: {e}")
                         rel_path = file_path.relative_to(codebase_path)

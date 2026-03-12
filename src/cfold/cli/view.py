@@ -27,5 +27,9 @@ def view(foldfile: str):
     console.print(instr_tree)
     files_tree = Tree("Files", guide_style="dim")
     for file in data.files:
-        files_tree.add(f"[green]{file.path}[/green]" if not file.delete else f"[red]{file.path} (delete)[/red]")
+        files_tree.add(
+            f"[green]{file.path}[/green]"
+            if not file.delete
+            else f"[red]{file.path} (delete)[/red]"
+        )
     console.print(files_tree)

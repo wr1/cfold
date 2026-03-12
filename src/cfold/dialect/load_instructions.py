@@ -3,7 +3,7 @@
 from importlib import resources
 from pathlib import Path
 import yaml
-from typing import List, Optional, Dict
+from typing import List, Optional
 from .collect_instructions import collect_instructions
 from .collect_patterns import collect_patterns
 
@@ -20,7 +20,11 @@ def load_instructions(
         with local_path.open("r", encoding="utf-8") as f:
             local_config = yaml.safe_load(f) or {}
     try:
-        with resources.files("cfold").joinpath("resources/prompts.yaml").open("r", encoding="utf-8") as f:
+        with (
+            resources.files("cfold")
+            .joinpath("resources/prompts.yaml")
+            .open("r", encoding="utf-8") as f
+        ):
             default_config = yaml.safe_load(f)
     except Exception as e:
         raise RuntimeError(f"Failed to load default instructions: {e}")

@@ -6,6 +6,7 @@ from pydantic import BaseModel, model_validator
 
 class file_entry(BaseModel):
     """Represents a file entry in the folded codebase."""
+
     path: str
     content: Optional[str] = None
     delete: bool = False

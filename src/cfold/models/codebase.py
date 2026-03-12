@@ -9,6 +9,7 @@ from .file_entry import file_entry
 
 class codebase(BaseModel):
     """Represents the entire folded codebase."""
+
     instructions: List[instruction] = []
     files: List[file_entry] = []
 

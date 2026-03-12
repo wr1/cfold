@@ -8,7 +8,10 @@ from ..summarization.summarize_codebases import summarize_codebases
 
 
 def summarize(
-    codebases: List[str], output: str = "summary.txt", include_tests: bool = False, clip: bool = False
+    codebases: List[str],
+    output: str = "summary.txt",
+    include_tests: bool = False,
+    clip: bool = False,
 ):
     """Summarize codebases using AST."""
     console = Console()
@@ -17,4 +20,7 @@ def summarize(
     Path(output).write_text(summary, encoding="utf-8")
     if clip:
         pyperclip.copy(summary)
-    console.print(f"Summary written to [cyan]{output}[/cyan]" + (" and copied to clipboard." if clip else "."))
+    console.print(
+        f"Summary written to [cyan]{output}[/cyan]"
+        + (" and copied to clipboard." if clip else ".")
+    )

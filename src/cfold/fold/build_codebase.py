@@ -1,7 +1,5 @@
 from pathlib import Path
-import json
 from typing import List
-from rich.console import Console
 from ..models.codebase import codebase
 from ..models.file_entry import file_entry
 from ..models.instruction import instruction
@@ -18,7 +16,9 @@ def build_codebase(
     if cwd is None:
         cwd = Path.cwd()
     if prompt_content:
-        instructions = instructions + [instruction(type="user", content=prompt_content, name="prompt")]
+        instructions = instructions + [
+            instruction(type="user", content=prompt_content, name="prompt")
+        ]
     file_entries = []
     for f in files:
         try:

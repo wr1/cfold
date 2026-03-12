@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 class instruction(BaseModel):
     """Represents a single instruction in the folded codebase."""
+
     type: str
     content: str
     name: Optional[str] = None

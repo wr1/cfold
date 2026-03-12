@@ -32,7 +32,11 @@ def fold(
                 if "default_dialect" in local:
                     dialect = local["default_dialect"]
     try:
-        instructions, include_patterns = load_instructions(dialect, cwd) if not bare else ([], load_instructions("default", cwd)[1])
+        instructions, include_patterns = (
+            load_instructions(dialect, cwd)
+            if not bare
+            else ([], load_instructions("default", cwd)[1])
+        )
     except ValueError:
         if dialect == "default":
             console.print("Default dialect not found, falling back to bare mode.")
@@ -40,7 +44,9 @@ def fold(
             bare = True
         else:
             available = list_available_dialects()
-            console.print(f"Invalid dialect. Available: {', '.join(available)}", style="red")
+            console.print(
+                f"Invalid dialect. Available: {', '.join(available)}", style="red"
+            )
             raise SystemExit(1)
     if bare:
         console.print("[orange]Using bare mode[/orange]")
@@ -62,9 +68,9 @@ def fold(
         file_paths = []
         for f in files:
             pattern = f
-            if '**' in f and '/' not in f and f.startswith('**'):
+            if "**" in f and "/" not in f and f.startswith("**"):
                 suffix = f[2:]
-                pattern = f'**/*{suffix}'
+                pattern = f"**/*{suffix}"
             for path_str in glob.glob(pattern, root_dir=str(cwd), recursive=True):
                 path = cwd / path_str
                 if path.is_file() and path.name != output:
@@ -73,7 +79,11 @@ def fold(
     if not filtered:
         console.print("No valid files to fold.")
         return
-    prompt_content = Path(prompt).read_text(encoding="utf-8") if prompt and Path(prompt).exists() else ""
+    prompt_content = (
+        Path(prompt).read_text(encoding="utf-8")
+        if prompt and Path(prompt).exists()
+        else ""
+    )
     if prompt and not Path(prompt).exists():
         console.print(f"Warning: Prompt file '{prompt}' does not exist. Skipping.")
     codebase = build_codebase(filtered, instructions, prompt_content, cwd)

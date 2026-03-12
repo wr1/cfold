@@ -23,13 +23,42 @@ fold_cmd = treeparse.command(
     name="fold",
     help="Fold files or directory into a single file and visualize the structure.",
     callback=fold,
-    arguments=[treeparse.argument(name="files", arg_type=str, nargs="*", default=[], sort_key=0)],
+    arguments=[
+        treeparse.argument(
+            name="files", arg_type=str, nargs="*", default=[], sort_key=0
+        )
+    ],
     options=[
-        treeparse.option(flags=["--output", "-o"], help="Output file", arg_type=str, default="codefold.json"),
-        treeparse.option(flags=["--prompt", "-p"], help="Prompt file to append", arg_type=str, default=None),
-        treeparse.option(flags=["--dialect", "-d"], help="Instruction dialect", arg_type=str, default="default"),
-        treeparse.option(flags=["--bare", "-b"], help="Bare mode without boilerplate", default=False, arg_type=bool),
-        treeparse.option(flags=["--clip", "-c"], help="Copy to clipboard", default=True, arg_type=bool),
+        treeparse.option(
+            flags=["--output", "-o"],
+            help="Output file",
+            arg_type=str,
+            default="codefold.json",
+        ),
+        treeparse.option(
+            flags=["--prompt", "-p"],
+            help="Prompt file to append",
+            arg_type=str,
+            default=None,
+        ),
+        treeparse.option(
+            flags=["--dialect", "-d"],
+            help="Instruction dialect",
+            arg_type=str,
+            default="default",
+        ),
+        treeparse.option(
+            flags=["--bare", "-b"],
+            help="Bare mode without boilerplate",
+            default=False,
+            arg_type=bool,
+        ),
+        treeparse.option(
+            flags=["--clip", "-c"],
+            help="Copy to clipboard",
+            default=True,
+            arg_type=bool,
+        ),
     ],
 )
 app.commands.append(fold_cmd)
@@ -40,8 +69,18 @@ unfold_cmd = treeparse.command(
     callback=unfold,
     arguments=[treeparse.argument(name="foldfile", arg_type=str, sort_key=0)],
     options=[
-        treeparse.option(flags=["--original-dir", "-i"], help="Original project directory", arg_type=str, default=None),
-        treeparse.option(flags=["--output-dir", "-o"], help="Output directory", arg_type=str, default=None),
+        treeparse.option(
+            flags=["--original-dir", "-i"],
+            help="Original project directory",
+            arg_type=str,
+            default=None,
+        ),
+        treeparse.option(
+            flags=["--output-dir", "-o"],
+            help="Output directory",
+            arg_type=str,
+            default=None,
+        ),
     ],
 )
 app.commands.append(unfold_cmd)
@@ -53,7 +92,9 @@ view_cmd = treeparse.command(
     name="view",
     help="View the prompts and files in a fold file.",
     callback=view,
-    arguments=[treeparse.argument(name="foldfile", arg_type=str, default="codefold.json")],
+    arguments=[
+        treeparse.argument(name="foldfile", arg_type=str, default="codefold.json")
+    ],
 )
 app.commands.append(view_cmd)
 
@@ -62,7 +103,14 @@ add_cmd = treeparse.command(
     help="Add files to an existing cfold file.",
     callback=add,
     arguments=[treeparse.argument(name="files", arg_type=str, nargs="*", default=[])],
-    options=[treeparse.option(flags=["--foldfile", "-f"], help="Cfold file to add to", arg_type=str, default="codefold.json")],
+    options=[
+        treeparse.option(
+            flags=["--foldfile", "-f"],
+            help="Cfold file to add to",
+            arg_type=str,
+            default="codefold.json",
+        )
+    ],
 )
 app.commands.append(add_cmd)
 
@@ -72,9 +120,24 @@ summarize_cmd = treeparse.command(
     callback=summarize,
     arguments=[treeparse.argument(name="codebases", arg_type=str, nargs="+")],
     options=[
-        treeparse.option(flags=["--output", "-o"], help="Output summary file", arg_type=str, default="summary.txt"),
-        treeparse.option(flags=["--include-tests", "-t"], help="Include test directories", default=False, arg_type=bool),
-        treeparse.option(flags=["--clip", "-c"], help="Copy to clipboard", default=True, arg_type=bool),
+        treeparse.option(
+            flags=["--output", "-o"],
+            help="Output summary file",
+            arg_type=str,
+            default="summary.txt",
+        ),
+        treeparse.option(
+            flags=["--include-tests", "-t"],
+            help="Include test directories",
+            default=False,
+            arg_type=bool,
+        ),
+        treeparse.option(
+            flags=["--clip", "-c"],
+            help="Copy to clipboard",
+            default=True,
+            arg_type=bool,
+        ),
     ],
 )
 app.commands.append(summarize_cmd)

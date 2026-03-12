@@ -1,4 +1,3 @@
-import pytest
 from cfold.dialect.collect_patterns import collect_patterns
 
 

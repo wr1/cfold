@@ -1,7 +1,6 @@
 """Convert AST annotation to string."""
 
 import ast
-from ast import AST
 
 
 def get_annotation_str(annotation):

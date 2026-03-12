@@ -1,7 +1,6 @@
 import json
 import yaml
 import subprocess
-from pathlib import Path
 from cfold.cli.fold import fold
 from cfold.cli.add import add
 from cfold.cli.rc import rc
