@@ -33,9 +33,27 @@ def fold(
     try:
         instructions, patterns = load_instructions(dialect, cwd) if not bare else ([], {})
     except ValueError:
-        available = list_available_dialects()
-        console.print(f"Invalid dialect. Available: {', '.join(available)}", style="red")
-        raise SystemExit(1)
+        if dialect == "default":
+            console.print("Default dialect not found, falling back to bare mode.")
+            instructions, patterns = [], {}
+            bare = True
+        else:
+            available = list_available_dialects()
+            console.print(f"Invalid dialect. Available: {', '.join(available)}", style="red")
+            raise SystemExit(1)
+    if bare:
+        console.print("[orange]Using bare mode[/orange]")
+    else:
+        console.print(f"[orange]Using dialect: {dialect}[/orange]")
+        instr_tree = Tree("Instructions")
+        for instr in instructions:
+            label = f"{instr.type}"
+            if instr.name:
+                label += f" ({instr.name})"
+            if instr.synopsis:
+                label += f" - {instr.synopsis}"
+            instr_tree.add(label)
+        console.print(instr_tree)
     if not files:
         files = list(cwd.rglob("*"))
         files = [f for f in files if f.name != output]

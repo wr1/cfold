@@ -45,3 +45,18 @@ def test_codebase():
     # Test validator for instructions as dict (though not typically used)
     codebase = Codebase.model_validate({"instructions": [], "files": []})
     assert isinstance(codebase.instructions, list)
+
+
+def test_codebase_with_role_instructions():
+    """Test Codebase validation with instructions using 'type' field."""
+    data = {
+        "instructions": [
+            {"type": "system", "content": "System prompt"},
+            {"type": "user", "content": "User prompt", "synopsis": "User focus"},
+        ],
+        "files": [{"path": "test.py", "content": "code"}],
+    }
+    codebase = Codebase.model_validate(data)
+    assert len(codebase.instructions) == 2
+    assert codebase.instructions[0].type == "system"
+    assert codebase.instructions[1].synopsis == "User focus"

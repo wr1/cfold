@@ -38,7 +38,7 @@ default:
         # === NEW BOILERPLATE (added per user request) ===
         # Granular one-function-per-file style (machine-first):
         # For Python code, use one public function/class per .py file.
-        # Filename = function_name.py (or clear verb_noun purpose).
+        # Filename = function_name.py (or clear verb_noun purpose). Use snake_case for all (function, class, and file names), avoid CamelCase. 
         # This enables precise, minimal LLM edits.
         - **Granular one-function-per-file style (machine-first)**: For Python code, use one public function/class per .py file. Filename = function_name.py (or clear verb_noun purpose). This enables precise, minimal LLM edits.
         # Tree maintenance freedom:
