@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import List
 import yaml
+import glob
 from rich.console import Console
 from rich.tree import Tree
 from ..fold.build_codebase import build_codebase
@@ -31,11 +32,11 @@ def fold(
                 if "default_dialect" in local:
                     dialect = local["default_dialect"]
     try:
-        instructions, patterns = load_instructions(dialect, cwd) if not bare else ([], {})
+        instructions, include_patterns = load_instructions(dialect, cwd) if not bare else ([], [])
     except ValueError:
         if dialect == "default":
             console.print("Default dialect not found, falling back to bare mode.")
-            instructions, patterns = [], {}
+            instructions, include_patterns = [], []
             bare = True
         else:
             available = list_available_dialects()
@@ -55,11 +56,18 @@ def fold(
             instr_tree.add(label)
         console.print(instr_tree)
     if not files:
-        files = list(cwd.rglob("*"))
-        files = [f for f in files if f.name != output]
+        filtered = filter_files(include_patterns, cwd)
+        filtered = [f for f in filtered if f.name != output]
     else:
-        files = [Path(f) for f in files]
-    filtered = filter_files(files, patterns.get("included", []), patterns.get("excluded", []), patterns.get("included_dirs", []), patterns.get("exclude_files", []), cwd)
+        file_paths = []
+        for f in files:
+            if '*' in f or '?' in f:
+                file_paths.extend(cwd / p for p in glob.glob(f, root_dir=str(cwd), recursive=True) if (cwd / p).is_file())
+            else:
+                path = cwd / f
+                if path.is_file():
+                    file_paths.append(path)
+        filtered = filter_files(include_patterns, cwd, file_paths)
     if not filtered:
         console.print("No valid files to fold.")
         return

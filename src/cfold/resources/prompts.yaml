@@ -38,7 +38,7 @@ default:
         # === NEW BOILERPLATE (added per user request) ===
         # Granular one-function-per-file style (machine-first):
         # For Python code, use one public function/class per .py file.
-        # Filename = function_name.py (or clear verb_noun purpose). Use snake_case for all (function, class, and file names), avoid CamelCase. 
+        # Filename = function_name.py (or clear verb_noun purpose). Use snake_case for all (function, class, and file names), avoid CamelCase.
         # This enables precise, minimal LLM edits.
         - **Granular one-function-per-file style (machine-first)**: For Python code, use one public function/class per .py file. Filename = function_name.py (or clear verb_noun purpose). This enables precise, minimal LLM edits.
         # Tree maintenance freedom:
@@ -53,30 +53,24 @@ default:
         - Use clear variable and function names that convey purpose and meaning, prioritizing human/machine readability.
         - Add one character alternatives to command line options i.e. --file and -f
         - Never delete files that are outside of cwd (i.e. starting with ../ or / or otherwise outside of the cwd)
-        - Make the CLI callable in pyproject.toml 
+        - Make the CLI callable in pyproject.toml
     - type: user
       synopsis: "instructions for authoring admin.sh"
       content: |-
         add an admin.sh file in the root dir, where each file has a separate line for each file added, pipe output from ruff check and pytest to out.txt
-        ruff format 
-        ruff check --fix > out.txt 
+        ruff format
+        ruff check --fix > out.txt
         git commit <filename> -m 'summary of edits for <filename>'
         git commit <filename2> -m 'summary of edits for <filename2>'
         ... for all files (but not the admin.sh file itself), if the files are new, add git add <filename> before git commit, do not parameterize or write as a loop, make it easy for the user to comment out parts of it if they want to skip certain files
-        uv run pytest -v >> out.txt 
+        uv run pytest -v >> out.txt
 
-  included_suffix:
-    - ".py"
-    - ".toml"
-    - ".md"
-    - ".yml"
-    - ".yaml"
-  included_dirs:
-    - "src"
-    - "tests"
-    - "docs"
-    - "examples"
-    - "."
+  include:
+    - "src/**/*.py"
+    - "tests/**/*.py"
+    - "examples/**/*.py"
+    - "**/*.toml"
+    - "**/*.md"
 
 py:
   pre: [common, default]
@@ -84,14 +78,12 @@ py:
     - type: user
       synopsis: "python instructions"
       content: "# Prefer uv for installation, use vectorisation using numpy, validation with pydantic. "
-  included_suffix:
-    - ".py"
-    - ".toml"
-    - ".ini"
-
-  included_dirs:
-    - "src"
-    - "."
+  include:
+    - "src/**/*.py"
+    - "examples/**/*.py"
+    - "tests/**/*.py"
+    - "pyproject.toml"
+    - "README.md"
 
 pytest:
   pre: [common, default]
@@ -99,11 +91,9 @@ pytest:
     - type: user
       synopsis: "pytest instructions"
       content: "# Use session-scoped fixtures for setup and conversion, parametrize tests when needed, avoid overuse of fixtures, in particular outside of a given test file."
-  included_suffix:
-    - ".py"
-    - ".log"
-  included_dirs:
-    - "tests"
+  include:
+    - "tests/**/*.py"
+    - "tests/**/*.log"
 
 doc:
   pre: [common]
@@ -111,21 +101,21 @@ doc:
     - type: user
       synopsis: "documentation instructions"
       content: "# use mkdocs for documentation, avoid overly long pages, try to split up into smaller sections in separate files. Use ubuntu sans and ubuntu mono fonts for text and code. Put particular care and attention to the front page, include a minimal and clear example of the main intented use of the project so that a user can get started without needing to read further. Avoid long-winded contribution guidelines. "
-  included_suffix:
-    - ".md"
-    - ".yml"
-    - ".yaml"
-  included_dirs:
-    - "src"
-    - "docs"
+  include:
+    - "src/**/*.md"
+    - "src/**/*.yml"
+    - "src/**/*.yaml"
+    - "docs/**/*.md"
+    - "docs/**/*.yml"
+    - "docs/**/*.yaml"
 
 typst:
   pre: [common]
   instructions:
     - type: system
       content: "# for typst, follow typst syntax. Structure the document with sections and subsections as needed. "
-  included_suffix:
-    - ".typ"
+  include:
+    - "**/*.typ"
 
 hugo:
   pre: [common]
@@ -133,12 +123,11 @@ hugo:
     - type: user
       synopsis: "hugo instructions"
       content: "# For Hugo projects, focus on content/ directory for MD files, include hugo.yaml config. Use Hugo's front matter for metadata, organize content hierarchically."
-  included_suffix:
-    - ".md"
-    - ".yaml"
-  included_dirs:
-    - "content"
-    - "."
+  include:
+    - "content/**/*.md"
+    - "content/**/*.yaml"
+    - "**/*.md"
+    - "**/*.yaml"
 
 pyscript:
   pre: [common]
@@ -174,10 +163,8 @@ pyscript:
         Do not create tests, documentation folders, or admin.sh unless asked.
         Focus on making the script immediately useful and easy to run in one command.
 
-  included_suffix:
-    - ".py"
-  included_dirs:
-    - "."
+  include:
+    - "**/*.py"
 
 # === OPTIMAL STRUCTURE (domain-driven, no vague folders like core/) ===
 scipy:
@@ -241,15 +228,16 @@ scipy:
         Never use monolithic or vague folders like core/, utils/, or processing/.
         LLM is allowed to rename/delete/reorganize files freely to keep the tree accurate.
 
-  included_suffix:
-    - ".py"
-    - ".toml"
-    - ".gitignore"
-  included_dirs:
-    - "src"
-    - "tests"
-    - "examples"
-    - "."
+  include:
+    - "src/**/*.py"
+    - "src/**/*.toml"
+    - "tests/**/*.py"
+    - "tests/**/*.toml"
+    - "examples/**/*.py"
+    - "examples/**/*.toml"
+    - "**/*.py"
+    - "**/*.toml"
+    - "**/*.gitignore"
 
 plan:
   pre: [common]
@@ -348,8 +336,6 @@ plan:
         - Assume starting from existing dir if described; handle tool installs if needed (e.g., uv sync).
         - Favor modularity, testability and future growth over shortest-path hacks; but keep changes incremental.
 
-  included_suffix:
-    - ".typ"
-    - ".fish"
-  included_dirs:
-    - "."
+  include:
+    - "**/*.typ"
+    - "**/*.fish"
