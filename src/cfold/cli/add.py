@@ -4,8 +4,8 @@ import json
 from pathlib import Path
 from rich.console import Console
 import pyperclip
-from ..models.codebase import Codebase
-from ..models.file_entry import FileEntry
+from ..models.codebase import codebase
+from ..models.file_entry import file_entry
 from ..tree.build_folded import build_folded_tree
 from typing import List
 
@@ -19,7 +19,7 @@ def add(files: List[str], foldfile: str = "codefold.json"):
         console.print(f"Error: {foldfile} does not exist.", style="red")
         return
     with open(path, "r", encoding="utf-8") as f:
-        data = Codebase.model_validate(json.load(f))
+        data = codebase.model_validate(json.load(f))
     existing = {f.path for f in data.files}
     new_added = False
     for f in files:
@@ -35,7 +35,7 @@ def add(files: List[str], foldfile: str = "codefold.json"):
                     entry.content = content
                     break
         else:
-            data.files.append(FileEntry(path=rel, content=content))
+            data.files.append(file_entry(path=rel, content=content))
             new_added = True
     added_files = [Path(entry.path) for entry in data.files if entry.path not in existing]
     if added_files:

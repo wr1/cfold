@@ -4,10 +4,10 @@ import json
 from pathlib import Path
 import pyperclip
 from rich.console import Console
-from ..models.codebase import Codebase
+from ..models.codebase import codebase
 
 
-def write_json(codebase: Codebase, output: Path, clip: bool = False) -> None:
+def write_json(codebase: codebase, output: Path, clip: bool = False) -> None:
     """Write folded codebase to JSON."""
     console = Console()
     with open(output, "w", encoding="utf-8") as f:

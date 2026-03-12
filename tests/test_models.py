@@ -1,6 +1,6 @@
-from cfold.models.codebase import Codebase
-from cfold.models.file_entry import FileEntry
-from cfold.models.instruction import Instruction
+from cfold.models.codebase import codebase
+from cfold.models.file_entry import file_entry
+from cfold.models.instruction import instruction
 from pydantic import ValidationError
 import pytest
 
@@ -8,43 +8,43 @@ import pytest
 def test_fileentry_validation():
     """Test FileEntry validation."""
     # Valid with content
-    entry = FileEntry(path="file.py", content="content")
+    entry = file_entry(path="file.py", content="content")
     assert entry.delete is False
     assert entry.content == "content"
 
     # Valid delete without content
-    entry = FileEntry(path="file.py", delete=True)
+    entry = file_entry(path="file.py", delete=True)
     assert entry.delete is True
     assert entry.content is None
 
     # Invalid: no content and not delete
     with pytest.raises(ValidationError):
-        FileEntry(path="file.py")
+        file_entry(path="file.py")
 
     # Invalid: delete with content (but allowed, as per model)
-    entry = FileEntry(path="file.py", delete=True, content="ignored")
+    entry = file_entry(path="file.py", delete=True, content="ignored")
     assert entry.content == "ignored"
 
 
 def test_instruction():
     """Test Instruction model."""
-    instr = Instruction(type="system", content="content", name="test", synopsis="syn")
+    instr = instruction(type="system", content="content", name="test", synopsis="syn")
     assert instr.type == "system"
     assert instr.synopsis == "syn"  # Internal field
 
 
 def test_codebase():
     """Test Codebase model."""
-    codebase = Codebase(
-        instructions=[Instruction(type="user", content="prompt")],
-        files=[FileEntry(path="file.py", content="code")],
+    codebase_instance = codebase(
+        instructions=[instruction(type="user", content="prompt")],
+        files=[file_entry(path="file.py", content="code")],
     )
-    dumped = codebase.model_dump(exclude={"instructions": {"__all__": {"synopsis"}}})
+    dumped = codebase_instance.model_dump(exclude={"instructions": {"__all__": {"synopsis"}}})
     assert "synopsis" not in dumped["instructions"][0]
 
     # Test validator for instructions as dict (though not typically used)
-    codebase = Codebase.model_validate({"instructions": [], "files": []})
-    assert isinstance(codebase.instructions, list)
+    codebase_instance = codebase.model_validate({"instructions": [], "files": []})
+    assert isinstance(codebase_instance.instructions, list)
 
 
 def test_codebase_with_role_instructions():
@@ -56,7 +56,7 @@ def test_codebase_with_role_instructions():
         ],
         "files": [{"path": "test.py", "content": "code"}],
     }
-    codebase = Codebase.model_validate(data)
-    assert len(codebase.instructions) == 2
-    assert codebase.instructions[0].type == "system"
-    assert codebase.instructions[1].synopsis == "User focus"
+    codebase_instance = codebase.model_validate(data)
+    assert len(codebase_instance.instructions) == 2
+    assert codebase_instance.instructions[0].type == "system"
+    assert codebase_instance.instructions[1].synopsis == "User focus"

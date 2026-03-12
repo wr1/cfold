@@ -4,10 +4,10 @@ from pathlib import Path
 import shutil
 from rich.console import Console
 from rich.tree import Tree
-from ..models.codebase import Codebase
+from ..models.codebase import codebase
 
 
-def apply_changes(data: Codebase, output_dir: Path, original_dir: Path | None = None) -> None:
+def apply_changes(data: codebase, output_dir: Path, original_dir: Path | None = None) -> None:
     """Apply adds, modifies, and deletes."""
     console = Console()
     if original_dir:

@@ -4,6 +4,7 @@ import subprocess
 from pathlib import Path
 from cfold.cli.fold import fold
 from cfold.cli.add import add
+from cfold.cli.rc import rc
 
 
 def test_basic_fold(tmp_path, monkeypatch, capsys):
@@ -164,7 +165,7 @@ def test_add_files(tmp_path, monkeypatch, capsys):
 
     captured = capsys.readouterr()
     assert "Added files to fold.json and copied to clipboard." in captured.out
-    assert "file2.py" in captured.out  # Tree includes the file
+    assert "file2.py" in captured.out
 
     # Check the file has both
     with open("fold.json", "r", encoding="utf-8") as f:
@@ -173,6 +174,18 @@ def test_add_files(tmp_path, monkeypatch, capsys):
     paths = {f["path"] for f in data["files"]}
     assert "file1.py" in paths
     assert "file2.py" in paths
+
+
+def test_rc(tmp_path, monkeypatch):
+    """Test rc command creates .foldrc with local as default."""
+    monkeypatch.chdir(tmp_path)
+    rc()
+    foldrc = tmp_path / ".foldrc"
+    assert foldrc.exists()
+    with open(foldrc, "r", encoding="utf-8") as f:
+        config = yaml.safe_load(f)
+    assert config["default_dialect"] == "local"
+    assert "local" in config
 
 
 def test_run_basic_fold_example():

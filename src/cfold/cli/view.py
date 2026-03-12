@@ -3,7 +3,7 @@
 import json
 from rich.console import Console
 from rich.tree import Tree
-from ..models.codebase import Codebase
+from ..models.codebase import codebase
 
 
 def view(foldfile: str):
@@ -12,7 +12,7 @@ def view(foldfile: str):
     try:
         with open(foldfile, "r", encoding="utf-8") as f:
             raw = json.load(f)
-        data = Codebase.model_validate(raw)
+        data = codebase.model_validate(raw)
     except Exception as e:
         console.print(f"Error loading file: {e}")
         return

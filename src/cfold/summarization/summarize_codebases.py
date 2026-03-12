@@ -2,10 +2,11 @@
 
 import ast
 import os
+import sys
 from pathlib import Path
 from typing import List
 from loguru import logger
-from .code_visitor import CodeVisitor
+from .code_visitor import code_visitor
 
 
 def summarize_codebases(codebase_paths: List[Path], include_tests: bool = False) -> str:
@@ -23,6 +24,7 @@ def summarize_codebases(codebase_paths: List[Path], include_tests: bool = False)
     if not include_tests:
         excluded_dirs.add("tests")
         excluded_dirs.add("test")
+    stdlib = set(sys.stdlib_module_names)
     valid_paths = [p for p in codebase_paths if p.is_dir()]
     if not valid_paths:
         raise ValueError("No valid directories provided")
@@ -41,19 +43,22 @@ def summarize_codebases(codebase_paths: List[Path], include_tests: bool = False)
                             source = f.read()
                         tree = ast.parse(source, filename=str(file_path))
                         rel_path = file_path.relative_to(codebase_path)
-                        summary_lines.append(f"  File: {rel_path}")
-                        visitor = CodeVisitor()
+                        summary_lines.append(f"  - {rel_path}")
+                        visitor = code_visitor()
                         visitor.visit(tree)
+                        non_stdlib_imports = sorted(visitor.imports - stdlib)
+                        if non_stdlib_imports:
+                            summary_lines.append(f"    imports: {', '.join(non_stdlib_imports)}")
                         summary_lines.extend(visitor.summary_lines)
                     except SyntaxError:
                         logger.warning(f"Syntax error in {file_path}, skipped")
                         rel_path = file_path.relative_to(codebase_path)
                         summary_lines.append(
-                            f"  File: {rel_path} - Syntax error, skipped"
+                            f"  - {rel_path} - Syntax error, skipped"
                         )
                     except Exception as e:
                         logger.error(f"Error processing {file_path}: {e}")
                         rel_path = file_path.relative_to(codebase_path)
-                        summary_lines.append(f"  File: {rel_path} - Error: {e}")
+                        summary_lines.append(f"  - {rel_path} - Error: {e}")
         summary_lines.append("")
     return "\n".join(summary_lines)

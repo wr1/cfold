@@ -4,7 +4,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-class Instruction(BaseModel):
+class instruction(BaseModel):
     """Represents a single instruction in the folded codebase."""
     type: str
     content: str

@@ -29,14 +29,11 @@ class Greeter:
         )
         summary = summarize_codebases([codebase_path])
         assert "Codebase:" in summary
-        assert "File: main.py" in summary
-        assert "Func: greet(name: str) -> str" in summary
-        assert "Doc: Greet someone." in summary
-        assert "Class: Greeter" in summary
-        assert "Doc: A greeter class." in summary
-        assert "Func: __init__(self, name: str)" in summary
-        assert "Func: say_hello(self) -> str" in summary
-        assert "Doc: Say hello." in summary
+        assert "- main.py" in summary
+        assert "function: greet(name: str) -> str - Greet someone." in summary
+        assert "class: Greeter - A greeter class." in summary
+        assert "function: __init__(self, name: str)" in summary
+        assert "function: say_hello(self) -> str - Say hello." in summary
 
 
 def test_summarize_codebases_multiple():
@@ -50,8 +47,8 @@ def test_summarize_codebases_multiple():
         (cb2 / "class.py").write_text("class C: pass")
         summary = summarize_codebases([cb1, cb2])
         assert "Codebase: " in summary
-        assert "Func: func()" in summary
-        assert "Class: C" in summary
+        assert "function: func()" in summary
+        assert "class: C" in summary
 
 
 def test_summarize_codebases_exclude_tests():
@@ -64,8 +61,8 @@ def test_summarize_codebases_exclude_tests():
         tests_dir.mkdir()
         (tests_dir / "test_main.py").write_text("def test_main(): pass")
         summary = summarize_codebases([codebase_path], include_tests=False)
-        assert "Func: main()" in summary
-        assert "Func: test_main()" not in summary
+        assert "function: main()" in summary
+        assert "function: test_main()" not in summary
 
 
 def test_summarize_codebases_include_tests():
@@ -78,8 +75,8 @@ def test_summarize_codebases_include_tests():
         tests_dir.mkdir()
         (tests_dir / "test_main.py").write_text("def test_main(): pass")
         summary = summarize_codebases([codebase_path], include_tests=True)
-        assert "Func: main()" in summary
-        assert "Func: test_main()" in summary
+        assert "function: main()" in summary
+        assert "function: test_main()" in summary
 
 
 def test_summarize_codebases_exclude_venv():
@@ -92,8 +89,8 @@ def test_summarize_codebases_exclude_venv():
         venv_dir.mkdir()
         (venv_dir / "script.py").write_text("def script(): pass")
         summary = summarize_codebases([codebase_path])
-        assert "Func: main()" in summary
-        assert "Func: script()" not in summary
+        assert "function: main()" in summary
+        assert "function: script()" not in summary
 
 
 def test_summarize_codebases_invalid_path():

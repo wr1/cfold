@@ -1,9 +1,9 @@
 from cfold.dialect.load_instructions import load_instructions
 from cfold.dialect.list_available import list_available_dialects
 from cfold.tree.build_folded import build_folded_tree
-from cfold.models.codebase import Codebase
-from cfold.models.file_entry import FileEntry
-from cfold.models.instruction import Instruction
+from cfold.models.codebase import codebase
+from cfold.models.file_entry import file_entry
+from cfold.models.instruction import instruction
 from pydantic import ValidationError
 import pytest
 
@@ -38,11 +38,11 @@ def test_build_folded_tree(tmp_path):
 def test_model_validation():
     """Test Pydantic model validation."""
     # Valid FileEntry
-    FileEntry(path="test.py", content="code")
+    file_entry(path="test.py", content="code")
     # Invalid: missing content without delete
     with pytest.raises(ValidationError):
-        FileEntry(path="test.py")
+        file_entry(path="test.py")
     # Valid delete
-    FileEntry(path="test.py", delete=True)
+    file_entry(path="test.py", delete=True)
     # Valid Codebase
-    Codebase(instructions=[Instruction(type="system", content="test")], files=[])
+    codebase(instructions=[instruction(type="system", content="test")], files=[])
