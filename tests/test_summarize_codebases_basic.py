@@ -29,7 +29,7 @@ class Greeter:
         summary = summarize_codebases([codebase_path])
         assert "Codebase:" in summary
         assert "- main.py" in summary
-        assert "function: greet(name: str) -> str - Greet someone." in summary
-        assert "class: Greeter - A greeter class." in summary
-        assert "function: __init__(self, name: str)" in summary
-        assert "function: say_hello(self) -> str - Say hello." in summary
+        assert "fn: greet(name: str) -> str - Greet someone." in summary
+        assert "cls: Greeter - A greeter class." in summary
+        assert "fn: __init__(self, name: str)" in summary
+        assert "fn: say_hello(self) -> str - Say hello." in summary

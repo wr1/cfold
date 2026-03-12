@@ -13,5 +13,5 @@ def test_summarize_codebases_exclude_venv():
         venv_dir.mkdir()
         (venv_dir / "script.py").write_text("def script(): pass")
         summary = summarize_codebases([codebase_path])
-        assert "function: main()" in summary
-        assert "function: script()" not in summary
+        assert "fn: main()" in summary
+        assert "fn: script()" not in summary

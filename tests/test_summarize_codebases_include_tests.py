@@ -13,5 +13,5 @@ def test_summarize_codebases_include_tests():
         tests_dir.mkdir()
         (tests_dir / "test_main.py").write_text("def test_main(): pass")
         summary = summarize_codebases([codebase_path], include_tests=True)
-        assert "function: main()" in summary
-        assert "function: test_main()" in summary
+        assert "fn: main()" in summary
+        assert "fn: test_main()" in summary

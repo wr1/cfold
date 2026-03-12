@@ -14,5 +14,5 @@ def test_summarize_codebases_multiple():
         (cb2 / "class.py").write_text("class C: pass")
         summary = summarize_codebases([cb1, cb2])
         assert "Codebase: " in summary
-        assert "function: func()" in summary
-        assert "class: C" in summary
+        assert "fn: func()" in summary
+        assert "cls: C" in summary

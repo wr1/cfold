@@ -1,6 +1,5 @@
 import json
 import yaml
-from pathlib import Path
 from cfold.cli.fold import fold
 
 

@@ -20,6 +20,17 @@ common:
         - Supports .foldrc YAML file for custom dialects, patterns, and instructions, which can reference defaults via 'pre'.
         - Write output as a full dict {'files': [...] }, not the bare 'files' array.
 
+# === NEW BOILERPLATE (added per user request) ===
+# Granular one-function-per-file style (machine-first):
+# For Python code, use one public function/class per .py file.
+# Filename = function_name.py (or clear verb_noun purpose). Use snake_case for all (function, class, and file names), avoid CamelCase.
+# This enables precise, minimal LLM edits.
+# Tree maintenance freedom:
+# LLM is explicitly allowed (and encouraged) to rename, delete,
+# or reorganize files whenever a function's purpose changes or
+# a better name emerges. The directory tree must always accurately
+# represent current code responsibilities — never leave outdated filenames.
+
 default:
   pre: [common]
 
@@ -34,20 +45,8 @@ default:
         - Prefer organizing code into subdirectories based on functionality (e.g. 'src/<project>/<functionality>/' where functionality can be cli or api etc.).
         - Split functionality into small, focused files (e.g., one function or class per file where practical, typically 50-200 lines).
         - Aim for modularity: Each file should have a single responsibility, making it easier to modify or replace individually.
-
-        # === NEW BOILERPLATE (added per user request) ===
-        # Granular one-function-per-file style (machine-first):
-        # For Python code, use one public function/class per .py file.
-        # Filename = function_name.py (or clear verb_noun purpose). Use snake_case for all (function, class, and file names), avoid CamelCase.
-        # This enables precise, minimal LLM edits.
         - **Granular one-function-per-file style (machine-first)**: For Python code, use one public function/class per .py file. Filename = function_name.py (or clear verb_noun purpose). This enables precise, minimal LLM edits.
-        # Tree maintenance freedom:
-        # LLM is explicitly allowed (and encouraged) to rename, delete,
-        # or reorganize files whenever a function's purpose changes or
-        # a better name emerges. The directory tree must always accurately
-        # represent current code responsibilities — never leave outdated filenames.
         - **Tree maintenance freedom**: LLM is explicitly allowed (and encouraged) to rename, delete, or reorganize files whenever a function's purpose changes or a better name emerges. The directory tree must always accurately represent current code responsibilities — never leave outdated filenames.
-
         - Don't include LLM instructions in the output.
         - Use high level 1 line docstrings
         - Use clear variable and function names that convey purpose and meaning, prioritizing human/machine readability.
