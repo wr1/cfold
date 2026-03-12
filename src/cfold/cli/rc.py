@@ -23,11 +23,16 @@ def rc():
                     "content": "Focus on brief and modular code.",
                 }
             ],
-            "included_suffix": [".py", ".toml"],
+            "include": [
+                "**/*.py",
+                "src/**/*.py",
+                "examples/**/*.py",
+                "tests/**/*.py",
+                "pyproject.toml",
+                "README.md",
+            ],
         }
     config["default_dialect"] = "local"
     with foldrc_path.open("w", encoding="utf-8") as f:
         yaml.safe_dump(config, f, default_flow_style=False)
-    Console().print(
-        "[green].foldrc created/updated with 'local' as default dialect.[/green]"
-    )
+    Console().print("[green].foldrc created/updated with 'local' as default dialect.[/green]")
