@@ -61,12 +61,18 @@ def fold(
                 label += f" - {instr.synopsis}"
             instr_tree.add(label)
         console.print(instr_tree)
-    if not files:
-        filtered = filter_files(include_patterns, cwd)
+    dirs = [f for f in files if Path(f).is_dir()]
+    non_dirs = [f for f in files if f not in dirs]
+    if dirs:
+        filtered = []
+        for d in dirs:
+            dir_path = cwd / d
+            sub_filtered = filter_files(include_patterns, dir_path)
+            filtered.extend(sub_filtered)
         filtered = [f for f in filtered if f.name != output]
-    else:
+    elif non_dirs:
         file_paths = []
-        for f in files:
+        for f in non_dirs:
             pattern = f
             if "**" in f and "/" not in f and f.startswith("**"):
                 suffix = f[2:]
@@ -76,6 +82,9 @@ def fold(
                 if path.is_file() and path.name != output:
                     file_paths.append(path)
         filtered = file_paths
+    else:
+        filtered = filter_files(include_patterns, cwd)
+        filtered = [f for f in filtered if f.name != output]
     if not filtered:
         console.print("No valid files to fold.")
         return

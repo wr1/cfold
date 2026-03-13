@@ -7,7 +7,7 @@ from .unfold import unfold
 from .rc import rc
 from .view import view
 from .add import add
-from .summarize import summarize
+from .sum import sum
 
 app = treeparse.cli(
     name="cfold",
@@ -114,11 +114,11 @@ add_cmd = treeparse.command(
 )
 app.commands.append(add_cmd)
 
-summarize_cmd = treeparse.command(
-    name="summarize",
+sum_cmd = treeparse.command(
+    name="sum",
     help="Summarize codebases using AST.",
-    callback=summarize,
-    arguments=[treeparse.argument(name="codebases", arg_type=str, nargs="+")],
+    callback=sum,
+    arguments=[treeparse.argument(name="codebases", arg_type=str, nargs="*", default=[])],
     options=[
         treeparse.option(
             flags=["--output", "-o"],
@@ -140,7 +140,7 @@ summarize_cmd = treeparse.command(
         ),
     ],
 )
-app.commands.append(summarize_cmd)
+app.commands.append(sum_cmd)
 
 
 def main():

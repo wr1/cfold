@@ -12,13 +12,13 @@ def test_entrypoint_fold(tmp_path, monkeypatch):
     assert Path("folded.json").exists()
 
 
-def test_entrypoint_summarize(tmp_path, monkeypatch):
-    """Test entrypoint summarize command."""
+def test_entrypoint_sum(tmp_path, monkeypatch):
+    """Test entrypoint sum command."""
     codebase_dir = tmp_path / "codebase"
     codebase_dir.mkdir()
     (codebase_dir / "main.py").write_text("def main(): pass")
     monkeypatch.setattr(
-        sys, "argv", ["cfold", "summarize", str(codebase_dir), "-o", "summary.txt"]
+        sys, "argv", ["cfold", "sum", str(codebase_dir), "-o", "summary.txt"]
     )
     main()
     assert Path("summary.txt").exists()

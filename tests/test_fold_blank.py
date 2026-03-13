@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from cfold.cli.fold import fold
 
 
@@ -22,10 +23,10 @@ def test_fold_blank(tmp_path, monkeypatch):
 
     with open("folded.json", "r", encoding="utf-8") as f:
         data = json.load(f)
-    # Default dialect includes .py and .md, but not .txt
-    assert len(data["files"]) == 3
+    # Default dialect includes .md, but not .py or .txt
+    assert len(data["files"]) == 1
     paths = {f["path"] for f in data["files"]}
-    assert "main.py" in paths
-    assert "utils.py" in paths
     assert "README.md" in paths
+    assert "main.py" not in paths
+    assert "utils.py" not in paths
     assert "ignore.txt" not in paths

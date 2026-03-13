@@ -1,10 +1,10 @@
 from pathlib import Path
 import tempfile
-from cfold.summarization.summarize_codebases import summarize_codebases
+from cfold.summarization.sum_codebases import sum_codebases
 
 
-def test_summarize_codebases_basic():
-    """Test basic summarizing of a codebase with classes and functions."""
+def test_sum_codebases_basic():
+    """Test basic summing of a codebase with classes and functions."""
     with tempfile.TemporaryDirectory() as tmpdir:
         codebase_path = Path(tmpdir) / "test_codebase"
         codebase_path.mkdir()
@@ -26,7 +26,7 @@ class Greeter:
         return f"Hello {self.name}"
 '''
         )
-        summary = summarize_codebases([codebase_path])
+        summary = sum_codebases([codebase_path])
         assert "Codebase:" in summary
         assert "- main.py" in summary
         assert "fn: greet(name: str) -> str - Greet someone." in summary

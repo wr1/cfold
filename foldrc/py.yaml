@@ -1,0 +1,14 @@
+py:
+  pre: [common, granular, default]
+  instructions:
+    - type: user
+      synopsis: "python instructions"
+      content: |-
+        Prefer uv for installation, use vectorisation using numpy, validation with pydantic.
+  include:
+    - "src/**/*.py"
+    - "examples/**/*.py"
+    - "tests/**/*.py"
+    - "pyproject.toml"
+    - "README.md"
+    - "summary.txt"

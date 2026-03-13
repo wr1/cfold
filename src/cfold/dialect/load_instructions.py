@@ -20,12 +20,12 @@ def load_instructions(
         with local_path.open("r", encoding="utf-8") as f:
             local_config = yaml.safe_load(f) or {}
     try:
-        with (
-            resources.files("cfold")
-            .joinpath("resources/prompts.yaml")
-            .open("r", encoding="utf-8") as f
-        ):
-            default_config = yaml.safe_load(f)
+        foldrc_dir = resources.files("cfold") / "foldrc"
+        default_config = {}
+        for yaml_file in foldrc_dir.glob("*.yaml"):
+            with yaml_file.open("r", encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+                default_config.update(data)
     except Exception as e:
         raise RuntimeError(f"Failed to load default instructions: {e}")
     combined_config = {**default_config, **local_config}

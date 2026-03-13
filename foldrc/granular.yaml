@@ -1,0 +1,20 @@
+granular:
+  pre: [common]
+  instructions:
+    - type: user
+      synopsis: "granular python style + tree freedom"
+      content: |-
+        Granular one-function-per-file style (machine-first):
+          For Python code, use one public function/class per .py file.
+          Filename = function_name.py (or clear verb_noun purpose). Use snake_case for all (function, class, and file names), avoid CamelCase.
+          This enables precise, minimal LLM edits.
+        Tree maintenance freedom:
+          LLM is explicitly allowed (and encouraged) to rename, delete,
+          or reorganize files whenever a function's purpose changes or
+          a better name emerges. The directory tree must always accurately
+          represent current code responsibilities — never leave outdated filenames.
+        Use high level 1 line docstrings.
+        Use clear variable and function names that convey purpose and meaning, prioritizing human/machine readability.
+        Add one character alternatives to command line options i.e. --file and -f.
+        Never delete files that are outside of cwd (i.e. starting with ../ or / or otherwise outside of the cwd).
+        Make the CLI callable in pyproject.toml.

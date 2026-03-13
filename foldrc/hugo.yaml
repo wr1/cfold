@@ -1,0 +1,11 @@
+hugo:
+  pre: [common]
+  instructions:
+    - type: user
+      synopsis: "hugo instructions"
+      content: "# For Hugo projects, focus on content/ directory for MD files, include hugo.yaml config. Use Hugo's front matter for metadata, organize content hierarchically."
+  include:
+    - "content/**/*.md"
+    - "content/**/*.yaml"
+    - "**/*.md"
+    - "**/*.yaml"

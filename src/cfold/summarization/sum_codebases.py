@@ -1,4 +1,4 @@
-"""Summarize Python codebases using AST for LLM-readable structure."""
+"""Sum Python codebases using AST for LLM-readable structure."""
 
 import ast
 import os
@@ -9,7 +9,7 @@ from loguru import logger
 from .code_visitor import code_visitor
 
 
-def summarize_codebases(codebase_paths: List[Path], include_tests: bool = False) -> str:
+def sum_codebases(codebase_paths: List[Path], include_tests: bool = False) -> str:
     """Walk through codebases, parse Python files with AST, and generate a summary of code structure."""
     summary_lines = []
     excluded_dirs = {

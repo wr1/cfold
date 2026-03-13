@@ -1,6 +1,5 @@
 """Visitor to collect code structure."""
 
-import sys
 from ast import NodeVisitor
 from .get_docstring import get_docstring
 from .get_annotation_str import get_annotation_str

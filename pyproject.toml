@@ -1,6 +1,6 @@
 [project]
 name = "cfold"
-version = "0.2.5"
+version = "0.2.6"
 description = "A command line tool to fold and unfold Python projects for LLM interaction"
 authors = [{ name = "wr1", email = "8971152+wr1@users.noreply.github.com" }]
 requires-python = "~=3.10"
@@ -27,10 +27,10 @@ dev = [
 ]
 
 [tool.hatch.build.targets.sdist]
-include = ["src/cfold", "src/cfold/resources"]
+include = ["src/cfold", "foldrc"]
 
 [tool.hatch.build.targets.wheel]
-include = ["src/cfold", "src/cfold/resources"]
+include = ["src/cfold", "foldrc"]
 
 [tool.hatch.build.targets.wheel.sources]
 "src/cfold" = "cfold"
