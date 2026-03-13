@@ -11,4 +11,4 @@ py:
     - "tests/**/*.py"
     - "pyproject.toml"
     - "README.md"
-    - "summary.txt"
+    # - "summary.txt"
