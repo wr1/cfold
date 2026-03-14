@@ -1,4 +1,3 @@
-from pathlib import Path
 from cfold.cli.sum import sum
 
 
@@ -10,7 +9,12 @@ def test_sum_cli(tmp_path):
     (codebase_dir / "main.py").write_text("def main(): pass")
 
     output_file = tmp_path / "summary.txt"
-    sum(codebases=[str(codebase_dir)], output=str(output_file), include_tests=False, clip=False)
+    sum(
+        codebases=[str(codebase_dir)],
+        output=str(output_file),
+        include_tests=False,
+        clip=False,
+    )
 
     assert output_file.exists()
     content = output_file.read_text(encoding="utf-8")

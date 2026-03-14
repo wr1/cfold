@@ -118,7 +118,9 @@ sum_cmd = treeparse.command(
     name="sum",
     help="Summarize codebases using AST.",
     callback=sum,
-    arguments=[treeparse.argument(name="codebases", arg_type=str, nargs="*", default=[])],
+    arguments=[
+        treeparse.argument(name="codebases", arg_type=str, nargs="*", default=[])
+    ],
     options=[
         treeparse.option(
             flags=["--output", "-o"],

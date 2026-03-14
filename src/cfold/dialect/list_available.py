@@ -1,6 +1,5 @@
 """Get the list of available dialects."""
 
-from importlib import resources
 from pathlib import Path
 import yaml
 from typing import List, Optional
