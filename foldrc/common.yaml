@@ -18,4 +18,6 @@ common:
         - Always provide full file content for additions and modifications; no partial updates within a file. Do not include unchanged files in the output.
         - Paths are relative to the current working directory (CWD) by default.
         - Supports .foldrc YAML file for custom dialects, patterns, and instructions, which can reference defaults via 'pre'.
-        - Write output as a full dict {'files': [...] }, not the bare 'files' array.
+        - Write output as a full dict {'files': [...] }, not the bare 'files' array. Do not use ```json or other prefixes
+
+        - You HAVE TO FOLLOW THESE INSTRUCTIONS EXACTLY. DO NOT DEVIATE FROM THE SPECIFIED FORMAT OR RULES.
