@@ -29,7 +29,7 @@ def test_basic_fold(tmp_path, monkeypatch, capsys):
     )
 
     captured = capsys.readouterr()
-    assert "Folded" in captured.out
+    assert "Codebase folded" in captured.out
     assert "files" in captured.out
 
     # Check the folded file
@@ -69,8 +69,20 @@ def test_using_profiles(tmp_path, monkeypatch, capsys):
                     "content": "Focus on custom project structure.",
                 }
             ],
-            "included_suffix": [".py", ".toml", ".md"],
-            "included_dirs": [".", "src", "tests", "docs"],
+            "include": [
+                "**/*.py",
+                "**/*.toml",
+                "**/*.md",
+                "src/**/*.py",
+                "src/**/*.toml",
+                "src/**/*.md",
+                "tests/**/*.py",
+                "tests/**/*.toml",
+                "tests/**/*.md",
+                "docs/**/*.py",
+                "docs/**/*.toml",
+                "docs/**/*.md",
+            ],
         },
     }
     with open(project_dir / ".foldrc", "w", encoding="utf-8") as f:

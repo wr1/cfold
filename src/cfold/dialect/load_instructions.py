@@ -18,15 +18,12 @@ def load_instructions(
     local_config = {}
     local_path = directory / ".foldrc"
     if local_path.exists():
-        logger.info(f"Loading local dialects from {local_path}")
         with local_path.open("r", encoding="utf-8") as f:
             local_config = yaml.safe_load(f) or {}
     try:
         foldrc_dir = Path(__file__).parent.parent.parent.parent / "foldrc"
-        logger.info(f"Loading default dialects from {foldrc_dir}")
         default_config = {}
         for yaml_file in foldrc_dir.glob("*.yaml"):
-            logger.info(f"Loading {yaml_file}")
             with yaml_file.open("r", encoding="utf-8") as f:
                 data = yaml.safe_load(f) or {}
                 default_config.update(data)

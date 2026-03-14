@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from cfold.cli.fold import fold
 
 
@@ -25,7 +26,7 @@ def test_basic_fold(tmp_path, monkeypatch, capsys):
     )
 
     captured = capsys.readouterr()
-    assert "Folded" in captured.out
+    assert "Codebase folded" in captured.out
     assert "files" in captured.out
 
     # Check the folded file
