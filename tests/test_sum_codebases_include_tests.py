@@ -12,6 +12,6 @@ def test_sum_codebases_include_tests():
         tests_dir = codebase_path / "tests"
         tests_dir.mkdir()
         (tests_dir / "test_main.py").write_text("def test_main(): pass")
-        summary = sum_codebases([codebase_path], include_tests=True)
+        summary, _ = sum_codebases([codebase_path], include_tests=True)
         assert "fn: main()" in summary
         assert "fn: test_main()" in summary

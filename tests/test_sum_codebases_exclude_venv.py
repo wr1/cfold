@@ -12,6 +12,6 @@ def test_sum_codebases_exclude_venv():
         venv_dir = codebase_path / ".venv"
         venv_dir.mkdir()
         (venv_dir / "script.py").write_text("def script(): pass")
-        summary = sum_codebases([codebase_path])
+        summary, _ = sum_codebases([codebase_path])
         assert "fn: main()" in summary
         assert "fn: script()" not in summary

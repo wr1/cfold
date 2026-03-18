@@ -9,9 +9,12 @@ from loguru import logger
 from .code_visitor import code_visitor
 
 
-def sum_codebases(codebase_paths: List[Path], include_tests: bool = False) -> str:
+def sum_codebases(
+    codebase_paths: List[Path], include_tests: bool = False
+) -> tuple[str, List[Path]]:
     """Walk through codebases, parse Python files with AST, and generate a summary of code structure."""
     summary_lines = []
+    processed_files = []
     excluded_dirs = {
         "venv",
         "build",
@@ -29,7 +32,6 @@ def sum_codebases(codebase_paths: List[Path], include_tests: bool = False) -> st
     if not valid_paths:
         raise ValueError("No valid directories provided")
     for codebase_path in valid_paths:
-        logger.info(f"Navigating codebase: {codebase_path}")
         summary_lines.append(f"Codebase: {codebase_path}")
         for root, dirs, files in os.walk(codebase_path):
             # Prune excluded directories
@@ -37,13 +39,13 @@ def sum_codebases(codebase_paths: List[Path], include_tests: bool = False) -> st
             for file in files:
                 if file.endswith(".py"):
                     file_path = Path(root) / file
-                    logger.info(f"Processing file: {file_path}")
                     try:
                         with open(file_path, "r", encoding="utf-8") as f:
                             source = f.read()
                         tree = ast.parse(source, filename=str(file_path))
                         rel_path = file_path.relative_to(codebase_path)
                         summary_lines.append(f"  - {rel_path}")
+                        processed_files.append(file_path)
                         visitor = code_visitor()
                         visitor.visit(tree)
                         non_stdlib_imports = sorted(
@@ -65,4 +67,4 @@ def sum_codebases(codebase_paths: List[Path], include_tests: bool = False) -> st
                         rel_path = file_path.relative_to(codebase_path)
                         summary_lines.append(f"  - {rel_path} - Error: {e}")
         summary_lines.append("")
-    return "\n".join(summary_lines)
+    return "\n".join(summary_lines), processed_files

@@ -26,7 +26,7 @@ class Greeter:
         return f"Hello {self.name}"
 '''
         )
-        summary = sum_codebases([codebase_path])
+        summary, _ = sum_codebases([codebase_path])
         assert "Codebase:" in summary
         assert "- main.py" in summary
         assert "fn: greet(name: str) -> str - Greet someone." in summary
