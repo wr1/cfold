@@ -1,7 +1,94 @@
 typst:
   pre: [common]
   instructions:
-    - type: system
-      content: "# for typst, follow typst syntax. Structure the document with sections and subsections as needed. "
+    - type: user
+      content: |- 
+        # for typst, follow typst syntax. Structure the document with sections and subsections (use = and ==, not bold for sectioning), *bold*, _italic_, 
+        note **bold** is not a thing in typst (avoid)
+        # if it is a presentation 
+
+        #import "@preview/touying:0.6.1": *
+        #import themes.metropolis: *
+
+        #show: metropolis-theme.with(
+          aspect-ratio: "16-9",
+          info: (
+            title: "",
+            subtitle: "",
+            author: "",
+            date: datetime(year: YYYY, month: YY, day: DD),
+          ),
+        )
+
+        #set text(font: "IBM Plex Serif")
+        #show raw: set text(font: "IBM Plex Mono")
+        #set text(size: 23pt)
+
+        = chapter 
+        == slide
+
+          - bullet 1
+          - bullet 2
+
+          #speaker-note[  
+            - notes
+          ]
+        = chapter 2 
+        == slide 2 
+
+        Where for bigger presentations, use cfold to write multiple files with a main.typ document and each slide is imported, give the slides names according to the content.  
+
+        # if it is a letter/brief document, structure it with sections and subsections, do not switch on chapter numbering (use = and ==, not bold for sectioning), use - and + for bullet points and numbered lists. Use 12pt font. 
+
+
+        # for larger books use cfold to write multiple files with a main.typ document as below, where the chapters hare individual typst files. 
+
+        // ==================== CONFIGURATION ====================
+        #let doc_title = "Document Title"
+        #let doc_subtitle = [How a [System] Manufactures [Issue] and [Consequence]]
+        #let doc_author = "Independent Analysis"
+        #let doc_type = "A Briefing Document"
+        #let prepared_for = "Parliamentary, Legal, Journalistic, Professional Audiences"
+
+        // ==================== SETUP ====================
+        #set document(title: doc_title, author: doc_author)
+        #set page(paper: "a4", margin: (left: 3cm, right: 3cm, top: 3cm, bottom: 3cm), numbering: "1")
+        #set heading(numbering: "1.")
+        #set par(justify: true, leading: 0.8em)
+
+        #show heading.where(level: 1): it => { v(1.5em); text(size: 14pt, weight: "bold", fill: rgb("#1a1a2e"))[#it]; v(0.5em) }
+        #show heading.where(level: 2): it => { v(1em); text(size: 12pt, weight: "bold", fill: rgb("#16213e"))[#it]; v(0.3em) }
+        #show heading.where(level: 3): it => { v(0.8em); text(size: 11pt, weight: "bold", fill: rgb("#0f3460"))[#it]; v(0.2em) }
+
+        // ==================== TITLE PAGE ====================
+        #align(center)[
+          #v(4cm)
+          #text(size: 28pt, weight: "bold", fill: rgb("#1a1a2e"))[#doc_title]
+          #v(0.5cm)
+          #text(size: 16pt, fill: rgb("#444444"))[#doc_subtitle]
+          #v(1cm)
+          #line(length: 60%, stroke: 1.5pt + rgb("#0f3460"))
+          #v(1cm)
+          #text(size: 12pt, fill: rgb("#666666"))[#doc_type]
+          #v(0.5cm)
+          #text(size: 10pt, fill: rgb("#888888"))[Prepared for: #prepared_for \ _Not legal advice. Citations on request._]
+          #v(8cm)
+        ]
+        #pagebreak()
+
+        // ==================== CONTENTS & SECTIONS ====================
+        #outline(title: [Contents], indent: 1.5em, depth: 2)
+        #pagebreak()
+
+        #include "chapter1.typ"
+        #include "chapter2.typ"
+        #pagebreak()
+
+        // ==================== BIBLIOGRAPHY ====================
+        #bibliography((
+          "bib1.bib",
+          "bib2.bib",
+        ))
+
   include:
     - "**/*.typ"

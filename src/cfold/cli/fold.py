@@ -63,25 +63,28 @@ def fold(
         console.print(instr_tree)
     dirs = [f for f in files if Path(f).is_dir()]
     non_dirs = [f for f in files if f not in dirs]
-    if dirs:
+    actual_files = [f for f in non_dirs if (cwd / f).is_file() or Path(f).is_file()]
+    glob_patterns = [f for f in non_dirs if f not in actual_files]
+
+    if files:
         filtered = []
         for d in dirs:
             dir_path = cwd / d
-            sub_filtered = filter_files(include_patterns, dir_path)
-            filtered.extend(sub_filtered)
-        filtered = [f for f in filtered if f.name != output]
-    elif non_dirs:
-        file_paths = []
-        for f in non_dirs:
+            filtered.extend(filter_files(include_patterns, dir_path))
+        for f in actual_files:
+            path = Path(f) if Path(f).is_absolute() else cwd / f
+            if path.is_file():
+                filtered.append(path)
+        for f in glob_patterns:
             pattern = f
             if "**" in f and "/" not in f and f.startswith("**"):
                 suffix = f[2:]
                 pattern = f"**/*{suffix}"
             for path_str in glob.glob(pattern, root_dir=str(cwd), recursive=True):
                 path = cwd / path_str
-                if path.is_file() and path.name != output:
-                    file_paths.append(path)
-        filtered = file_paths
+                if path.is_file():
+                    filtered.append(path)
+        filtered = [f for f in filtered if f.name != output]
     else:
         filtered = filter_files(include_patterns, cwd)
         filtered = [f for f in filtered if f.name != output]
