@@ -2,8 +2,7 @@
 
 import ast
 
-from cfold.summarization.code_visitor import code_visitor
-from cfold.summarization.get_annotation_str import get_annotation_str
+from cfold.summarization.code_visitor import code_visitor, get_annotation_str
 
 
 def test_visit_import():

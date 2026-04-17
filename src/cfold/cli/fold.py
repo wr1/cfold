@@ -6,11 +6,8 @@ import yaml
 from rich.console import Console
 from rich.tree import Tree
 
-from ..dialect.list_available import list_available_dialects
-from ..dialect.load_instructions import load_instructions
-from ..fold.build_codebase import build_codebase
-from ..fold.filter_files import filter_files
-from ..fold.write_json import write_json
+from ..dialect.load_instructions import list_available_dialects, load_instructions
+from ..fold.fold import build_codebase, filter_files, write_json
 from ..tree.build_folded import build_folded_tree
 
 

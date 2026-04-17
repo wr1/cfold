@@ -1,8 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from cfold.dialect.list_available import list_available_dialects
-from cfold.dialect.load_instructions import load_instructions
+from cfold.dialect.load_instructions import list_available_dialects, load_instructions
 from cfold.models.codebase import codebase
 from cfold.models.file_entry import file_entry
 from cfold.models.instruction import instruction

@@ -1,11 +1,31 @@
+import glob
+import json
 from pathlib import Path
 from typing import List
 
+import pyperclip
 from loguru import logger
+from rich.console import Console
 
 from ..models.codebase import codebase
 from ..models.file_entry import file_entry
 from ..models.instruction import instruction
+
+
+def filter_files(
+    include_patterns: List[str], cwd: Path, files: List[Path] | None = None
+) -> List[Path]:
+    """Return files that match any include pattern."""
+    if files is not None:
+        filtered = [f for f in files if any(f.relative_to(cwd).match(p) for p in include_patterns)]
+        return filtered
+    matched = set()
+    for pattern in include_patterns:
+        for path_str in glob.glob(pattern, root_dir=str(cwd), recursive=True):
+            path = cwd / path_str
+            if path.is_file():
+                matched.add(path)
+    return list(matched)
 
 
 def build_codebase(
@@ -39,4 +59,17 @@ def build_codebase(
     return codebase(
         instructions=instructions,
         files=file_entries,
+    )
+
+
+def write_json(cb: codebase, output: Path, clip: bool = False) -> None:
+    """Write folded codebase to JSON."""
+    console = Console()
+    with open(output, "w", encoding="utf-8") as f:
+        json.dump(cb.model_dump(), f, indent=2)
+    if clip:
+        pyperclip.copy(json.dumps(cb.model_dump()))
+    console.print(
+        f"Codebase folded into [cyan]{output}[/cyan]"
+        + (" and copied to clipboard" if clip else ".")
     )

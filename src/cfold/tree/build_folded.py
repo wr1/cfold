@@ -4,13 +4,27 @@ from typing import List
 
 from rich.tree import Tree
 
-from .count_lines import count_lines
-from .heat_color import heat_color
+
+def _count_lines(file_path: Path) -> int:
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            return sum(1 for _ in f)
+    except Exception:
+        return 0
+
+
+def _heat_color(percent: float) -> str:
+    if percent > 50:
+        return "red"
+    elif percent > 20:
+        return "yellow"
+    else:
+        return "green"
 
 
 def build_folded_tree(files: List[Path], cwd: Path) -> Tree:
     """Generate a Rich Tree for folded files with percentages and heat colors."""
-    line_counts = {os.path.relpath(str(f), str(cwd)): count_lines(f) for f in files}
+    line_counts = {os.path.relpath(str(f), str(cwd)): _count_lines(f) for f in files}
     total_lines = sum(line_counts.values())
     dir_totals = {}
     for file_path_rel, lines in line_counts.items():
@@ -33,7 +47,7 @@ def build_folded_tree(files: List[Path], cwd: Path) -> Tree:
                 if dir_path in dir_totals:
                     dir_lines = dir_totals[dir_path]
                     percent = (dir_lines / total_lines) * 100 if total_lines > 0 else 0
-                    color = heat_color(percent)
+                    color = _heat_color(percent)
                     label = (
                         f"[yellow]{part}/[/yellow]"
                         f" ({dir_lines} lines, [{color}]{percent:.1f}%[/{color}])"

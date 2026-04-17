@@ -1,9 +1,21 @@
 """Visitor to collect code structure."""
 
-from ast import NodeVisitor
+import ast
+from ast import Constant, Expr, NodeVisitor
 
-from .get_annotation_str import get_annotation_str
-from .get_docstring import get_docstring
+
+def get_annotation_str(annotation) -> str:
+    if annotation is None:
+        return ""
+    return ast.unparse(annotation) if hasattr(ast, "unparse") else str(annotation)
+
+
+def get_docstring(node):
+    if node.body and isinstance(node.body[0], Expr):
+        expr = node.body[0]
+        if isinstance(expr.value, Constant) and isinstance(expr.value.value, str):
+            return expr.value.value
+    return None
 
 
 class code_visitor(NodeVisitor):

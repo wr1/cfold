@@ -19,7 +19,7 @@ def test_sum_codebases_syntax_error(tmp_path):
 
 def test_sum_codebases_filter_with_files(tmp_path):
     """Test filter_files with files parameter filters by pattern."""
-    from cfold.fold.filter_files import filter_files
+    from cfold.fold.fold import filter_files
 
     (tmp_path / "a.py").write_text("a")
     (tmp_path / "b.txt").write_text("b")

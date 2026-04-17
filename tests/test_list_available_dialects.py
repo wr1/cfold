@@ -1,4 +1,4 @@
-from cfold.dialect.list_available import list_available_dialects
+from cfold.dialect.load_instructions import list_available_dialects
 
 
 def test_list_available_dialects():

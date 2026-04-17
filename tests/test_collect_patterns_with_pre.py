@@ -1,4 +1,4 @@
-from cfold.dialect.collect_patterns import collect_patterns
+from cfold.dialect.load_instructions import collect_patterns
 
 
 def test_collect_patterns_with_pre():

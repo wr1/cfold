@@ -1,6 +1,6 @@
 """Tests for build_codebase covering cwd=None, prompt_content, and binary files."""
 
-from cfold.fold.build_codebase import build_codebase
+from cfold.fold.fold import build_codebase
 
 
 def test_build_codebase_no_cwd(tmp_path, monkeypatch):
