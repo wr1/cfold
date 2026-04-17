@@ -1,6 +1,7 @@
 """Handle rc command for cfold."""
 
 from pathlib import Path
+
 import yaml
 from rich.console import Console
 
@@ -35,6 +36,4 @@ def rc():
     config["default_dialect"] = "local"
     with foldrc_path.open("w", encoding="utf-8") as f:
         yaml.safe_dump(config, f, default_flow_style=False)
-    Console().print(
-        "[green].foldrc created/updated with 'local' as default dialect.[/green]"
-    )
+    Console().print("[green].foldrc created/updated with 'local' as default dialect.[/green]")

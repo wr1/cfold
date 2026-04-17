@@ -1,8 +1,10 @@
 """Handle viewing command for cfold."""
 
 import json
+
 from rich.console import Console
 from rich.tree import Tree
+
 from ..models.codebase import codebase
 
 
@@ -28,8 +30,6 @@ def view(foldfile: str):
     files_tree = Tree("Files", guide_style="dim")
     for file in data.files:
         files_tree.add(
-            f"[green]{file.path}[/green]"
-            if not file.delete
-            else f"[red]{file.path} (delete)[/red]"
+            f"[green]{file.path}[/green]" if not file.delete else f"[red]{file.path} (delete)[/red]"
         )
     console.print(files_tree)

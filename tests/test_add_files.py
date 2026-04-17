@@ -1,6 +1,7 @@
 import json
-from cfold.cli.fold import fold
+
 from cfold.cli.add import add
+from cfold.cli.fold import fold
 
 
 def test_add_files(tmp_path, monkeypatch, capsys):

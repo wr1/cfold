@@ -2,9 +2,11 @@
 
 from pathlib import Path
 from typing import List
+
+import pyperclip
 from rich.console import Console
 from rich.tree import Tree
-import pyperclip
+
 from ..summarization.sum_codebases import sum_codebases
 
 
@@ -38,6 +40,5 @@ def sum(
     if clip:
         pyperclip.copy(summary_with_header)
     console.print(
-        f"Summary written to [cyan]{output}[/cyan]"
-        + (" and copied to clipboard." if clip else ".")
+        f"Summary written to [cyan]{output}[/cyan]" + (" and copied to clipboard." if clip else ".")
     )

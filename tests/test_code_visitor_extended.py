@@ -1,5 +1,7 @@
 """Tests for code_visitor covering Import and ImportFrom branches."""
+
 import ast
+
 from cfold.summarization.code_visitor import code_visitor
 from cfold.summarization.get_annotation_str import get_annotation_str
 

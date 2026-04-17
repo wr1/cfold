@@ -2,8 +2,10 @@
 
 import json
 from pathlib import Path
+
 import pyperclip
 from rich.console import Console
+
 from ..models.codebase import codebase
 
 

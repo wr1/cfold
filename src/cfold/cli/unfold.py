@@ -1,8 +1,10 @@
 """Handle unfolding command for cfold."""
 
-from pathlib import Path
 import json
+from pathlib import Path
+
 from rich.console import Console
+
 from ..models.codebase import codebase
 from ..unfold.apply_changes import apply_changes
 

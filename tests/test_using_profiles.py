@@ -1,5 +1,7 @@
 import json
+
 import yaml
+
 from cfold.cli.fold import fold
 
 

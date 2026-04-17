@@ -1,8 +1,9 @@
 """Visitor to collect code structure."""
 
 from ast import NodeVisitor
-from .get_docstring import get_docstring
+
 from .get_annotation_str import get_annotation_str
+from .get_docstring import get_docstring
 
 
 class code_visitor(NodeVisitor):

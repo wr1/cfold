@@ -1,6 +1,7 @@
 """Recursively collect instructions for the dialect."""
 
-from typing import List, Dict, Set
+from typing import Dict, List, Set
+
 from ..models.instruction import instruction
 
 

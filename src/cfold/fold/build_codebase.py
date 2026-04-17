@@ -1,9 +1,11 @@
 from pathlib import Path
 from typing import List
+
+from loguru import logger
+
 from ..models.codebase import codebase
 from ..models.file_entry import file_entry
 from ..models.instruction import instruction
-from loguru import logger
 
 
 def build_codebase(
@@ -25,7 +27,9 @@ def build_codebase(
             content = f.read_text(encoding="utf-8")
             file_entries.append(
                 file_entry(
-                    path=str(f.resolve().relative_to(cwd.resolve())),
+                    path=str(f.resolve().relative_to(cwd.resolve()))
+                    if f.resolve().is_relative_to(cwd.resolve())
+                    else str(f.resolve()),
                     content=content,
                 )
             )

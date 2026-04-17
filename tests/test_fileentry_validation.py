@@ -1,6 +1,7 @@
-from cfold.models.file_entry import file_entry
-from pydantic import ValidationError
 import pytest
+from pydantic import ValidationError
+
+from cfold.models.file_entry import file_entry
 
 
 def test_fileentry_validation():

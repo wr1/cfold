@@ -1,12 +1,11 @@
-![Tests](https://github.com/wr1/cfold/actions/workflows/tests.yml/badge.svg)![Version](https://img.shields.io/github/v/release/wr1/cfold)
-# cfold
+![Tests](https://github.com/wr1/cfold/actions/workflows/tests.yml/badge.svg)
+![Version](https://img.shields.io/github/v/release/wr1/cfold)
 
-<!-- `cfold` is a command-line tool that helps you prepare codebases for interaction with Large Language Models (LLMs). It can `fold` a directory of code into a single JSON file and `unfold` a modified version back into a directory structure. -->
+# cfold
 
 - Fold files and instructions into json
 - Unfold LLM return jsons in same format
-- Intended to let LLM's produce codebase changes in a controlled manner
-
+- Intended to let LLMs produce codebase changes in a controlled manner
 
 ## Installation
 
@@ -16,15 +15,22 @@ uv pip install https://github.com/wr1/cfold.git
 
 ## Usage
 
-<!-- ![Help](docs/assets/help1.svg) -->
-
-
 ### CLI help
 ![Help](docs/assets/help.svg)
 
 ### Example output
 ![Output](docs/assets/output.svg)
 
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `fold` | Fold a codebase into a JSON file |
+| `unfold` | Apply changes from a modified JSON file |
+| `add` | Add files to an existing fold file |
+| `view` | View the contents of a fold file |
+| `sum` | Summarize Python codebases via AST |
+| `rc` | Create or update a `.foldrc` config |
 
 ## Fold File Format
 
@@ -44,5 +50,6 @@ The `sum` command summarizes the structure of Python codebases using AST parsing
 cfold sum codebase/ codebase2/ -o summary.txt
 ```
 
-# license
+## License
+
 MIT

@@ -1,6 +1,7 @@
-from pathlib import Path
-from cfold.fold.filter_files import filter_files
 import tempfile
+from pathlib import Path
+
+from cfold.fold.filter_files import filter_files
 
 
 def test_filter_files():

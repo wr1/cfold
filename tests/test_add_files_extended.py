@@ -1,7 +1,9 @@
 """Tests for add CLI covering missing foldfile, non-file, and update branches."""
+
 import json
-from cfold.cli.fold import fold
+
 from cfold.cli.add import add
+from cfold.cli.fold import fold
 
 
 def test_add_missing_foldfile(tmp_path, monkeypatch, capsys):

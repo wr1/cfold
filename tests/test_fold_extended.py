@@ -1,6 +1,9 @@
 """Tests for fold CLI covering invalid dialect, glob patterns, no files, and missing prompt."""
+
 import json
+
 import pytest
+
 from cfold.cli.fold import fold
 
 

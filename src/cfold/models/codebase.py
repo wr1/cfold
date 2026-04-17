@@ -1,10 +1,11 @@
 """Pydantic model for Codebase."""
 
 from typing import List
+
 from pydantic import BaseModel, field_validator
 
-from .instruction import instruction
 from .file_entry import file_entry
+from .instruction import instruction
 
 
 class codebase(BaseModel):

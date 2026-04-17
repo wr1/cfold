@@ -1,5 +1,5 @@
 """Tests for build_codebase covering cwd=None, prompt_content, and binary files."""
-from pathlib import Path
+
 from cfold.fold.build_codebase import build_codebase
 
 

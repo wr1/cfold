@@ -1,8 +1,10 @@
 import json
-import yaml
 import subprocess
-from cfold.cli.fold import fold
+
+import yaml
+
 from cfold.cli.add import add
+from cfold.cli.fold import fold
 from cfold.cli.rc import rc
 
 

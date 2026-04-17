@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+
 from cfold.cli.entrypoint import main
 
 
@@ -17,8 +18,6 @@ def test_entrypoint_sum(tmp_path, monkeypatch):
     codebase_dir = tmp_path / "codebase"
     codebase_dir.mkdir()
     (codebase_dir / "main.py").write_text("def main(): pass")
-    monkeypatch.setattr(
-        sys, "argv", ["cfold", "sum", str(codebase_dir), "-o", "summary.txt"]
-    )
+    monkeypatch.setattr(sys, "argv", ["cfold", "sum", str(codebase_dir), "-o", "summary.txt"])
     main()
     assert Path("summary.txt").exists()

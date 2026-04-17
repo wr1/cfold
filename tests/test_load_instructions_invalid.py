@@ -1,5 +1,6 @@
-from cfold.dialect.load_instructions import load_instructions
 import pytest
+
+from cfold.dialect.load_instructions import load_instructions
 
 
 def test_load_instructions_invalid():

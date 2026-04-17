@@ -1,11 +1,12 @@
-from cfold.dialect.load_instructions import load_instructions
+import pytest
+from pydantic import ValidationError
+
 from cfold.dialect.list_available import list_available_dialects
-from cfold.tree.build_folded import build_folded_tree
+from cfold.dialect.load_instructions import load_instructions
 from cfold.models.codebase import codebase
 from cfold.models.file_entry import file_entry
 from cfold.models.instruction import instruction
-from pydantic import ValidationError
-import pytest
+from cfold.tree.build_folded import build_folded_tree
 
 
 def test_load_instructions():

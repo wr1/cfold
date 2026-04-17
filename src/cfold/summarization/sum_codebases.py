@@ -5,14 +5,16 @@ import os
 import sys
 from pathlib import Path
 from typing import List
+
 from loguru import logger
+
 from .code_visitor import code_visitor
 
 
 def sum_codebases(
     codebase_paths: List[Path], include_tests: bool = False
 ) -> tuple[str, List[Path]]:
-    """Walk through codebases, parse Python files with AST, and generate a summary of code structure."""
+    """Walk codebases, parse Python files with AST, and generate a summary of code structure."""
     summary_lines = []
     processed_files = []
     excluded_dirs = {
@@ -49,14 +51,10 @@ def sum_codebases(
                         visitor = code_visitor()
                         visitor.visit(tree)
                         non_stdlib_imports = sorted(
-                            imp
-                            for imp in visitor.imports
-                            if imp.split(".")[0] not in stdlib
+                            imp for imp in visitor.imports if imp.split(".")[0] not in stdlib
                         )
                         if non_stdlib_imports:
-                            summary_lines.append(
-                                f"    imports: {', '.join(non_stdlib_imports)}"
-                            )
+                            summary_lines.append(f"    imports: {', '.join(non_stdlib_imports)}")
                         summary_lines.extend(visitor.summary_lines)
                     except SyntaxError:
                         logger.warning(f"Syntax error in {file_path}, skipped")

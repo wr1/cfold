@@ -1,8 +1,9 @@
 """Get the list of available dialects."""
 
 from pathlib import Path
-import yaml
 from typing import List, Optional
+
+import yaml
 from loguru import logger
 
 

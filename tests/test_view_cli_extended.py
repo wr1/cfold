@@ -1,4 +1,5 @@
 """Tests for view CLI covering error and instructions-with-metadata branches."""
+
 from cfold.cli.view import view
 
 

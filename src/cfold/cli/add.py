@@ -2,12 +2,14 @@
 
 import json
 from pathlib import Path
-from rich.console import Console
+from typing import List
+
 import pyperclip
+from rich.console import Console
+
 from ..models.codebase import codebase
 from ..models.file_entry import file_entry
 from ..tree.build_folded import build_folded_tree
-from typing import List
 
 
 def add(files: List[str], foldfile: str = "codefold.json"):
@@ -37,9 +39,7 @@ def add(files: List[str], foldfile: str = "codefold.json"):
         else:
             data.files.append(file_entry(path=rel, content=content))
             new_added = True
-    added_files = [
-        Path(entry.path) for entry in data.files if entry.path not in existing
-    ]
+    added_files = [Path(entry.path) for entry in data.files if entry.path not in existing]
     if added_files:
         tree = build_folded_tree(added_files, cwd)
         console.print(tree)
@@ -47,8 +47,6 @@ def add(files: List[str], foldfile: str = "codefold.json"):
         json.dump(data.model_dump(), f, indent=2)
     pyperclip.copy(json.dumps(data.model_dump()))
     if new_added:
-        console.print(
-            f"Added files to [cyan]{foldfile}[/cyan] and copied to clipboard."
-        )
+        console.print(f"Added files to [cyan]{foldfile}[/cyan] and copied to clipboard.")
     else:
         console.print("No new files added, but updated existing.")

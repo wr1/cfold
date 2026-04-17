@@ -1,6 +1,6 @@
 [project]
 name = "cfold"
-version = "0.2.6"
+version = "0.2.7"
 description = "A command line tool to fold and unfold Python projects for LLM interaction"
 authors = [{ name = "wr1", email = "8971152+wr1@users.noreply.github.com" }]
 requires-python = "~=3.10"
@@ -11,7 +11,7 @@ dependencies = [
     "click>=8.1.7,<9",
     "pyperclip>=1.8.2",
     "pydantic>=2.0.0,<3",
-    "treeparse",
+    "treeparse @ git+https://github.com/wr1/treeparse.git",
     "loguru>=0.7.0,<1",
     "rich>=13.0.0,<14",
 ]
@@ -44,3 +44,9 @@ allow-direct-references = true
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]

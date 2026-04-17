@@ -1,6 +1,6 @@
 """Extract docstring from a node if present."""
 
-from ast import Expr, Constant
+from ast import Constant, Expr
 
 
 def get_docstring(node):

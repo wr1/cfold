@@ -1,6 +1,6 @@
 """Tests for misc coverage: rc existing file, codebase dict validator."""
+
 from cfold.models.codebase import codebase
-from cfold.models.instruction import instruction
 
 
 def test_codebase_convert_dict_instructions():
@@ -18,6 +18,7 @@ def test_codebase_convert_dict_instructions():
 def test_rc_existing_foldrc(tmp_path, monkeypatch, capsys):
     """Test rc when .foldrc already exists updates it."""
     import yaml
+
     from cfold.cli.rc import rc
 
     foldrc = tmp_path / ".foldrc"

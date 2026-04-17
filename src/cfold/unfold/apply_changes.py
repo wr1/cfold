@@ -1,15 +1,15 @@
 """Apply all changes from a folded file to the target directory."""
 
-from pathlib import Path
 import shutil
+from pathlib import Path
+
 from rich.console import Console
 from rich.tree import Tree
+
 from ..models.codebase import codebase
 
 
-def apply_changes(
-    data: codebase, output_dir: Path, original_dir: Path | None = None
-) -> None:
+def apply_changes(data: codebase, output_dir: Path, original_dir: Path | None = None) -> None:
     """Apply adds, modifies, and deletes."""
     console = Console()
     if original_dir:
@@ -21,9 +21,7 @@ def apply_changes(
         full_path = output_dir / entry.path
         full_path.parent.mkdir(parents=True, exist_ok=True)
         if entry.delete:
-            if full_path.exists() and full_path.resolve().is_relative_to(
-                output_dir.resolve()
-            ):
+            if full_path.exists() and full_path.resolve().is_relative_to(output_dir.resolve()):
                 full_path.unlink()
                 deleted.append(entry.path)
         else:

@@ -4,7 +4,10 @@ from typing import Dict, List, Set
 def collect_patterns(
     config: Dict, dialect: str, processed: Set = None, path: Set = None
 ) -> Dict[str, List[str]]:
-    """Collect include patterns for the dialect, handling included_suffix and included_dirs if include not present."""
+    """Collect include patterns for the dialect.
+
+    Falls back to building patterns from included_suffix/included_dirs if include not present.
+    """
     if processed is None:
         processed = set()
     if path is None:

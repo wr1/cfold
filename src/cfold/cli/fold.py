@@ -1,15 +1,17 @@
+import glob
 from pathlib import Path
 from typing import List
+
 import yaml
-import glob
 from rich.console import Console
 from rich.tree import Tree
+
+from ..dialect.list_available import list_available_dialects
+from ..dialect.load_instructions import load_instructions
 from ..fold.build_codebase import build_codebase
 from ..fold.filter_files import filter_files
 from ..fold.write_json import write_json
 from ..tree.build_folded import build_folded_tree
-from ..dialect.list_available import list_available_dialects
-from ..dialect.load_instructions import load_instructions
 
 
 def fold(
@@ -44,9 +46,7 @@ def fold(
             bare = True
         else:
             available = list_available_dialects()
-            console.print(
-                f"Invalid dialect. Available: {', '.join(available)}", style="red"
-            )
+            console.print(f"Invalid dialect. Available: {', '.join(available)}", style="red")
             raise SystemExit(1)
     if bare:
         console.print("[orange]Using bare mode[/orange]")
@@ -92,9 +92,7 @@ def fold(
         console.print("No valid files to fold.")
         return
     prompt_content = (
-        Path(prompt).read_text(encoding="utf-8")
-        if prompt and Path(prompt).exists()
-        else ""
+        Path(prompt).read_text(encoding="utf-8") if prompt and Path(prompt).exists() else ""
     )
     if prompt and not Path(prompt).exists():
         console.print(f"Warning: Prompt file '{prompt}' does not exist. Skipping.")

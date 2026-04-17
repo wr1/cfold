@@ -1,8 +1,10 @@
 """Load the boilerplate instructions and patterns for the specified dialect."""
 
 from pathlib import Path
-import yaml
 from typing import List, Optional
+
+import yaml
+
 from .collect_instructions import collect_instructions
 from .collect_patterns import collect_patterns
 

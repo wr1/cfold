@@ -1,5 +1,5 @@
-from pathlib import Path
 import glob
+from pathlib import Path
 from typing import List
 
 
@@ -8,11 +8,7 @@ def filter_files(
 ) -> List[Path]:
     """Return files that match any include pattern."""
     if files is not None:
-        filtered = [
-            f
-            for f in files
-            if any(f.relative_to(cwd).match(p) for p in include_patterns)
-        ]
+        filtered = [f for f in files if any(f.relative_to(cwd).match(p) for p in include_patterns)]
         return filtered
     matched = set()
     for pattern in include_patterns:

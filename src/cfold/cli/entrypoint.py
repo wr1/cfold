@@ -2,12 +2,12 @@
 
 import treeparse
 
-from .fold import fold
-from .unfold import unfold
-from .rc import rc
-from .view import view
 from .add import add
+from .fold import fold
+from .rc import rc
 from .sum import sum
+from .unfold import unfold
+from .view import view
 
 app = treeparse.cli(
     name="cfold",
@@ -23,11 +23,7 @@ fold_cmd = treeparse.command(
     name="fold",
     help="Fold files or directory into a single file and visualize the structure.",
     callback=fold,
-    arguments=[
-        treeparse.argument(
-            name="files", arg_type=str, nargs="*", default=[], sort_key=0
-        )
-    ],
+    arguments=[treeparse.argument(name="files", arg_type=str, nargs="*", default=[], sort_key=0)],
     options=[
         treeparse.option(
             flags=["--output", "-o"],
@@ -50,8 +46,7 @@ fold_cmd = treeparse.command(
         treeparse.option(
             flags=["--bare", "-b"],
             help="Bare mode without boilerplate",
-            default=False,
-            arg_type=bool,
+            flag=True,
         ),
         treeparse.option(
             flags=["--clip", "-c"],
@@ -92,9 +87,7 @@ view_cmd = treeparse.command(
     name="view",
     help="View the prompts and files in a fold file.",
     callback=view,
-    arguments=[
-        treeparse.argument(name="foldfile", arg_type=str, default="codefold.json")
-    ],
+    arguments=[treeparse.argument(name="foldfile", arg_type=str, default="codefold.json")],
 )
 app.commands.append(view_cmd)
 
@@ -118,9 +111,7 @@ sum_cmd = treeparse.command(
     name="sum",
     help="Summarize codebases using AST.",
     callback=sum,
-    arguments=[
-        treeparse.argument(name="codebases", arg_type=str, nargs="*", default=[])
-    ],
+    arguments=[treeparse.argument(name="codebases", arg_type=str, nargs="*", default=[])],
     options=[
         treeparse.option(
             flags=["--output", "-o"],

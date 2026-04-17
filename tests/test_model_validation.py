@@ -1,8 +1,9 @@
 import pytest
+from pydantic import ValidationError
+
 from cfold.models.codebase import codebase
 from cfold.models.file_entry import file_entry
 from cfold.models.instruction import instruction
-from pydantic import ValidationError
 
 
 def test_model_validation():

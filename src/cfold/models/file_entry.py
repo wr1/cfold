@@ -1,6 +1,7 @@
 """Pydantic model for FileEntry."""
 
 from typing import Optional
+
 from pydantic import BaseModel, model_validator
 
 

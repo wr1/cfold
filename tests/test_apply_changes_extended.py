@@ -1,4 +1,5 @@
 """Tests for apply_changes covering delete, modified, and original_dir branches."""
+
 from cfold.models.codebase import codebase
 from cfold.models.file_entry import file_entry
 from cfold.unfold.apply_changes import apply_changes

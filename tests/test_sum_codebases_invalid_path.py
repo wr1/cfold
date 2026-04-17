@@ -1,6 +1,8 @@
 from pathlib import Path
-from cfold.summarization.sum_codebases import sum_codebases
+
 import pytest
+
+from cfold.summarization.sum_codebases import sum_codebases
 
 
 def test_sum_codebases_invalid_path():

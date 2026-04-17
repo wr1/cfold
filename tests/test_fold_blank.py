@@ -1,4 +1,5 @@
 import json
+
 from cfold.cli.fold import fold
 
 
