@@ -7,3 +7,9 @@ __pycache__
 *.lock
 .grk*
 .aider*
+notes/
+.coverage
+.foldrc
+codefold.json
+output.svg
+demo.svg
