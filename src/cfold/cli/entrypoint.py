@@ -1,0 +1,144 @@
+"""Main CLI entry point for cfold using treeparse."""
+
+import treeparse
+
+from .add import add
+from .fold import fold
+from .rc import rc
+from .sum import sum
+from .unfold import unfold
+from .view import view
+
+app = treeparse.cli(
+    name="cfold",
+    help="Fold code or docs tree into a single file with prompting for LLM interaction.",
+    max_width=120,
+    show_types=True,
+    show_defaults=True,
+    line_connect=True,
+    theme="default",
+)
+
+fold_cmd = treeparse.command(
+    name="fold",
+    help="Fold files or directory into a single file and visualize the structure.",
+    callback=fold,
+    arguments=[treeparse.argument(name="files", arg_type=str, nargs="*", default=[], sort_key=0)],
+    options=[
+        treeparse.option(
+            flags=["--output", "-o"],
+            help="Output file",
+            arg_type=str,
+            default="codefold.json",
+        ),
+        treeparse.option(
+            flags=["--prompt", "-p"],
+            help="Prompt file to append",
+            arg_type=str,
+            default=None,
+        ),
+        treeparse.option(
+            flags=["--dialect", "-d"],
+            help="Instruction dialect",
+            arg_type=str,
+            default="default",
+        ),
+        treeparse.option(
+            flags=["--bare", "-b"],
+            help="Bare mode without boilerplate",
+            flag=True,
+        ),
+        treeparse.option(
+            flags=["--clip", "-c"],
+            help="Copy to clipboard",
+            default=True,
+            arg_type=bool,
+        ),
+    ],
+)
+app.commands.append(fold_cmd)
+
+unfold_cmd = treeparse.command(
+    name="unfold",
+    help="Unfold a modified fold file into a directory.",
+    callback=unfold,
+    arguments=[treeparse.argument(name="foldfile", arg_type=str, sort_key=0)],
+    options=[
+        treeparse.option(
+            flags=["--original-dir", "-i"],
+            help="Original project directory",
+            arg_type=str,
+            default=None,
+        ),
+        treeparse.option(
+            flags=["--output-dir", "-o"],
+            help="Output directory",
+            arg_type=str,
+            default=None,
+        ),
+    ],
+)
+app.commands.append(unfold_cmd)
+
+rc_cmd = treeparse.command(name="rc", help="Create or update .foldrc", callback=rc)
+app.commands.append(rc_cmd)
+
+view_cmd = treeparse.command(
+    name="view",
+    help="View the prompts and files in a fold file.",
+    callback=view,
+    arguments=[treeparse.argument(name="foldfile", arg_type=str, default="codefold.json")],
+)
+app.commands.append(view_cmd)
+
+add_cmd = treeparse.command(
+    name="add",
+    help="Add files to an existing cfold file.",
+    callback=add,
+    arguments=[treeparse.argument(name="files", arg_type=str, nargs="*", default=[])],
+    options=[
+        treeparse.option(
+            flags=["--foldfile", "-f"],
+            help="Cfold file to add to",
+            arg_type=str,
+            default="codefold.json",
+        )
+    ],
+)
+app.commands.append(add_cmd)
+
+sum_cmd = treeparse.command(
+    name="sum",
+    help="Summarize codebases using AST.",
+    callback=sum,
+    arguments=[treeparse.argument(name="codebases", arg_type=str, nargs="*", default=[])],
+    options=[
+        treeparse.option(
+            flags=["--output", "-o"],
+            help="Output summary file",
+            arg_type=str,
+            default="summary.txt",
+        ),
+        treeparse.option(
+            flags=["--include-tests", "-t"],
+            help="Include test directories",
+            default=False,
+            arg_type=bool,
+        ),
+        treeparse.option(
+            flags=["--clip", "-c"],
+            help="Copy to clipboard",
+            default=True,
+            arg_type=bool,
+        ),
+    ],
+)
+app.commands.append(sum_cmd)
+
+
+def main():
+    app.run()
+
+
+if __name__ == "__main__":
+    main()

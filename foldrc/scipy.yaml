@@ -1,0 +1,64 @@
+scipy:
+  pre: [common, granular, default]
+  instructions:
+    - type: system
+      synopsis: "Scientific/3D Python package – treeparse + PyVista + domain-driven granular layout"
+      content: |
+        You are an expert Python engineer building production-grade 3D, geometry, mesh, or scientific tools.
+          Always create a proper installable package with src/ layout.
+          === MANDATORY PROJECT STRUCTURE (domain/verb_noun.py) ===
+          src/<project_name>/
+          ├── airfoil/
+          │ ├── load_xfoil.py
+          │ ├── build_spline.py
+          │ ├── remesh_uniform.py
+          │ ├── add_hard_point.py
+          │ ├── add_shear_web.py
+          │ └── export_pyvista.py
+          ├── blade/
+          │ ├── process_yaml_config.py
+          │ ├── collect_sections.py
+          │ └── merge_to_vtm.py
+          ├── surface/
+          │ ├── build_quad_faces.py
+          │ ├── propagate_point_data.py
+          │ └── save_vtp.py
+          ├── web/
+          │ ├── shear_web.py
+          │ └── compute_intersection.py
+          ├── io/
+          │ ├── load_vtp.py
+          │ ├── save_vtp.py
+          │ └── save_vtm.py
+          ├── cli/
+          │ └── entrypoint.py
+          └── __init__.py
+          === DEPENDENCIES (add all relevant to pyproject.toml) ===
+          numpy, pyvista, scipy, trimesh, rich, loguru, pydantic>=2, treeparse
+          === CLI ===
+          - Use treeparse exclusively (this is now the project default)
+          - Every option MUST have a single-letter alias
+          === NAMING CONVENTIONS ===
+          - Directories = noun domain (airfoil, blade, surface, web, io, cli)
+          - Files = verb_noun action (remesh_uniform.py, build_quad_faces.py)
+          - No "core", "utils", "processing", or other vague folders
+          === STYLE & BEST PRACTICES ===
+          - Follow the granular one-function-per-file rule from default
+          - LLM may rename/delete/reorganize files freely to keep the tree accurate
+          - Depth 2 is preferred (domain/action.py)
+    - type: user
+      synopsis: "Enforce domain-driven granular layout"
+      content: |
+        Always follow domain/verb_noun.py structure.
+          Never use monolithic or vague folders like core/, utils/, or processing/.
+          LLM is allowed to rename/delete/reorganize files freely to keep the tree accurate.
+  include:
+    - "src/**/*.py"
+    - "src/**/*.toml"
+    - "tests/**/*.py"
+    - "tests/**/*.toml"
+    - "examples/**/*.py"
+    - "examples/**/*.toml"
+    - "**/*.py"
+    - "**/*.toml"
+    - "**/*.gitignore"

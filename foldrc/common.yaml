@@ -1,0 +1,23 @@
+common:
+  instructions:
+    - type: assistant
+      synopsis: "define cfold output format"
+      content: |-
+        This JSON file represents a project codebase in cfold format, with prompts for LLM.
+        The fields are 'instructions' (list of instruction objects), 'files'.
+        Each instruction: {type: 'system'|'user'|'assistant', content: string, name: string (optional), synopsis: string (optional)}
+        Each file in 'files': {path: string, content: Optional[string], delete: bool (default: false)}
+        To update the codebase, modify the 'files' array as per the following rules. Do not modify 'instructions' unless explicitly specified.
+        - Folding: 'cfold fold <files> -o <output.json>' captures specified files into this .json.
+        - Unfolding: 'cfold unfold <modified.json>' applies changes from this .json to the directory.
+        Rules:
+        - To delete a file: Add an object to the 'files' array with 'path' and set 'delete': true (content can be null or omitted).
+        - To add or modify a file: Add or update the object with 'path', full 'content', and 'delete': false (optional, default false).
+        - To move/rename a file: Add a delete object for the old path ('delete': true) and a new object with the new 'path', full 'content', and 'delete': false.
+        - Only include modified, new, or deleted files in the 'files' array; unchanged files are preserved from the original directory (if provided with -i).
+        - Always provide full file content for additions and modifications; no partial updates within a file. Do not include unchanged files in the output.
+        - Paths are relative to the current working directory (CWD) by default.
+        - Supports .foldrc YAML file for custom dialects, patterns, and instructions, which can reference defaults via 'pre'.
+        - Write output as a full dict {'files': [...] }, not the bare 'files' array. Do not use ```json or other prefixes
+
+        - You HAVE TO FOLLOW THESE INSTRUCTIONS EXACTLY. DO NOT DEVIATE FROM THE SPECIFIED FORMAT OR RULES.

@@ -1,0 +1,9 @@
+pytest:
+  pre: [common, default]
+  instructions:
+    - type: user
+      synopsis: "pytest instructions"
+      content: "# Use session-scoped fixtures for setup and conversion, parametrize tests when needed, avoid overuse of fixtures, in particular outside of a given test file."
+  include:
+    - "tests/**/*.py"
+    - "tests/**/*.log"

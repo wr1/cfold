@@ -1,0 +1,36 @@
+name: Tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install uv
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+    - name: Install clipboard dependencies
+      run: sudo apt-get update && sudo apt-get install -y xclip xsel
+    - name: Set up Xvfb
+      run: |
+        sudo apt-get install -y xvfb
+        /usr/bin/Xvfb :99 -ac -screen 0 1024x768x8 &
+        echo "DISPLAY=:99" >> $GITHUB_ENV
+    - name: Create virtual environment
+      run: uv venv .venv
+    - name: Install dependencies
+      run: uv pip install --python .venv -e ".[dev]"
+    - name: Run tests with coverage
+      run: uv run --python .venv pytest --cov=cfold --cov-report=xml
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml

@@ -1,39 +1,48 @@
 import pytest
-from cfold import cfold
+from pydantic import ValidationError
 
-# Test suite for cfold utility functions
+from cfold.dialect.load_instructions import list_available_dialects, load_instructions
+from cfold.models.codebase import codebase
+from cfold.models.file_entry import file_entry
+from cfold.models.instruction import instruction
+from cfold.tree.build_folded import build_folded_tree
 
-def test_should_include_file():
-    """Test file inclusion/exclusion rules."""
-    assert cfold.should_include_file("src/main.py") == True
-    assert cfold.should_include_file("docs/index.md") == True
-    assert cfold.should_include_file("config.yml") == True
-    assert cfold.should_include_file("build/output.o") == False
-    assert cfold.should_include_file("src/__pycache__/main.pyc") == False
-    assert cfold.should_include_file("test.txt") == False
 
-def test_should_include_file_with_ignore():
-    """Test file inclusion with .foldignore patterns."""
-    ignore_patterns = ["*.log", "temp/*", "secret.conf"]
-    assert cfold.should_include_file("src/main.py", ignore_patterns) == True
-    assert cfold.should_include_file("logs/app.log", ignore_patterns) == False
-    assert cfold.should_include_file("temp/file.py", ignore_patterns) == False
-    assert cfold.should_include_file("secret.conf", ignore_patterns) == False
-    assert cfold.should_include_file("docs/index.md", ignore_patterns) == True
+def test_load_instructions():
+    """Test loading instructions for a dialect."""
+    instr, patterns = load_instructions("default")
+    assert len(instr) > 0
+    assert len(patterns) > 0
 
-def test_load_foldignore(tmp_path):
-    """Test loading and parsing .foldignore file."""
-    ignore_file = tmp_path / ".foldignore"
-    ignore_file.write_text("*.log\ntemp/*\n# comment\nsecret.conf\n")
-    patterns = cfold.load_foldignore(str(tmp_path))
-    assert patterns == ["*.log", "temp/*", "secret.conf"]
 
-def test_apply_diff():
-    """Test diff application for file modifications."""
-    original = ["line1\n", "line2\n", "line3\n"]
-    modified = ["line1\n", "new line2\n", "line3\n"]
-    result = cfold.apply_diff(original, modified)
-    assert result == "line1\nnew line2\nline3\n"
-    modified = ["line1\n", "line2\n", "line3\n", "line4\n"]
-    result = cfold.apply_diff(original, modified)
-    assert result == "line1\nline2\nline3\nline4\n"
+def test_load_instructions_invalid():
+    """Test loading invalid dialect raises error."""
+    with pytest.raises(ValueError):
+        load_instructions("invalid")
+
+
+def test_list_available_dialects():
+    """Test getting available dialects."""
+    dialects = list_available_dialects()
+    assert "default" in dialects
+    assert "py" in dialects
+
+
+def test_build_folded_tree(tmp_path):
+    """Test generating folded tree."""
+    files = [tmp_path / "src" / "main.py", tmp_path / "docs" / "index.md"]
+    tree = build_folded_tree(files, tmp_path)
+    assert tree.label == "Folded files tree (total lines: 0)"
+
+
+def test_model_validation():
+    """Test Pydantic model validation."""
+    # Valid FileEntry
+    file_entry(path="test.py", content="code")
+    # Invalid: missing content without delete
+    with pytest.raises(ValidationError):
+        file_entry(path="test.py")
+    # Valid delete
+    file_entry(path="test.py", delete=True)
+    # Valid Codebase
+    codebase(instructions=[instruction(type="system", content="test")], files=[])

@@ -1,0 +1,13 @@
+doc:
+  pre: [common]
+  instructions:
+    - type: user
+      synopsis: "documentation instructions"
+      content: "# use mkdocs for documentation, avoid overly long pages, try to split up into smaller sections in separate files. Use ubuntu sans and ubuntu mono fonts for text and code. Put particular care and attention to the front page, include a minimal and clear example of the main intented use of the project so that a user can get started without needing to read further. Avoid long-winded contribution guidelines. "
+  include:
+    - "src/**/*.md"
+    - "src/**/*.yml"
+    - "src/**/*.yaml"
+    - "docs/**/*.md"
+    - "docs/**/*.yml"
+    - "docs/**/*.yaml"

@@ -1,99 +1,55 @@
+![Tests](https://github.com/wr1/cfold/actions/workflows/tests.yml/badge.svg)
+![Version](https://img.shields.io/github/v/release/wr1/cfold)
+
 # cfold
 
-cfold is a command-line tool that helps you prepare codebases for interaction with Large Language Models (LLMs). It can "fold" a directory of code into a single text file, and "unfold" a modified version of that file back into a directory structure. This is useful for providing LLMs with the context of an entire project in a manageable format, allowing them to make changes, add new files, or delete existing ones.
+- Fold files and instructions into json
+- Unfold LLM return jsons in same format
+- Intended to let LLMs produce codebase changes in a controlled manner
 
 ## Installation
 
 ```bash
-pip install cfold
-```
-
-Alternatively, if you have the project locally:
-
-```bash
-poetry install # if using poetry
-python -m pip install .
+uv pip install https://github.com/wr1/cfold.git
 ```
 
 ## Usage
 
-### Folding a codebase
+### CLI help
+![Help](docs/assets/help.svg)
 
-To fold a directory into a single file, use the `fold` command:
+### Example output
+![Output](docs/assets/output.svg)
 
-```bash
-cfold fold <directory> -o <output_file>
-```
+## Commands
 
-*   `<directory>`: The directory containing the codebase you want to fold (defaults to current directory).
-*   `-o <output_file>` or `--output <output_file>`: (Optional) The name of the output file. Defaults to `codefold.txt`.
-*   Paths in the output file are relative to the current working directory (CWD).
-*   Supports `.foldignore` file with gitignore-style patterns to exclude files during folding.
-
-Example:
-
-```bash
-cfold fold my_project -o folded_code.txt
-```
-
-If run from `/home/user`, this will create `folded_code.txt` with paths like `my_project/main.py`. Create a `.foldignore` file in the directory to exclude specific patterns (e.g., `*.log` or `temp/`).
-
-### Unfolding a codebase
-
-To unfold a modified fold file back into a directory structure, use the `unfold` command:
-
-```bash
-cfold unfold <fold_file> -d <output_directory>
-```
-
-*   `<fold_file>`: The file containing the folded codebase (e.g., the one modified by an LLM).
-*   `-d <output_directory>` or `--output-dir <output_directory>`: (Optional) The directory to unfold into. Defaults to the current working directory (CWD).
-
-Example:
-
-```bash
-cfold unfold folded_code.txt -d my_project_modified
-```
-
-If run from `/home/user`, and without `-d`, it will unfold into `/home/user/my_project/...`. With `-d`, it will unfold into `/home/user/my_project_modified/...`.
+| Command | Description |
+|---------|-------------|
+| `fold` | Fold a codebase into a JSON file |
+| `unfold` | Apply changes from a modified JSON file |
+| `add` | Add files to an existing fold file |
+| `view` | View the contents of a fold file |
+| `sum` | Summarize Python codebases via AST |
+| `rc` | Create or update a `.foldrc` config |
 
 ## Fold File Format
 
-The fold file format is designed to be easily understood by both humans and LLMs. It consists of the following structure:
+- JSON structure with keys: `instructions` (list of objects), `files`.
+- Each instruction object: `{type: 'system'|'user'|'assistant', content: string, name: string (optional)}`.
+- `files`: Array of objects with `path` (relative to CWD), `content` (full file content, optional if deleting), and `delete` (bool, default false).
+- Modify files by updating `content` (with `delete: false`).
+- Delete files with `delete: true` (content optional).
+- Add new files by adding new objects with `path` and `content`.
+- Move/rename: Delete old (`delete: true`) and add new with updated path and content.
 
-1.  **Instructions:** The file begins with instructions for the LLM, explaining how to modify, delete, or add files.
-2.  **File Sections:** The rest of the file is divided into sections, each representing a single file in the codebase. Each section starts with a line in the format `# --- File: <path> ---`, where `<path>` is the path relative to the CWD of the original `fold` command.
+## Sum Command
 
-**Modifying Files:** To modify a file, keep its `# --- File: path ---` header and update the content below.
+The `sum` command summarizes the structure of Python codebases using AST parsing. It generates an LLM-readable summary of classes, functions, and other code elements.
 
-**Deleting Files:** To delete a file, replace its content with `# DELETE`.
-
-**Adding New Files:** To add a new file, include a new `# --- File: path ---` section with the desired content.
-
-**Ignoring Files:** Add patterns to a `.foldignore` file in the project root (e.g., `*.log` or `temp/`) to exclude files during folding.
-
-**Important:** Preserve the `# --- File: path ---` format for all files.
-
-## Example
-
-Let's say you have a directory structure under `/home/user`:
-```
-/home/user/
-├── my_project/
-│   ├── main.py
-│   ├── utils.py
-│   └── .foldignore
+```bash
+cfold sum codebase/ codebase2/ -o summary.txt
 ```
 
-With `.foldignore` containing:
-```
-my_project/utils.py
-```
+## License
 
-Running `cfold fold my_project -o folded.txt` from `/home/user` produces `folded.txt`:
-```
-# Instructions for LLM:
-# - To modify a file, keep its '# --- File: path ---' header and update the content below.
-# - To delete a file, replace its content with '# DELETE'.
-# - To add a new file, include a new '# --- File: path ---' section with the desired content.
-# - Preserve the '# --- File: path ---' format for all files.
+MIT
