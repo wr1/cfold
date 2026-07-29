@@ -50,6 +50,12 @@ The `sum` command summarizes the structure of Python codebases using AST parsing
 cfold sum codebase/ codebase2/ -o summary.txt
 ```
 
+## Agent skill
+
+`SKILL.md` at the repo root teaches agents when to use `sum` vs `fold`/`unfold`
+(and how to build a once-per-tip state pack). Symlink into your agent skills dir,
+e.g. `ln -sf /path/to/cfold/SKILL.md ~/.claude/skills/cfold/SKILL.md`.
+
 ## License
 
 MIT
